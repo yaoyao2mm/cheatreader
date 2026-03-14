@@ -68,14 +68,17 @@ jobs:
             target: macos
             artifact_name: cheatreader-macos
             build_output: build/macos/Build/Products/Release/cheatreader.app
+            release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-macos.dmg
           - os: windows-latest
             target: windows
             artifact_name: cheatreader-windows
             build_output: build/windows/x64/runner/Release
+            release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-windows-setup.exe
           - os: ubuntu-latest
             target: linux
             artifact_name: cheatreader-linux
             build_output: build/linux/x64/release/bundle
+            release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-linux.deb
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -107,36 +110,124 @@ jobs:
         run: flutter pub get
 
       - name: Build desktop release
-        run: flutter build ${{ matrix.target }} --release
+        run: flutter build ${{ matrix.target }} --release --split-debug-info=build/debug-info/${{ matrix.target }}
 
-      - name: Package release asset
+      - name: Package macOS DMG
+        if: matrix.target == 'macos'
+        shell: bash
+        run: |
+          STAGING_DIR="$RUNNER_TEMP/dmg-root"
+          rm -rf "$STAGING_DIR"
+          mkdir -p "$STAGING_DIR"
+          cp -R "${{ matrix.build_output }}" "$STAGING_DIR/cheatreader.app"
+          ln -s /Applications "$STAGING_DIR/Applications"
+          hdiutil create \
+            -volname "CheatReader" \
+            -srcfolder "$STAGING_DIR" \
+            -ov \
+            -format UDZO \
+            "$RUNNER_TEMP/${{ matrix.release_asset }}"
+
+      - name: Package Windows installer
+        if: matrix.target == 'windows'
         shell: pwsh
         run: |
-          $stagingRoot = Join-Path $env:RUNNER_TEMP "${{ matrix.artifact_name }}"
-          New-Item -ItemType Directory -Force -Path $stagingRoot | Out-Null
+          $issPath = Join-Path $env:RUNNER_TEMP "cheatreader-installer.iss"
+          $outputDir = $env:RUNNER_TEMP.Replace('\', '\\')
+          $sourceDir = (Resolve-Path "${{ matrix.build_output }}").Path.Replace('\', '\\')
+          $iconPath = (Resolve-Path "windows/runner/resources/app_icon.ico").Path.Replace('\', '\\')
+          $releaseTag = $env:RELEASE_TAG
+          @(
+            '[Setup]'
+            'AppName=CheatReader'
+            "AppVersion=$releaseTag"
+            'DefaultDirName={autopf}\CheatReader'
+            'DefaultGroupName=CheatReader'
+            "OutputDir=$outputDir"
+            "OutputBaseFilename=cheatreader-$releaseTag-windows-setup"
+            'Compression=lzma2'
+            'SolidCompression=yes'
+            'WizardStyle=modern'
+            'ArchitecturesInstallIn64BitMode=x64compatible'
+            "SetupIconFile=$iconPath"
+            'UninstallDisplayIcon={app}\cheatreader.exe'
+            ''
+            '[Tasks]'
+            'Name: "desktopicon"; Description: "Create a desktop shortcut"; GroupDescription: "Additional icons:"; Flags: unchecked'
+            ''
+            '[Files]'
+            "Source: `"$sourceDir\*`"; DestDir: `"{app}`"; Flags: ignoreversion recursesubdirs createallsubdirs"
+            ''
+            '[Icons]'
+            'Name: "{group}\CheatReader"; Filename: "{app}\cheatreader.exe"'
+            'Name: "{autodesktop}\CheatReader"; Filename: "{app}\cheatreader.exe"; Tasks: desktopicon'
+            ''
+            '[Run]'
+            'Filename: "{app}\cheatreader.exe"; Description: "Launch CheatReader"; Flags: nowait postinstall skipifsilent'
+          ) -join "`n" | Set-Content -Path $issPath -Encoding UTF8
 
-          if ("${{ matrix.target }}" -eq "macos") {
-            Copy-Item "${{ matrix.build_output }}" -Destination $stagingRoot -Recurse
-          } elseif ("${{ matrix.target }}" -eq "windows") {
-            $dest = Join-Path $stagingRoot "cheatreader"
-            Copy-Item "${{ matrix.build_output }}" -Destination $dest -Recurse
+          $iscc = Get-Command iscc -ErrorAction SilentlyContinue
+          if (-not $iscc) {
+            $fallback = "C:\Program Files (x86)\Inno Setup 6\ISCC.exe"
+            if (Test-Path $fallback) {
+              & $fallback $issPath
+            } else {
+              throw "Inno Setup compiler not found on runner."
+            }
           } else {
-            $dest = Join-Path $stagingRoot "cheatreader"
-            Copy-Item "${{ matrix.build_output }}" -Destination $dest -Recurse
+            & $iscc.Source $issPath
           }
 
-          $archiveName = "cheatreader-$env:RELEASE_TAG-${{ matrix.target }}.zip"
-          $archivePath = Join-Path $env:RUNNER_TEMP $archiveName
-          if (Test-Path $archivePath) {
-            Remove-Item $archivePath -Force
-          }
-          Compress-Archive -Path (Join-Path $stagingRoot '*') -DestinationPath $archivePath
+      - name: Package Linux DEB
+        if: matrix.target == 'linux'
+        shell: bash
+        run: |
+          PACKAGE_ROOT="$RUNNER_TEMP/cheatreader-deb"
+          APP_ROOT="$PACKAGE_ROOT/opt/cheatreader"
+          DESKTOP_DIR="$PACKAGE_ROOT/usr/share/applications"
+          ICON_DIR="$PACKAGE_ROOT/usr/share/icons/hicolor/256x256/apps"
+          DEBIAN_DIR="$PACKAGE_ROOT/DEBIAN"
+
+          rm -rf "$PACKAGE_ROOT"
+          mkdir -p "$APP_ROOT" "$DESKTOP_DIR" "$ICON_DIR" "$DEBIAN_DIR"
+          cp -R "${{ matrix.build_output }}/." "$APP_ROOT/"
+          cp snap/gui/app_icon.png "$ICON_DIR/cheatreader.png"
+
+          {
+            echo '[Desktop Entry]'
+            echo 'Name=CheatReader'
+            echo 'Comment=Floating desktop reader for low-distraction reading'
+            echo 'Exec=/opt/cheatreader/cheatreader'
+            echo 'Icon=cheatreader'
+            echo 'Terminal=false'
+            echo 'Type=Application'
+            echo 'Categories=Office;Viewer;Utility;'
+            echo 'StartupNotify=true'
+          } > "$DESKTOP_DIR/cheatreader.desktop"
+
+          {
+            echo 'Package: cheatreader'
+            echo "Version: ${RELEASE_TAG#v}"
+            echo 'Section: utils'
+            echo 'Priority: optional'
+            echo 'Architecture: amd64'
+            echo 'Maintainer: yaoyao2mm <yaoyao2mm@users.noreply.github.com>'
+            echo 'Description: Floating desktop reader for low-distraction reading'
+            echo 'Depends: libgtk-3-0, libstdc++6'
+          } > "$DEBIAN_DIR/control"
+
+          chmod 0755 "$DEBIAN_DIR"
+          find "$PACKAGE_ROOT/opt" -type f -exec chmod 0644 {} \;
+          chmod 0755 "$APP_ROOT/cheatreader"
+          chmod 0644 "$DESKTOP_DIR/cheatreader.desktop"
+          chmod 0644 "$ICON_DIR/cheatreader.png"
+          dpkg-deb --build --root-owner-group "$PACKAGE_ROOT" "$RUNNER_TEMP/${{ matrix.release_asset }}"
 
       - name: Upload packaged asset
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.artifact_name }}
-          path: ${{ runner.temp }}/cheatreader-${{ env.RELEASE_TAG }}-${{ matrix.target }}.zip
+          path: ${{ runner.temp }}/${{ matrix.release_asset }}
           if-no-files-found: error
 
   release:
@@ -172,7 +263,7 @@ jobs:
           RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
         run: |
           shopt -s nullglob
-          assets=(dist/**/*.zip)
+          assets=(dist/**/*.{dmg,deb,exe})
           if [ ${#assets[@]} -eq 0 ]; then
             echo "No release assets found."
             exit 1
