@@ -1,0 +1,45 @@
+<svg width="1280" height="640" viewBox="0 0 1280 640" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="640" rx="36" fill="#12100F"/>
+  <rect x="24" y="24" width="1232" height="592" rx="28" fill="url(#bg)"/>
+  <g opacity="0.55">
+    <circle cx="1088" cy="116" r="168" fill="#8D6E63"/>
+    <circle cx="120" cy="590" r="220" fill="#2F4858"/>
+    <circle cx="1190" cy="524" r="96" fill="#B08968"/>
+  </g>
+  <rect x="70" y="78" width="1140" height="484" rx="28" fill="#171413" fill-opacity="0.72" stroke="rgba(255,255,255,0.10)"/>
+  <text x="96" y="176" fill="#F6EEE7" font-family="Georgia, 'Times New Roman', serif" font-size="64" font-weight="700">CheatReader</text>
+  <text x="96" y="224" fill="#D8C9BA" font-family="Arial, sans-serif" font-size="24">A floating desktop reader for low-distraction reading.</text>
+
+  <rect x="96" y="270" width="154" height="42" rx="21" fill="#F0E6DC"/>
+  <text x="126" y="297" fill="#16110F" font-family="Arial, sans-serif" font-size="18" font-weight="700">Text-only UI</text>
+  <rect x="264" y="270" width="170" height="42" rx="21" fill="#2D4A57"/>
+  <text x="296" y="297" fill="#E8F0F2" font-family="Arial, sans-serif" font-size="18" font-weight="700">Transparent mode</text>
+  <rect x="448" y="270" width="180" height="42" rx="21" fill="#725B52"/>
+  <text x="481" y="297" fill="#FFF4ED" font-family="Arial, sans-serif" font-size="18" font-weight="700">One-line reading</text>
+  <rect x="642" y="270" width="170" height="42" rx="21" fill="#B08968"/>
+  <text x="681" y="297" fill="#18110D" font-family="Arial, sans-serif" font-size="18" font-weight="700">EPUB / FB2</text>
+
+  <rect x="96" y="356" width="772" height="96" rx="24" fill="#2B2422" fill-opacity="0.92"/>
+  <text x="126" y="415" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="32">“Keep reading in the corner of your screen</text>
+  <text x="126" y="454" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="32">without giving your desktop away.”</text>
+
+  <rect x="900" y="170" width="248" height="182" rx="26" fill="#000000" fill-opacity="0.26" stroke="rgba(255,255,255,0.14)"/>
+  <rect x="928" y="202" width="192" height="34" rx="17" fill="#3B2F2B"/>
+  <text x="950" y="225" fill="#FFF6F0" font-family="Georgia, 'Times New Roman', serif" font-size="18">Single-line mode</text>
+  <rect x="928" y="258" width="192" height="22" rx="11" fill="#D6C4B4" fill-opacity="0.95"/>
+  <rect x="928" y="292" width="150" height="12" rx="6" fill="#F4ECE6" fill-opacity="0.75"/>
+  <rect x="928" y="318" width="166" height="12" rx="6" fill="#F4ECE6" fill-opacity="0.58"/>
+
+  <rect x="900" y="380" width="248" height="138" rx="26" fill="#000000" fill-opacity="0.26" stroke="rgba(255,255,255,0.14)"/>
+  <text x="928" y="420" fill="#E5D7CA" font-family="Arial, sans-serif" font-size="20" font-weight="700">Formats</text>
+  <text x="928" y="456" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="18">TXT  EPUB  HTML</text>
+  <text x="928" y="486" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="18">Markdown  FB2</text>
+
+  <defs>
+    <linearGradient id="bg" x1="78" y1="32" x2="1180" y2="620" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2E2420"/>
+      <stop offset="0.52" stop-color="#151311"/>
+      <stop offset="1" stop-color="#203642"/>
+    </linearGradient>
+  </defs>
+</svg>

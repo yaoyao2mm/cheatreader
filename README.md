@@ -1,14 +1,45 @@
-# CheatReader
+<p align="center">
+  <img src=".github/assets/cheatreader-hero.svg" alt="CheatReader hero banner" width="100%" />
+</p>
 
-CheatReader is a lightweight floating reader built with Flutter.
+<p align="center">
+  <strong>A floating desktop reader for low-distraction reading.</strong>
+</p>
 
-It is designed for low-distraction reading on desktop:
+<p align="center">
+  CheatReader keeps books visible in the corner of your screen without turning your desktop into a full reading app.
+</p>
 
-- transparent text-only mode
-- compact one-line and multi-line reading modes
-- configurable mode switching triggers
-- support for `txt`, `epub`, `html`, `markdown`, and `fb2`
-- local managed library copies so imported books still restore after restart
+<p align="center">
+  <img alt="Platform" src="https://img.shields.io/badge/platform-Flutter-54C5F8?style=flat-square">
+  <img alt="Desktop" src="https://img.shields.io/badge/focus-desktop-2F4858?style=flat-square">
+  <img alt="Formats" src="https://img.shields.io/badge/formats-txt%20%7C%20epub%20%7C%20html%20%7C%20md%20%7C%20fb2-B08968?style=flat-square">
+  <img alt="UI" src="https://img.shields.io/badge/mode-transparent%20text--only-F0E6DC?style=flat-square&labelColor=16110F&color=F0E6DC">
+</p>
+
+## Why It Exists
+
+Traditional reading apps want your full attention.
+CheatReader does the opposite: it stays light, quiet, and easy to tuck into the edge of your workspace while you keep doing other things.
+
+## Highlights
+
+- Transparent text-only mode that lets the app disappear into your desktop
+- Compact single-line and multi-line reading modes
+- Configurable mode switching via double click, middle click, or keyboard shortcut
+- Support for `txt`, `epub`, `html`, `markdown`, and `fb2`
+- Local managed library copies so imported books still restore after restart
+- Lightweight desktop-first reading flow with drag-and-drop import
+
+## Supported Formats
+
+| Format | Status | Notes |
+| --- | --- | --- |
+| `txt` | Full | Encoding-aware plain text import |
+| `epub` | Text extraction | Chapter text is extracted into the existing reader flow |
+| `html` / `htm` / `xhtml` | Text extraction | Ignores page chrome and keeps readable body text |
+| `md` / `markdown` | Text extraction | Strips markdown syntax into plain readable text |
+| `fb2` | Text extraction | Pulls FictionBook section text into the reader |
 
 ## Run
 
@@ -17,9 +48,19 @@ flutter pub get
 flutter run -d macos
 ```
 
-## Test
+## Verify
 
 ```bash
 flutter test
 flutter analyze
 ```
+
+## Project Direction
+
+CheatReader is intentionally opinionated:
+
+- minimal chrome
+- floating utility, not a bookshelf-heavy library app
+- text-first extraction over perfect original-format rendering
+
+That keeps the experience fast, calm, and easy to leave open all day.
