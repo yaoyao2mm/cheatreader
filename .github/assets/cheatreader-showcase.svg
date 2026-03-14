@@ -1,0 +1,42 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" fill="#0E0C0B"/>
+  <rect width="1440" height="900" fill="url(#bg)"/>
+
+  <g opacity="0.9">
+    <rect x="98" y="92" width="1244" height="716" rx="30" fill="#121010" fill-opacity="0.56" stroke="rgba(255,255,255,0.12)"/>
+    <rect x="146" y="148" width="1148" height="90" rx="32" fill="#352C2A" fill-opacity="0.95"/>
+    <text x="188" y="204" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="40">当龙骨焚箱的焰火燃起，那些神秘家族、古老传闻与未解的踪迹</text>
+
+    <rect x="146" y="304" width="720" height="298" rx="28" fill="#161313" fill-opacity="0.80" stroke="rgba(255,255,255,0.08)"/>
+    <text x="184" y="372" fill="#F4EBE3" font-family="Georgia, 'Times New Roman', serif" font-size="30">CheatReader keeps reading light.</text>
+    <text x="184" y="425" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">Single-line mode for peripheral reading.</text>
+    <text x="184" y="466" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">Transparent mode for text-only overlays.</text>
+    <text x="184" y="507" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">EPUB / HTML / Markdown / FB2 support.</text>
+
+    <rect x="184" y="542" width="176" height="42" rx="21" fill="#F0E6DC"/>
+    <text x="220" y="568" fill="#171210" font-family="Arial, sans-serif" font-size="18" font-weight="700">Floating desktop UI</text>
+    <rect x="376" y="542" width="158" height="42" rx="21" fill="#28414C"/>
+    <text x="410" y="568" fill="#EAF2F5" font-family="Arial, sans-serif" font-size="18" font-weight="700">Transparent</text>
+    <rect x="548" y="542" width="120" height="42" rx="21" fill="#8F6E61"/>
+    <text x="578" y="568" fill="#FFF4ED" font-family="Arial, sans-serif" font-size="18" font-weight="700">Text-first</text>
+
+    <rect x="924" y="304" width="370" height="298" rx="28" fill="#151312" fill-opacity="0.78" stroke="rgba(255,255,255,0.08)"/>
+    <text x="958" y="358" fill="#E9D9CC" font-family="Arial, sans-serif" font-size="20" font-weight="700">Supported formats</text>
+    <text x="958" y="414" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="28">TXT</text>
+    <text x="1046" y="414" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="28">EPUB</text>
+    <text x="1166" y="414" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="28">HTML</text>
+    <text x="958" y="466" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="28">Markdown</text>
+    <text x="1150" y="466" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="28">FB2</text>
+
+    <text x="958" y="540" fill="#D4C1B2" font-family="Arial, sans-serif" font-size="20">Made for low-distraction reading</text>
+    <text x="958" y="574" fill="#D4C1B2" font-family="Arial, sans-serif" font-size="20">without surrendering your whole screen.</text>
+  </g>
+
+  <defs>
+    <linearGradient id="bg" x1="192" y1="42" x2="1291" y2="842" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#241D1A"/>
+      <stop offset="0.58" stop-color="#100E0D"/>
+      <stop offset="1" stop-color="#213841"/>
+    </linearGradient>
+  </defs>
+</svg>

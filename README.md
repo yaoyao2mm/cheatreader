@@ -31,6 +31,12 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Local managed library copies so imported books still restore after restart
 - Lightweight desktop-first reading flow with drag-and-drop import
 
+## Preview
+
+<p align="center">
+  <img src=".github/assets/cheatreader-showcase.svg" alt="CheatReader showcase" width="100%" />
+</p>
+
 ## Supported Formats
 
 | Format | Status | Notes |
