@@ -72,6 +72,18 @@ flutter pub get
 flutter run -d macos
 ```
 
+### Install on macOS without an Apple Developer account
+
+If you download the unsigned macOS app from GitHub Releases, macOS may block it the first time you launch it.
+
+You can remove the quarantine flag in Terminal:
+
+```bash
+xattr -dr com.apple.quarantine /Applications/cheatreader.app
+```
+
+If you keep the app somewhere else, replace the path with the actual app location.
+
 ### Run on Windows
 
 ```bash

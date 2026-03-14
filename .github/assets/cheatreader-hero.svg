@@ -19,9 +19,10 @@
   <rect x="642" y="270" width="170" height="42" rx="21" fill="#B08968"/>
   <text x="681" y="297" fill="#18110D" font-family="Arial, sans-serif" font-size="18" font-weight="700">EPUB / FB2</text>
 
-  <rect x="96" y="356" width="772" height="96" rx="24" fill="#2B2422" fill-opacity="0.92"/>
-  <text x="126" y="415" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="32">“Keep reading in the corner of your screen</text>
-  <text x="126" y="454" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="32">without giving your desktop away.”</text>
+  <rect x="96" y="350" width="772" height="116" rx="24" fill="#2B2422" fill-opacity="0.92"/>
+  <text x="126" y="404" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="29">“Keep reading in the corner of your screen</text>
+  <text x="126" y="440" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="29">without giving your desktop away</text>
+  <text x="126" y="476" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="29">to a full-size reading app.”</text>
 
   <rect x="900" y="170" width="248" height="182" rx="26" fill="#000000" fill-opacity="0.26" stroke="rgba(255,255,255,0.14)"/>
   <rect x="928" y="202" width="192" height="34" rx="17" fill="#3B2F2B"/>

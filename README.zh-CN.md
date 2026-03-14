@@ -72,6 +72,18 @@ flutter pub get
 flutter run -d macos
 ```
 
+### macOS 安装说明（没有苹果开发者账号）
+
+如果你是从 GitHub Releases 下载未签名的 macOS 应用，系统第一次打开时大概率会拦截。
+
+可以在终端里去掉隔离属性：
+
+```bash
+xattr -dr com.apple.quarantine /Applications/cheatreader.app
+```
+
+如果你的 app 不在 `/Applications`，把后面的路径替换成你自己的实际位置即可。
+
 ### Windows
 
 ```bash

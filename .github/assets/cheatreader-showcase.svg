@@ -4,17 +4,18 @@
 
   <g opacity="0.9">
     <rect x="98" y="92" width="1244" height="716" rx="30" fill="#121010" fill-opacity="0.56" stroke="rgba(255,255,255,0.12)"/>
-    <rect x="146" y="148" width="1148" height="90" rx="32" fill="#352C2A" fill-opacity="0.95"/>
-    <text x="188" y="204" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="40">当龙骨焚箱的焰火燃起，那些神秘家族、古老传闻与未解的踪迹</text>
+    <rect x="146" y="148" width="1148" height="116" rx="32" fill="#352C2A" fill-opacity="0.95"/>
+    <text x="188" y="196" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="34">当龙骨焚箱的焰火燃起，那些神秘家族、古老传闻与未解的踪迹</text>
+    <text x="188" y="236" fill="#FFF9F4" font-family="Georgia, 'Times New Roman', serif" font-size="34">就会以一条克制、安静、悬浮的方式停在你的桌面边缘。</text>
 
-    <rect x="146" y="304" width="720" height="298" rx="28" fill="#161313" fill-opacity="0.80" stroke="rgba(255,255,255,0.08)"/>
-    <text x="184" y="372" fill="#F4EBE3" font-family="Georgia, 'Times New Roman', serif" font-size="30">CheatReader keeps reading light.</text>
-    <text x="184" y="425" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">Single-line mode for peripheral reading.</text>
-    <text x="184" y="466" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">Transparent mode for text-only overlays.</text>
-    <text x="184" y="507" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">EPUB / HTML / Markdown / FB2 support.</text>
+    <rect x="146" y="326" width="720" height="276" rx="28" fill="#161313" fill-opacity="0.80" stroke="rgba(255,255,255,0.08)"/>
+    <text x="184" y="390" fill="#F4EBE3" font-family="Georgia, 'Times New Roman', serif" font-size="30">CheatReader keeps reading light.</text>
+    <text x="184" y="443" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">Single-line mode for peripheral reading.</text>
+    <text x="184" y="484" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">Transparent mode for text-only overlays.</text>
+    <text x="184" y="525" fill="#DCCBBC" font-family="Arial, sans-serif" font-size="24">EPUB / HTML / Markdown / FB2 support.</text>
 
-    <rect x="184" y="542" width="176" height="42" rx="21" fill="#F0E6DC"/>
-    <text x="220" y="568" fill="#171210" font-family="Arial, sans-serif" font-size="18" font-weight="700">Floating desktop UI</text>
+    <rect x="184" y="550" width="196" height="42" rx="21" fill="#F0E6DC"/>
+    <text x="209" y="576" fill="#171210" font-family="Arial, sans-serif" font-size="18" font-weight="700">Floating desktop UI</text>
     <rect x="376" y="542" width="158" height="42" rx="21" fill="#28414C"/>
     <text x="410" y="568" fill="#EAF2F5" font-family="Arial, sans-serif" font-size="18" font-weight="700">Transparent</text>
     <rect x="548" y="542" width="120" height="42" rx="21" fill="#8F6E61"/>
@@ -28,8 +29,8 @@
     <text x="958" y="466" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="28">Markdown</text>
     <text x="1150" y="466" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="28">FB2</text>
 
-    <text x="958" y="540" fill="#D4C1B2" font-family="Arial, sans-serif" font-size="20">Made for low-distraction reading</text>
-    <text x="958" y="574" fill="#D4C1B2" font-family="Arial, sans-serif" font-size="20">without surrendering your whole screen.</text>
+    <text x="958" y="534" fill="#D4C1B2" font-family="Arial, sans-serif" font-size="18">Made for low-distraction reading</text>
+    <text x="958" y="564" fill="#D4C1B2" font-family="Arial, sans-serif" font-size="18">without surrendering your whole screen.</text>
   </g>
 
   <defs>
