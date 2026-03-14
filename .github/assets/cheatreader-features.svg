@@ -3,32 +3,34 @@
   <rect x="32" y="32" width="1376" height="656" rx="28" fill="url(#bg)"/>
 
   <text x="76" y="108" fill="#F8F0E8" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700">Feature Highlights</text>
-  <text x="76" y="146" fill="#DCC9BA" font-family="Arial, sans-serif" font-size="22">Three focused interactions that define CheatReader.</text>
+  <text x="76" y="146" fill="#DCC9BA" font-family="Arial, sans-serif" font-size="20">Three focused interactions that define CheatReader.</text>
 
   <rect x="76" y="192" width="396" height="440" rx="30" fill="#171413" fill-opacity="0.86" stroke="rgba(255,255,255,0.08)"/>
   <text x="108" y="242" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="26" font-weight="700">Transparent Mode</text>
-  <text x="108" y="276" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="17">Text stays readable while the app fades into your desktop.</text>
-  <text x="108" y="300" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="17">Only text remains. No tinted card behind it.</text>
+  <text x="108" y="274" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Text stays readable while the app fades into your desktop.</text>
+  <text x="108" y="296" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Only text remains. No tinted card behind it.</text>
   <rect x="108" y="336" width="332" height="156" rx="24" fill="#0F0C0B"/>
-  <rect x="140" y="395" width="248" height="36" rx="18" fill="#000000" fill-opacity="0.12"/>
-  <text x="150" y="420" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="20">那些故事不会打断你的工作流</text>
-  <text x="108" y="546" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="17">No tinted panel. No half-transparent card. Just text.</text>
+  <rect x="140" y="390" width="250" height="42" rx="21" fill="#000000" fill-opacity="0.12"/>
+  <text x="153" y="417" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="16">那些故事不会打断你的工作流</text>
+  <text x="108" y="540" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">No tinted panel. No half-transparent card.</text>
+  <text x="108" y="561" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">Just text.</text>
 
   <rect x="522" y="192" width="396" height="440" rx="30" fill="#171413" fill-opacity="0.86" stroke="rgba(255,255,255,0.08)"/>
   <text x="554" y="242" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="26" font-weight="700">One-line Reading</text>
-  <text x="554" y="276" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="17">A thin strip for peripheral reading, with visual-line stepping.</text>
-  <text x="554" y="300" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="17">Compact when it needs to disappear into the edge.</text>
+  <text x="554" y="274" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">A thin strip for peripheral reading, with visual-line stepping.</text>
+  <text x="554" y="296" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Compact when it needs to disappear into the edge.</text>
   <rect x="554" y="338" width="332" height="52" rx="26" fill="#3A2F2B"/>
-  <text x="575" y="370" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">这就是最小模式下的一条阅读带</text>
+  <text x="590" y="371" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="18">这就是最小模式下的一条阅读带</text>
   <rect x="554" y="424" width="332" height="112" rx="24" fill="#0F0C0B"/>
-  <text x="580" y="460" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="18">Switch via double click, middle click,</text>
-  <text x="580" y="489" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="18">or a keyboard shortcut.</text>
-  <text x="554" y="584" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="17">Compact when you need it, expandable when you do not.</text>
+  <text x="576" y="458" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">Switch via double click, middle click,</text>
+  <text x="576" y="481" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">or a keyboard shortcut.</text>
+  <text x="554" y="578" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">Compact when you need it.</text>
+  <text x="554" y="599" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">Expandable when you do not.</text>
 
   <rect x="968" y="192" width="396" height="440" rx="30" fill="#171413" fill-opacity="0.86" stroke="rgba(255,255,255,0.08)"/>
   <text x="1000" y="242" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="26" font-weight="700">Multi-format Import</text>
-  <text x="1000" y="276" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="17">Bring different ebook sources into one calm reading flow.</text>
-  <text x="1000" y="300" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="17">All formats are normalized into the same lightweight reader.</text>
+  <text x="1000" y="274" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Bring different ebook sources into one calm reading flow.</text>
+  <text x="1000" y="296" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">All formats are normalized into the same lightweight reader.</text>
   <rect x="1000" y="336" width="100" height="42" rx="21" fill="#F0E6DC"/>
   <text x="1033" y="363" fill="#17110F" font-family="Arial, sans-serif" font-size="18" font-weight="700">TXT</text>
   <rect x="1114" y="336" width="114" height="42" rx="21" fill="#2D4A57"/>
@@ -40,9 +42,9 @@
   <rect x="1126" y="396" width="154" height="42" rx="21" fill="#243C46"/>
   <text x="1158" y="423" fill="#EDF4F6" font-family="Arial, sans-serif" font-size="18" font-weight="700">Markdown</text>
   <rect x="1000" y="482" width="332" height="102" rx="24" fill="#0F0C0B"/>
-  <text x="1026" y="526" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="17">Everything is normalized into text-first reading,</text>
-  <text x="1026" y="553" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="17">so the experience stays lightweight, calm,</text>
-  <text x="1026" y="580" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="17">and consistent across formats.</text>
+  <text x="1024" y="520" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="14">Everything is normalized into text-first reading,</text>
+  <text x="1024" y="541" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="14">so the experience stays lightweight, calm,</text>
+  <text x="1024" y="562" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="14">and consistent across formats.</text>
 
   <defs>
     <linearGradient id="bg" x1="68" y1="20" x2="1365" y2="673" gradientUnits="userSpaceOnUse">
