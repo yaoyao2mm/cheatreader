@@ -87,12 +87,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libstdc++-12-dev liblzma-dev
 
-      - name: Set up Flutter
+      - name: Set up Flutter on macOS/Linux
+        if: matrix.target != 'windows'
         shell: bash
         run: |
           git clone https://github.com/flutter/flutter.git --depth 1 -b stable "$HOME/flutter"
           echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
           "$HOME/flutter/bin/flutter" --version
+
+      - name: Set up Flutter on Windows
+        if: matrix.target == 'windows'
+        shell: pwsh
+        run: |
+          git clone https://github.com/flutter/flutter.git --depth 1 -b stable "$env:USERPROFILE\flutter"
+          "$env:USERPROFILE\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          & "$env:USERPROFILE\flutter\bin\flutter.bat" --version
 
       - name: Fetch dependencies
         run: flutter pub get
