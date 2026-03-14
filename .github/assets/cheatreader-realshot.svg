@@ -1,0 +1,46 @@
+<svg width="1600" height="1000" viewBox="0 0 1600 1000" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1600" height="1000" fill="#0F1115"/>
+  <rect width="1600" height="1000" fill="url(#bg)"/>
+
+  <rect x="72" y="60" width="1456" height="880" rx="34" fill="#15181D" fill-opacity="0.88" stroke="rgba(255,255,255,0.08)"/>
+  <rect x="72" y="60" width="1456" height="58" rx="34" fill="#1C2128"/>
+  <circle cx="112" cy="89" r="8" fill="#FF6157"/>
+  <circle cx="140" cy="89" r="8" fill="#FEBB2E"/>
+  <circle cx="168" cy="89" r="8" fill="#28C840"/>
+
+  <rect x="128" y="176" width="1092" height="84" rx="28" fill="#3A2F2B" fill-opacity="0.96"/>
+  <text x="166" y="229" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="36">当龙骨焚箱的焰火燃起，那些神秘家族、古老传闻与未解的踪迹</text>
+
+  <rect x="128" y="322" width="840" height="410" rx="30" fill="#181412" fill-opacity="0.88" stroke="rgba(255,255,255,0.08)"/>
+  <text x="168" y="384" fill="#EEDFD2" font-family="Arial, sans-serif" font-size="20" font-weight="700">Multi-line mode</text>
+  <text x="168" y="438" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="31">它不是传统阅读器那样铺满整个屏幕，</text>
+  <text x="168" y="482" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="31">而是保留一种克制的存在感：足够可读，</text>
+  <text x="168" y="526" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="31">又不至于把你的工作界面变成另一个世界。</text>
+  <text x="168" y="570" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="31">你可以在浏览器、终端、IM 窗口之间穿梭，</text>
+  <text x="168" y="614" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="31">但书会一直停在刚才那一段，等你继续往下读。</text>
+  <text x="168" y="680" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="18">Drag-and-drop import, 5-line default reading area, keyboard and mouse controls.</text>
+
+  <rect x="1048" y="322" width="368" height="186" rx="28" fill="#0F0C0B" fill-opacity="0.84" stroke="rgba(255,255,255,0.08)"/>
+  <text x="1082" y="376" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="20" font-weight="700">Transparent Mode</text>
+  <text x="1082" y="416" fill="#D7C7B9" font-family="Arial, sans-serif" font-size="18">The app can drop every background tint</text>
+  <text x="1082" y="444" fill="#D7C7B9" font-family="Arial, sans-serif" font-size="18">and leave only the text floating above</text>
+  <text x="1082" y="472" fill="#D7C7B9" font-family="Arial, sans-serif" font-size="18">your desktop.</text>
+
+  <rect x="1048" y="546" width="368" height="186" rx="28" fill="#0F0C0B" fill-opacity="0.84" stroke="rgba(255,255,255,0.08)"/>
+  <text x="1082" y="600" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="20" font-weight="700">Formats</text>
+  <rect x="1082" y="634" width="80" height="36" rx="18" fill="#F0E6DC"/>
+  <text x="1108" y="657" fill="#17110F" font-family="Arial, sans-serif" font-size="16" font-weight="700">TXT</text>
+  <rect x="1172" y="634" width="92" height="36" rx="18" fill="#29414D"/>
+  <text x="1200" y="657" fill="#EEF5F7" font-family="Arial, sans-serif" font-size="16" font-weight="700">EPUB</text>
+  <rect x="1274" y="634" width="80" height="36" rx="18" fill="#8B6B60"/>
+  <text x="1299" y="657" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="16" font-weight="700">FB2</text>
+  <text x="1082" y="706" fill="#D7C7B9" font-family="Arial, sans-serif" font-size="18">HTML / Markdown / XHTML also supported.</text>
+
+  <defs>
+    <linearGradient id="bg" x1="88" y1="40" x2="1514" y2="970" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2D2320"/>
+      <stop offset="0.58" stop-color="#111315"/>
+      <stop offset="1" stop-color="#223C47"/>
+    </linearGradient>
+  </defs>
+</svg>

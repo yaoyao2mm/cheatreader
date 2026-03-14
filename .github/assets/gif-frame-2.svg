@@ -1,0 +1,17 @@
+<svg width="1280" height="720" viewBox="0 0 1280 720" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1280" height="720" fill="#111317"/>
+  <rect width="1280" height="720" fill="url(#bg)"/>
+  <rect x="70" y="72" width="1140" height="576" rx="28" fill="#171413" fill-opacity="0.80" stroke="rgba(255,255,255,0.08)"/>
+  <text x="96" y="124" fill="#E7D6C8" font-family="Arial, sans-serif" font-size="20" font-weight="700">Step 2 · Single-line mode</text>
+  <rect x="208" y="292" width="590" height="58" rx="29" fill="#3A2F2B"/>
+  <text x="238" y="329" fill="#FFF8F1" font-family="Georgia, 'Times New Roman', serif" font-size="28">这就是最小模式下的一条阅读带</text>
+  <rect x="862" y="272" width="212" height="44" rx="22" fill="#29424E"/>
+  <text x="907" y="300" fill="#EEF5F7" font-family="Arial, sans-serif" font-size="18" font-weight="700">One-line mode</text>
+  <defs>
+    <linearGradient id="bg" x1="42" y1="20" x2="1236" y2="702" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2E2521"/>
+      <stop offset="0.6" stop-color="#121315"/>
+      <stop offset="1" stop-color="#213743"/>
+    </linearGradient>
+  </defs>
+</svg>

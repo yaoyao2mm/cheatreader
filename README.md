@@ -41,6 +41,10 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
   <img src=".github/assets/cheatreader-features.svg" alt="CheatReader feature demos" width="100%" />
 </p>
 
+<p align="center">
+  <img src=".github/assets/cheatreader-demo.gif" alt="CheatReader animated demo" width="100%" />
+</p>
+
 ## Platform Support
 
 | Platform | Status | Notes |
@@ -53,6 +57,10 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 
 <p align="center">
   <img src=".github/assets/cheatreader-showcase.svg" alt="CheatReader showcase" width="100%" />
+</p>
+
+<p align="center">
+  <img src=".github/assets/cheatreader-realshot.png" alt="CheatReader realistic preview" width="100%" />
 </p>
 
 ## Supported Formats
