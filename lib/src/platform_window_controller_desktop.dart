@@ -192,6 +192,15 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   }
 
   @override
+  Future<void> closeWindow() async {
+    if (!_isSupportedDesktop) {
+      return;
+    }
+
+    await windowManager.close();
+  }
+
+  @override
   Future<void> syncPresentation(ReaderSettings settings) async {
     if (!_isSupportedDesktop) {
       return;

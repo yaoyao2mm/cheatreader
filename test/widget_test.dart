@@ -186,4 +186,7 @@ class _FakePlatformWindowController implements PlatformWindowController {
 
   @override
   Future<void> syncPresentation(ReaderSettings settings) async {}
+
+  @override
+  Future<void> closeWindow() async {}
 }

@@ -5,11 +5,11 @@
   <circle cx="160" cy="848" r="188" fill="#26404A" fill-opacity="0.45"/>
   <circle cx="826" cy="830" r="108" fill="#B08968" fill-opacity="0.42"/>
   <rect x="168" y="196" width="688" height="632" rx="144" fill="#181412" fill-opacity="0.86" stroke="rgba(255,255,255,0.10)"/>
-  <rect x="248" y="300" width="528" height="108" rx="54" fill="#3A2F2B"/>
-  <text x="512" y="368" text-anchor="middle" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="84" font-weight="700">CR</text>
-  <rect x="272" y="492" width="480" height="42" rx="21" fill="#F2E8DD" fill-opacity="0.95"/>
-  <rect x="272" y="572" width="364" height="30" rx="15" fill="#F2E8DD" fill-opacity="0.76"/>
-  <rect x="272" y="636" width="396" height="30" rx="15" fill="#F2E8DD" fill-opacity="0.58"/>
+  <rect x="256" y="282" width="512" height="120" rx="60" fill="#3A2F2B"/>
+  <rect x="304" y="340" width="416" height="38" rx="19" fill="#FFF8F2"/>
+  <rect x="304" y="478" width="416" height="46" rx="23" fill="#F2E8DD" fill-opacity="0.95"/>
+  <rect x="304" y="564" width="316" height="32" rx="16" fill="#F2E8DD" fill-opacity="0.76"/>
+  <rect x="304" y="632" width="352" height="32" rx="16" fill="#F2E8DD" fill-opacity="0.58"/>
   <defs>
     <linearGradient id="bg" x1="74" y1="60" x2="934" y2="964" gradientUnits="userSpaceOnUse">
       <stop stop-color="#2B221E"/>

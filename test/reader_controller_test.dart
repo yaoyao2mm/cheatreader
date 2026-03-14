@@ -368,4 +368,7 @@ class FakePlatformWindowController implements PlatformWindowController {
   Future<void> syncPresentation(ReaderSettings settings) async {
     syncedSettings = settings;
   }
+
+  @override
+  Future<void> closeWindow() async {}
 }

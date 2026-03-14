@@ -177,6 +177,11 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   }
 
   void _handleExit() {
+    if (widget.windowController.supportsFloatingControls) {
+      unawaited(widget.windowController.closeWindow());
+      return;
+    }
+
     SystemNavigator.pop();
   }
 
@@ -674,6 +679,15 @@ class _ReaderControlPanel extends StatefulWidget {
 class _ReaderControlPanelState extends State<_ReaderControlPanel> {
   late final ScrollController _scrollController = ScrollController();
 
+  void _handleExit() {
+    if (widget.windowController.supportsFloatingControls) {
+      unawaited(widget.windowController.closeWindow());
+      return;
+    }
+
+    SystemNavigator.pop();
+  }
+
   Future<void> _importFromPicker(BuildContext context) async {
     final message = await widget.controller.importFromPicker();
     if (message != null && context.mounted) {
@@ -882,7 +896,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                         SizedBox(
                           width: double.infinity,
                           child: OutlinedButton.icon(
-                            onPressed: SystemNavigator.pop,
+                            onPressed: _handleExit,
                             icon: const Icon(Icons.close),
                             label: const Text('退出阅读器'),
                           ),
@@ -936,7 +950,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                       SizedBox(
                         width: double.infinity,
                         child: OutlinedButton.icon(
-                          onPressed: SystemNavigator.pop,
+                          onPressed: _handleExit,
                           icon: const Icon(Icons.close),
                           label: const Text('退出阅读器'),
                         ),

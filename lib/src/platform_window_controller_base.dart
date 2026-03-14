@@ -31,4 +31,6 @@ abstract class PlatformWindowController {
   Future<void> startDragging();
 
   Future<void> resizeWindow(WindowResizeEdge edge, Offset delta);
+
+  Future<void> closeWindow();
 }
