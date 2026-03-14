@@ -1,4 +1,8 @@
 <p align="center">
+  <strong>English</strong> · <a href="./README.zh-CN.md">简体中文</a>
+</p>
+
+<p align="center">
   <img src=".github/assets/cheatreader-hero.svg" alt="CheatReader hero banner" width="100%" />
 </p>
 
@@ -30,6 +34,12 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Support for `txt`, `epub`, `html`, `markdown`, and `fb2`
 - Local managed library copies so imported books still restore after restart
 - Lightweight desktop-first reading flow with drag-and-drop import
+
+## Feature Demos
+
+<p align="center">
+  <img src=".github/assets/cheatreader-features.svg" alt="CheatReader feature demos" width="100%" />
+</p>
 
 ## Platform Support
 
