@@ -31,6 +31,14 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Local managed library copies so imported books still restore after restart
 - Lightweight desktop-first reading flow with drag-and-drop import
 
+## Platform Support
+
+| Platform | Status | Notes |
+| --- | --- | --- |
+| macOS | Best supported | Transparent overlay mode is fully tuned here |
+| Windows | Supported | Same reading flow, frameless desktop window, test recommended on target machine |
+| Linux | Supported | Same reading flow, frameless desktop window, test recommended on target machine |
+
 ## Preview
 
 <p align="center">
@@ -54,11 +62,52 @@ flutter pub get
 flutter run -d macos
 ```
 
+### Run on Windows
+
+```bash
+flutter config --enable-windows-desktop
+flutter run -d windows
+```
+
+### Run on Linux
+
+```bash
+flutter config --enable-linux-desktop
+flutter run -d linux
+```
+
+## Desktop Prerequisites
+
+### Windows
+
+- Flutter with Windows desktop enabled
+- Visual Studio with Desktop development with C++
+
+### Linux
+
+- Flutter with Linux desktop enabled
+- `clang`, `cmake`, `ninja-build`, `pkg-config`
+- GTK development packages required by Flutter desktop
+
+Typical Ubuntu/Debian setup:
+
+```bash
+sudo apt-get update
+sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+```
+
 ## Verify
 
 ```bash
 flutter test
 flutter analyze
+```
+
+You can also test platform builds directly:
+
+```bash
+flutter build windows
+flutter build linux
 ```
 
 ## Project Direction
