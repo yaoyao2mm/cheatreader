@@ -1,55 +1,57 @@
-<svg width="1440" height="720" viewBox="0 0 1440 720" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <rect width="1440" height="720" rx="32" fill="#12100F"/>
-  <rect x="32" y="32" width="1376" height="656" rx="28" fill="url(#bg)"/>
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" fill="#12100F"/>
+  <rect width="1440" height="900" fill="url(#bg)"/>
 
-  <text x="76" y="108" fill="#F8F0E8" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700">Feature Highlights</text>
-  <text x="76" y="146" fill="#DCC9BA" font-family="Arial, sans-serif" font-size="20">Three focused interactions that define CheatReader.</text>
+  <rect x="96" y="88" width="1248" height="724" rx="30" fill="#171413" fill-opacity="0.84" stroke="rgba(255,255,255,0.08)"/>
+  <text x="132" y="152" fill="#F8F0E8" font-family="Georgia, 'Times New Roman', serif" font-size="42" font-weight="700">Feature Highlights</text>
+  <text x="132" y="190" fill="#DCC9BA" font-family="Arial, sans-serif" font-size="22">Three focused interactions that define CheatReader.</text>
 
-  <rect x="76" y="192" width="396" height="440" rx="30" fill="#171413" fill-opacity="0.86" stroke="rgba(255,255,255,0.08)"/>
-  <text x="108" y="242" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="26" font-weight="700">Transparent Mode</text>
-  <text x="108" y="274" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Text stays readable while the app fades into your desktop.</text>
-  <text x="108" y="296" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Only text remains. No tinted card behind it.</text>
-  <rect x="108" y="336" width="332" height="156" rx="24" fill="#0F0C0B"/>
-  <rect x="140" y="390" width="250" height="42" rx="21" fill="#000000" fill-opacity="0.12"/>
-  <text x="153" y="417" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="16">那些故事不会打断你的工作流</text>
-  <text x="108" y="540" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">No tinted panel. No half-transparent card.</text>
-  <text x="108" y="561" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">Just text.</text>
+  <rect x="132" y="242" width="340" height="500" rx="30" fill="#1A1614" stroke="rgba(255,255,255,0.08)"/>
+  <text x="164" y="294" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="24" font-weight="700">Transparent Mode</text>
+  <text x="164" y="330" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="16">Text stays readable while the app fades into your desktop.</text>
+  <text x="164" y="356" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="16">Only text remains. No tinted card behind it.</text>
+  <rect x="164" y="414" width="276" height="132" rx="24" fill="#0F0C0B"/>
+  <rect x="190" y="458" width="224" height="38" rx="19" fill="#000000" fill-opacity="0.16"/>
+  <text x="212" y="483" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="18">那些故事不会打断你的工作流</text>
+  <text x="164" y="620" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="15">No tinted panel.</text>
+  <text x="164" y="644" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="15">No half-transparent card.</text>
+  <text x="164" y="668" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="15">Just text.</text>
 
-  <rect x="522" y="192" width="396" height="440" rx="30" fill="#171413" fill-opacity="0.86" stroke="rgba(255,255,255,0.08)"/>
-  <text x="554" y="242" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="26" font-weight="700">One-line Reading</text>
-  <text x="554" y="274" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">A thin strip for peripheral reading, with visual-line stepping.</text>
-  <text x="554" y="296" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Compact when it needs to disappear into the edge.</text>
-  <rect x="554" y="338" width="332" height="52" rx="26" fill="#3A2F2B"/>
-  <text x="590" y="371" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="18">这就是最小模式下的一条阅读带</text>
-  <rect x="554" y="424" width="332" height="112" rx="24" fill="#0F0C0B"/>
-  <text x="576" y="458" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">Switch via double click, middle click,</text>
-  <text x="576" y="481" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">or a keyboard shortcut.</text>
-  <text x="554" y="578" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">Compact when you need it.</text>
-  <text x="554" y="599" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="14">Expandable when you do not.</text>
+  <rect x="550" y="242" width="340" height="500" rx="30" fill="#1A1614" stroke="rgba(255,255,255,0.08)"/>
+  <text x="582" y="294" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="24" font-weight="700">One-line Reading</text>
+  <text x="582" y="330" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="16">A thin strip for peripheral reading, with visual-line stepping.</text>
+  <text x="582" y="356" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="16">Compact when it needs to disappear into the edge.</text>
+  <rect x="582" y="418" width="276" height="54" rx="27" fill="#3A2F2B"/>
+  <text x="616" y="452" fill="#FFF8F2" font-family="Georgia, 'Times New Roman', serif" font-size="20">这就是最小模式下的一条阅读带</text>
+  <rect x="582" y="516" width="276" height="110" rx="24" fill="#0F0C0B"/>
+  <text x="610" y="560" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">Switch via double click, middle click,</text>
+  <text x="610" y="584" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">or a keyboard shortcut.</text>
+  <text x="582" y="668" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="15">Compact when you need it.</text>
+  <text x="582" y="692" fill="#CDB9A9" font-family="Arial, sans-serif" font-size="15">Expandable when you do not.</text>
 
-  <rect x="968" y="192" width="396" height="440" rx="30" fill="#171413" fill-opacity="0.86" stroke="rgba(255,255,255,0.08)"/>
-  <text x="1000" y="242" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="26" font-weight="700">Multi-format Import</text>
-  <text x="1000" y="274" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">Bring different ebook sources into one calm reading flow.</text>
-  <text x="1000" y="296" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="15">All formats are normalized into the same lightweight reader.</text>
-  <rect x="1000" y="336" width="100" height="42" rx="21" fill="#F0E6DC"/>
-  <text x="1033" y="363" fill="#17110F" font-family="Arial, sans-serif" font-size="18" font-weight="700">TXT</text>
-  <rect x="1114" y="336" width="114" height="42" rx="21" fill="#2D4A57"/>
-  <text x="1146" y="363" fill="#EDF4F6" font-family="Arial, sans-serif" font-size="18" font-weight="700">EPUB</text>
-  <rect x="1242" y="336" width="90" height="42" rx="21" fill="#8D6D61"/>
-  <text x="1269" y="363" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="18" font-weight="700">FB2</text>
-  <rect x="1000" y="396" width="112" height="42" rx="21" fill="#5E4A43"/>
-  <text x="1030" y="423" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="18" font-weight="700">HTML</text>
-  <rect x="1126" y="396" width="154" height="42" rx="21" fill="#243C46"/>
-  <text x="1158" y="423" fill="#EDF4F6" font-family="Arial, sans-serif" font-size="18" font-weight="700">Markdown</text>
-  <rect x="1000" y="482" width="332" height="102" rx="24" fill="#0F0C0B"/>
-  <text x="1024" y="520" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="14">Everything is normalized into text-first reading,</text>
-  <text x="1024" y="541" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="14">so the experience stays lightweight, calm,</text>
-  <text x="1024" y="562" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="14">and consistent across formats.</text>
+  <rect x="968" y="242" width="340" height="500" rx="30" fill="#1A1614" stroke="rgba(255,255,255,0.08)"/>
+  <text x="1000" y="294" fill="#FFF7F0" font-family="Arial, sans-serif" font-size="24" font-weight="700">Multi-format Import</text>
+  <text x="1000" y="330" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="16">Bring different ebook sources into one calm reading flow.</text>
+  <text x="1000" y="356" fill="#D8C7B8" font-family="Arial, sans-serif" font-size="16">All formats are normalized into the same lightweight reader.</text>
+  <rect x="1000" y="418" width="82" height="38" rx="19" fill="#F0E6DC"/>
+  <text x="1027" y="442" fill="#17110F" font-family="Arial, sans-serif" font-size="16" font-weight="700">TXT</text>
+  <rect x="1094" y="418" width="94" height="38" rx="19" fill="#2D4A57"/>
+  <text x="1124" y="442" fill="#EDF4F6" font-family="Arial, sans-serif" font-size="16" font-weight="700">EPUB</text>
+  <rect x="1200" y="418" width="82" height="38" rx="19" fill="#8D6D61"/>
+  <text x="1226" y="442" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="16" font-weight="700">FB2</text>
+  <rect x="1000" y="470" width="96" height="38" rx="19" fill="#5E4A43"/>
+  <text x="1025" y="494" fill="#FFF8F0" font-family="Arial, sans-serif" font-size="16" font-weight="700">HTML</text>
+  <rect x="1108" y="470" width="126" height="38" rx="19" fill="#243C46"/>
+  <text x="1133" y="494" fill="#EDF4F6" font-family="Arial, sans-serif" font-size="16" font-weight="700">Markdown</text>
+  <rect x="1000" y="548" width="276" height="118" rx="24" fill="#0F0C0B"/>
+  <text x="1026" y="592" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">Everything is normalized into text-first reading,</text>
+  <text x="1026" y="616" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">so the experience stays lightweight, calm,</text>
+  <text x="1026" y="640" fill="#E8D8CA" font-family="Arial, sans-serif" font-size="15">and consistent across formats.</text>
 
   <defs>
-    <linearGradient id="bg" x1="68" y1="20" x2="1365" y2="673" gradientUnits="userSpaceOnUse">
+    <linearGradient id="bg" x1="74" y1="42" x2="1366" y2="858" gradientUnits="userSpaceOnUse">
       <stop stop-color="#2B221E"/>
-      <stop offset="0.5" stop-color="#141211"/>
+      <stop offset="0.56" stop-color="#141211"/>
       <stop offset="1" stop-color="#203742"/>
     </linearGradient>
   </defs>
