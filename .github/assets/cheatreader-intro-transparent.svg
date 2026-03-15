@@ -1,0 +1,28 @@
+<svg width="1440" height="900" viewBox="0 0 1440 900" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1440" height="900" fill="#0E1115"/>
+  <rect width="1440" height="900" fill="url(#bg)"/>
+
+  <rect x="170" y="138" width="1100" height="610" rx="34" fill="#14181D" fill-opacity="0.70" stroke="rgba(255,255,255,0.06)"/>
+  <rect x="170" y="138" width="1100" height="52" rx="34" fill="#1B2027"/>
+  <circle cx="206" cy="164" r="8" fill="#FF6157"/>
+  <circle cx="234" cy="164" r="8" fill="#FEBB2E"/>
+  <circle cx="262" cy="164" r="8" fill="#28C840"/>
+
+  <text x="214" y="258" fill="#F7EFE7" font-family="Georgia, 'Times New Roman', serif" font-size="40" font-weight="700">Transparent Mode</text>
+  <text x="214" y="296" fill="#D8C8BA" font-family="Arial, sans-serif" font-size="21">Text only. No tinted card. The desktop behind it stays visible.</text>
+
+  <rect x="250" y="382" width="560" height="48" rx="24" fill="#000000" fill-opacity="0.08"/>
+  <text x="278" y="414" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="24">第1章 引子</text>
+
+  <text x="278" y="484" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">云南是个出古城的地方。</text>
+  <text x="278" y="524" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">自打丽江走红、大理行俏之后，方圆左近，能抬出来开发成古城的去处，</text>
+  <text x="278" y="564" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">都一一收成登场，因着各有特色，居然也逐个打出了名号。</text>
+
+  <defs>
+    <linearGradient id="bg" x1="86" y1="48" x2="1354" y2="858" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2A221E"/>
+      <stop offset="0.58" stop-color="#101317"/>
+      <stop offset="1" stop-color="#243F49"/>
+    </linearGradient>
+  </defs>
+</svg>

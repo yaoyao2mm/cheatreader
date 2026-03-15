@@ -15,6 +15,10 @@
 </p>
 
 <p align="center">
+  <img src=".github/assets/cheatreader-intro-transparent.svg" alt="CheatReader 透明模式介绍图" />
+</p>
+
+<p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/platform-Flutter-54C5F8?style=flat-square">
   <img alt="Desktop" src="https://img.shields.io/badge/focus-desktop-2F4858?style=flat-square">
   <img alt="Formats" src="https://img.shields.io/badge/formats-txt%20%7C%20epub%20%7C%20html%20%7C%20md%20%7C%20fb2-B08968?style=flat-square">
