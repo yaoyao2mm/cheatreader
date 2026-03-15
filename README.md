@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src=".github/assets/cheatreader-hero.svg" alt="CheatReader hero banner" width="100%" />
+  <img src=".github/assets/cheatreader-hero.svg" alt="CheatReader hero banner" />
 </p>
 
 <p align="center">
@@ -38,11 +38,11 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 ## Feature Demos
 
 <p align="center">
-  <img src=".github/assets/cheatreader-features-fixed.png" alt="CheatReader feature demos" width="100%" />
+  <img src=".github/assets/cheatreader-features-fixed.png" alt="CheatReader feature demos" />
 </p>
 
 <p align="center">
-  <img src=".github/assets/cheatreader-demo-fixed.gif" alt="CheatReader animated demo" width="100%" />
+  <img src=".github/assets/cheatreader-demo-fixed.gif" alt="CheatReader animated demo" />
 </p>
 
 ## Platform Support
@@ -56,11 +56,11 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 ## Preview
 
 <p align="center">
-  <img src=".github/assets/cheatreader-showcase-fixed.png" alt="CheatReader showcase" width="100%" />
+  <img src=".github/assets/cheatreader-showcase-fixed.png" alt="CheatReader showcase" />
 </p>
 
 <p align="center">
-  <img src=".github/assets/cheatreader-realshot-fixed.png" alt="CheatReader realistic preview" width="100%" />
+  <img src=".github/assets/cheatreader-realshot-fixed.png" alt="CheatReader realistic preview" />
 </p>
 
 ## Supported Formats
