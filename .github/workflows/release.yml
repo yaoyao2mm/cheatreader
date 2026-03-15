@@ -187,18 +187,26 @@ jobs:
           DESKTOP_DIR="$PACKAGE_ROOT/usr/share/applications"
           ICON_DIR="$PACKAGE_ROOT/usr/share/icons/hicolor/256x256/apps"
           DEBIAN_DIR="$PACKAGE_ROOT/DEBIAN"
+          BIN_DIR="$PACKAGE_ROOT/usr/bin"
 
           rm -rf "$PACKAGE_ROOT"
-          mkdir -p "$APP_ROOT" "$DESKTOP_DIR" "$ICON_DIR" "$DEBIAN_DIR"
+          mkdir -p "$APP_ROOT" "$DESKTOP_DIR" "$ICON_DIR" "$DEBIAN_DIR" "$BIN_DIR"
           cp -R "${{ matrix.build_output }}/." "$APP_ROOT/"
           cp snap/gui/app_icon.png "$ICON_DIR/cheatreader.png"
+
+          printf '%s\n' \
+            '#!/usr/bin/env sh' \
+            'cd /opt/cheatreader || exit 1' \
+            'exec /opt/cheatreader/cheatreader "$@"' \
+            > "$BIN_DIR/cheatreader"
 
           {
             echo '[Desktop Entry]'
             echo 'Name=CheatReader'
             echo 'Comment=Floating desktop reader for low-distraction reading'
-            echo 'Exec=/opt/cheatreader/cheatreader'
+            echo 'Exec=/usr/bin/cheatreader'
             echo 'Icon=cheatreader'
+            echo 'Path=/opt/cheatreader'
             echo 'Terminal=false'
             echo 'Type=Application'
             echo 'Categories=Office;Viewer;Utility;'
@@ -219,6 +227,7 @@ jobs:
           chmod 0755 "$DEBIAN_DIR"
           find "$PACKAGE_ROOT/opt" -type f -exec chmod 0644 {} \;
           chmod 0755 "$APP_ROOT/cheatreader"
+          chmod 0755 "$BIN_DIR/cheatreader"
           chmod 0644 "$DESKTOP_DIR/cheatreader.desktop"
           chmod 0644 "$ICON_DIR/cheatreader.png"
           dpkg-deb --build --root-owner-group "$PACKAGE_ROOT" "$RUNNER_TEMP/${{ matrix.release_asset }}"
