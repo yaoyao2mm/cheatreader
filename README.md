@@ -35,12 +35,6 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Local managed library copies so imported books still restore after restart
 - Lightweight desktop-first reading flow with drag-and-drop import
 
-## Feature Demos
-
-![CheatReader feature demos](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-features-readme.png)
-
-![CheatReader animated demo](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-demo-readme.gif)
-
 ## Platform Support
 
 | Platform | Status | Notes |
@@ -48,12 +42,6 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 | macOS | Best supported | Transparent overlay mode is fully tuned here |
 | Windows | Supported | Same reading flow, frameless desktop window, test recommended on target machine |
 | Linux | Supported | Same reading flow, frameless desktop window, test recommended on target machine |
-
-## Preview
-
-![CheatReader showcase](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-showcase-readme.png)
-
-![CheatReader realistic preview](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-realshot-readme.png)
 
 ## Supported Formats
 
