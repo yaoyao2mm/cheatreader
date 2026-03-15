@@ -37,13 +37,9 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 
 ## Feature Demos
 
-<p align="center">
-  <img src=".github/assets/cheatreader-features-fixed.png" alt="CheatReader feature demos" />
-</p>
+![CheatReader feature demos](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-features-readme.png)
 
-<p align="center">
-  <img src=".github/assets/cheatreader-demo-fixed.gif" alt="CheatReader animated demo" />
-</p>
+![CheatReader animated demo](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-demo-readme.gif)
 
 ## Platform Support
 
@@ -55,13 +51,9 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 
 ## Preview
 
-<p align="center">
-  <img src=".github/assets/cheatreader-showcase-fixed.png" alt="CheatReader showcase" />
-</p>
+![CheatReader showcase](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-showcase-readme.png)
 
-<p align="center">
-  <img src=".github/assets/cheatreader-realshot-fixed.png" alt="CheatReader realistic preview" />
-</p>
+![CheatReader realistic preview](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/cheatreader-realshot-readme.png)
 
 ## Supported Formats
 
