@@ -38,11 +38,14 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     };
   }
 
+  bool get _useFramelessWindow =>
+      _isSupportedDesktop && defaultTargetPlatform != TargetPlatform.linux;
+
   @override
   bool get supportsFloatingControls => _isSupportedDesktop;
 
   @override
-  bool get supportsFramelessWindow => _isSupportedDesktop;
+  bool get supportsFramelessWindow => _useFramelessWindow;
 
   @override
   bool get supportsManualResize =>
@@ -55,22 +58,28 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     }
 
     await windowManager.ensureInitialized();
-    const windowOptions = WindowOptions(
+    final windowOptions = WindowOptions(
       size: _normalSize,
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: TitleBarStyle.hidden,
-      windowButtonVisibility: false,
+      titleBarStyle: _useFramelessWindow
+          ? TitleBarStyle.hidden
+          : TitleBarStyle.normal,
+      windowButtonVisibility: !_useFramelessWindow,
     );
 
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.setTitle('CheatReader');
       await windowManager.setResizable(true);
       await windowManager.setMinimumSize(_minimumSize);
-      await windowManager.setAsFrameless();
+      if (_useFramelessWindow) {
+        await windowManager.setAsFrameless();
+      }
       await windowManager.setOpacity(1.0);
-      await windowManager.setHasShadow(false);
+      if (_useFramelessWindow) {
+        await windowManager.setHasShadow(false);
+      }
       await windowManager.show();
       await windowManager.focus();
     });
@@ -206,10 +215,12 @@ class DesktopPlatformWindowController implements PlatformWindowController {
       return;
     }
 
-    await windowManager.setAsFrameless();
+    if (_useFramelessWindow) {
+      await windowManager.setAsFrameless();
+      await windowManager.setHasShadow(false);
+    }
     await windowManager.setAlwaysOnTop(settings.alwaysOnTop);
     await windowManager.setOpacity(1.0);
-    await windowManager.setHasShadow(false);
 
     final currentSize = await windowManager.getSize();
     final targetSize = _targetReaderSize(
@@ -237,10 +248,12 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     _controlPanelRestorePosition = null;
     _controlPanelRestoreSize = null;
 
-    await windowManager.setAsFrameless();
+    if (_useFramelessWindow) {
+      await windowManager.setAsFrameless();
+      await windowManager.setHasShadow(false);
+    }
     await windowManager.setAlwaysOnTop(settings.alwaysOnTop);
     await windowManager.setOpacity(1.0);
-    await windowManager.setHasShadow(false);
     final currentSize = restoreSize ?? await windowManager.getSize();
     final targetSize = _targetReaderSize(
       currentSize: currentSize,

@@ -30,13 +30,16 @@ const _demoContent = '''
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  final preferencesStore =
-      await SharedPreferencesReaderPreferencesStore.create();
+  final preferencesStore = await _createPreferencesStore();
   final windowController = createPlatformWindowController();
   final fileBookmarkService = PlatformReaderFileBookmarkService();
   final importService = FileSelectorReaderImportService();
   final libraryStorage = PlatformReaderLibraryStorage();
-  await windowController.initialize();
+  try {
+    await windowController.initialize();
+  } catch (_) {
+    // Fall back to the default behavior if window initialization fails.
+  }
 
   final controller = ReaderController(
     initialContent: _demoContent,
@@ -46,9 +49,21 @@ Future<void> main() async {
     importService: importService,
     libraryStorage: libraryStorage,
   );
-  await controller.initialize();
+  try {
+    await controller.initialize();
+  } catch (_) {
+    // Preserve startup on platforms where a desktop plugin may fail.
+  }
 
   runApp(
     CheatReaderApp(controller: controller, windowController: windowController),
   );
+}
+
+Future<ReaderPreferencesStore> _createPreferencesStore() async {
+  try {
+    return await SharedPreferencesReaderPreferencesStore.create();
+  } catch (_) {
+    return MemoryReaderPreferencesStore();
+  }
 }
