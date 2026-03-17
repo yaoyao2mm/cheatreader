@@ -24,6 +24,7 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   Offset? _controlPanelRestorePosition;
   Size? _controlPanelRestoreSize;
   bool? _lastOneLineMode;
+  Size? _rememberedMultiLineSize;
 
   bool get _isSupportedDesktop {
     if (kIsWeb) {
@@ -92,6 +93,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
 
     _controlPanelRestorePosition ??= await windowManager.getPosition();
     final currentSize = await windowManager.getSize();
+    if (_lastOneLineMode != true) {
+      _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
+    }
     _controlPanelRestoreSize ??= currentSize;
     final maxX = math.max(0.0, screenSize.width - _controlPanelSize.width);
     final maxY = math.max(0.0, screenSize.height - _controlPanelSize.height);
@@ -191,6 +195,10 @@ class DesktopPlatformWindowController implements PlatformWindowController {
       height = minHeight;
     }
 
+    if (_lastOneLineMode != true) {
+      _rememberedMultiLineSize = _normalizeMultiLineSize(Size(width, height));
+    }
+
     await windowManager.setBounds(
       null,
       position: Offset(left, top),
@@ -222,6 +230,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     await windowManager.setOpacity(1.0);
 
     final currentSize = await windowManager.getSize();
+    if (_lastOneLineMode != true) {
+      _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
+    }
     final targetSize = _targetReaderSize(
       currentSize: currentSize,
       settings: settings,
@@ -254,6 +265,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     await windowManager.setAlwaysOnTop(settings.alwaysOnTop);
     await windowManager.setOpacity(1.0);
     final currentSize = restoreSize ?? await windowManager.getSize();
+    if (_lastOneLineMode != true) {
+      _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
+    }
     final targetSize = _targetReaderSize(
       currentSize: currentSize,
       settings: settings,
@@ -281,21 +295,26 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     if (_lastOneLineMode == null) {
       return oneLineMode
           ? Size(_minimumWidth, oneLineHeight)
-          : Size(width, multiLineHeight);
+          : (_rememberedMultiLineSize ??
+                Size(width, multiLineHeight));
     }
 
     if (_lastOneLineMode == oneLineMode) {
       final minimumHeight = oneLineMode
           ? oneLineHeight
           : _minimumMultiLineHeight;
-      return Size(width, math.max(currentSize.height, minimumHeight));
+      return Size(
+        width,
+        math.max(currentSize.height, minimumHeight),
+      );
     }
 
     if (oneLineMode) {
+      _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
       return Size(_minimumWidth, oneLineHeight);
     }
 
-    return Size(width, multiLineHeight);
+    return _rememberedMultiLineSize ?? Size(width, multiLineHeight);
   }
 
   Size _minimumWindowSizeFor(ReaderSettings settings) {
@@ -321,6 +340,13 @@ class DesktopPlatformWindowController implements PlatformWindowController {
         (textHeight * _defaultMultiLineVisibleLines) +
         _multiLineHeightSafetyInset;
     return math.max(_minimumMultiLineHeight, targetHeight);
+  }
+
+  Size _normalizeMultiLineSize(Size size) {
+    return Size(
+      math.max(size.width, _minimumWidth),
+      math.max(size.height, _minimumMultiLineHeight),
+    );
   }
 }
 

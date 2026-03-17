@@ -26,10 +26,6 @@ class ReaderController extends ChangeNotifier {
        _importService = importService,
        _libraryStorage = libraryStorage,
        _fallbackContent = initialContent,
-       _fallbackLines = _splitLines(
-         initialContent,
-         ReaderSettings.defaults.languageMode,
-       ),
        _lines = _splitLines(
          initialContent,
          ReaderSettings.defaults.languageMode,
@@ -41,7 +37,6 @@ class ReaderController extends ChangeNotifier {
   final ReaderImportService _importService;
   final ReaderLibraryStorage _libraryStorage;
   final String _fallbackContent;
-  final List<String> _fallbackLines;
 
   ReaderSettings _settings = ReaderSettings.defaults;
   List<ReaderBookRecord> _bookshelf = const [];
