@@ -39,6 +39,10 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
   <img src=".github/assets/cheatreader-intro-transparent.svg" alt="CheatReader transparent mode intro" />
 </p>
 
+![CheatReader single-line demo](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/demo-single-line-1.gif)
+
+![CheatReader multi-line demo](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/demo-multi-line.gif)
+
 ## Platform Support
 
 | Platform | Status | Notes |
