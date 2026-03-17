@@ -31,7 +31,7 @@ jobs:
 
   verify:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -74,7 +74,7 @@ jobs:
             artifact_name: cheatreader-windows
             build_output: build/windows/x64/runner/Release
             release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-windows-setup.exe
-          - os: ubuntu-latest
+          - os: ubuntu-22.04
             target: linux
             artifact_name: cheatreader-linux
             build_output: build/linux/x64/release/bundle
@@ -241,7 +241,7 @@ jobs:
 
   release:
     needs: [prepare, build]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
         uses: actions/checkout@v5
