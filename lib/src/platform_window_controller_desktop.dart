@@ -38,8 +38,7 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     };
   }
 
-  bool get _useFramelessWindow =>
-      _isSupportedDesktop && defaultTargetPlatform != TargetPlatform.linux;
+  bool get _useFramelessWindow => _isSupportedDesktop;
 
   @override
   bool get supportsFloatingControls => _isSupportedDesktop;
