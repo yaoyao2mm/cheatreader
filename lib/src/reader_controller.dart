@@ -25,6 +25,7 @@ class ReaderController extends ChangeNotifier {
        _fileBookmarkService = fileBookmarkService,
        _importService = importService,
        _libraryStorage = libraryStorage,
+       _fallbackContent = initialContent,
        _fallbackLines = _splitLines(
          initialContent,
          ReaderSettings.defaults.languageMode,
@@ -39,6 +40,7 @@ class ReaderController extends ChangeNotifier {
   final ReaderFileBookmarkService _fileBookmarkService;
   final ReaderImportService _importService;
   final ReaderLibraryStorage _libraryStorage;
+  final String _fallbackContent;
   final List<String> _fallbackLines;
 
   ReaderSettings _settings = ReaderSettings.defaults;
@@ -285,7 +287,7 @@ class ReaderController extends ChangeNotifier {
     _burnedLineCount = _clampLineIndex(_burnedLineCount);
     if (_currentBookPath == null) {
       _currentDisplayName = stringsForSettings(_settings).demoTitle;
-      _lines = List<String>.from(_fallbackLines);
+      _lines = _splitLines(_fallbackContent, _settings.languageMode);
     }
     notifyListeners();
     unawaited(_persistSettings());
@@ -432,7 +434,7 @@ class ReaderController extends ChangeNotifier {
   }
 
   void _restoreFallbackContent() {
-    _lines = List<String>.from(_fallbackLines);
+    _lines = _splitLines(_fallbackContent, _settings.languageMode);
     _currentBookPath = null;
     _currentDisplayName = stringsForSettings(_settings).demoTitle;
     _readLineIndex = 0;
