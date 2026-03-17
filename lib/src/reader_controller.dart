@@ -8,6 +8,7 @@ import 'reader_book.dart';
 import 'reader_file_bookmark_service.dart';
 import 'reader_import_service.dart';
 import 'reader_library_storage.dart';
+import 'reader_localization.dart';
 import 'reader_preferences.dart';
 import 'reader_settings.dart';
 
@@ -24,8 +25,14 @@ class ReaderController extends ChangeNotifier {
        _fileBookmarkService = fileBookmarkService,
        _importService = importService,
        _libraryStorage = libraryStorage,
-       _fallbackLines = _splitLines(initialContent),
-       _lines = _splitLines(initialContent);
+       _fallbackLines = _splitLines(
+         initialContent,
+         ReaderSettings.defaults.languageMode,
+       ),
+       _lines = _splitLines(
+         initialContent,
+         ReaderSettings.defaults.languageMode,
+       );
 
   final ReaderPreferencesStore _preferencesStore;
   final PlatformWindowController _windowController;
@@ -42,7 +49,9 @@ class ReaderController extends ChangeNotifier {
   int _burnedLineCount = 0;
   int _pageLineCount = 8;
   String? _currentBookPath;
-  String _currentDisplayName = '演示文本';
+  String _currentDisplayName = stringsForLanguageMode(
+    ReaderSettings.defaults.languageMode,
+  ).demoTitle;
   bool _dragTargetActive = false;
 
   ReaderSettings get settings => _settings;
@@ -131,6 +140,10 @@ class ReaderController extends ChangeNotifier {
     _updateSettings(_settings.copyWith(modeToggleTrigger: value));
   }
 
+  void setLanguageMode(ReaderLanguageMode value) {
+    _updateSettings(_settings.copyWith(languageMode: value));
+  }
+
   void toggleBurnMode() {
     // Temporarily disabled until the feature is redesigned.
   }
@@ -175,7 +188,7 @@ class ReaderController extends ChangeNotifier {
 
       return _openImportedFile(file, storedBookPath: file.path);
     } catch (_) {
-      return '无法导入该电子书文件';
+      return stringsForSettings(_settings).importFailure;
     }
   }
 
@@ -190,7 +203,7 @@ class ReaderController extends ChangeNotifier {
     String? existingStoredFilePath,
   }) async {
     if (!_importService.isSupportedTextFilePath(path)) {
-      return '仅支持导入 txt / epub / html / md / fb2';
+      return stringsForSettings(_settings).importUnsupportedFormat;
     }
 
     try {
@@ -204,7 +217,7 @@ class ReaderController extends ChangeNotifier {
     } catch (_) {
       _staleBookPaths.add(storedBookPath);
       notifyListeners();
-      return '无法打开该电子书文件';
+      return stringsForSettings(_settings).importOpenFailure;
     }
   }
 
@@ -258,6 +271,7 @@ class ReaderController extends ChangeNotifier {
   void _updateSettings(ReaderSettings value) {
     if (_settings.oneLineMode == value.oneLineMode &&
         _settings.modeToggleTrigger == value.modeToggleTrigger &&
+        _settings.languageMode == value.languageMode &&
         _settings.alwaysOnTop == value.alwaysOnTop &&
         _settings.fontScale == value.fontScale &&
         _settings.windowOpacity == value.windowOpacity &&
@@ -269,6 +283,10 @@ class ReaderController extends ChangeNotifier {
     _settings = value;
     _readLineIndex = _clampLineIndex(_readLineIndex);
     _burnedLineCount = _clampLineIndex(_burnedLineCount);
+    if (_currentBookPath == null) {
+      _currentDisplayName = stringsForSettings(_settings).demoTitle;
+      _lines = List<String>.from(_fallbackLines);
+    }
     notifyListeners();
     unawaited(_persistSettings());
   }
@@ -304,7 +322,7 @@ class ReaderController extends ChangeNotifier {
     final existingRecord = _findBookRecord(storedBookPath);
     final displayName = existingRecord?.displayName ?? file.displayName;
     _staleBookPaths.remove(storedBookPath);
-    _lines = _splitLines(file.content);
+    _lines = _splitLines(file.content, _settings.languageMode);
     _currentBookPath = storedBookPath;
     _currentDisplayName = displayName;
 
@@ -416,7 +434,7 @@ class ReaderController extends ChangeNotifier {
   void _restoreFallbackContent() {
     _lines = List<String>.from(_fallbackLines);
     _currentBookPath = null;
-    _currentDisplayName = '演示文本';
+    _currentDisplayName = stringsForSettings(_settings).demoTitle;
     _readLineIndex = 0;
     _burnedLineCount = 0;
   }
@@ -429,7 +447,10 @@ class ReaderController extends ChangeNotifier {
     return List<ReaderBookRecord>.unmodifiable(sorted);
   }
 
-  static List<String> _splitLines(String content) {
+  static List<String> _splitLines(
+    String content,
+    ReaderLanguageMode languageMode,
+  ) {
     final normalizedLines = content
         .replaceAll('\r\n', '\n')
         .replaceAll('\r', '\n')
@@ -439,7 +460,7 @@ class ReaderController extends ChangeNotifier {
 
     if (normalizedLines.isEmpty ||
         normalizedLines.every((line) => line.isEmpty)) {
-      return const <String>['（空文本）'];
+      return <String>[stringsForLanguageMode(languageMode).emptyText];
     }
 
     return normalizedLines;

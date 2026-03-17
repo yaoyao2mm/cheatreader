@@ -29,6 +29,7 @@ class SharedPreferencesReaderPreferencesStore
 
   static const _oneLineModeKey = 'reader.oneLineMode';
   static const _modeToggleTriggerKey = 'reader.modeToggleTrigger';
+  static const _languageModeKey = 'reader.languageMode';
   static const _alwaysOnTopKey = 'reader.alwaysOnTop';
   static const _fontScaleKey = 'reader.fontScale';
   static const _windowOpacityKey = 'reader.windowOpacity';
@@ -58,6 +59,10 @@ class SharedPreferencesReaderPreferencesStore
         modeToggleTrigger: ReaderModeToggleTrigger.values.byName(
           _preferences.getString(_modeToggleTriggerKey) ??
               ReaderSettings.defaults.modeToggleTrigger.name,
+        ),
+        languageMode: ReaderLanguageMode.values.byName(
+          _preferences.getString(_languageModeKey) ??
+              ReaderSettings.defaults.languageMode.name,
         ),
         alwaysOnTop:
             _preferences.getBool(_alwaysOnTopKey) ??
@@ -91,6 +96,7 @@ class SharedPreferencesReaderPreferencesStore
       _modeToggleTriggerKey,
       settings.modeToggleTrigger.name,
     );
+    await _preferences.setString(_languageModeKey, settings.languageMode.name);
     await _preferences.setBool(_alwaysOnTopKey, settings.alwaysOnTop);
     await _preferences.setDouble(_fontScaleKey, settings.fontScale);
     await _preferences.setDouble(_windowOpacityKey, settings.windowOpacity);

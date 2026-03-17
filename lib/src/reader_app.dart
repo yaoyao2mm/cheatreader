@@ -6,11 +6,14 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:window_manager/window_manager.dart';
 
+import '../l10n/generated/app_localizations.dart';
 import 'platform_window_controller_base.dart';
 import 'reader_book.dart';
 import 'reader_controller.dart';
+import 'reader_localization.dart';
 import 'reader_settings.dart';
 
 class CheatReaderApp extends StatelessWidget {
@@ -28,9 +31,18 @@ class CheatReaderApp extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
+        final locale = materialLocaleForLanguageMode(controller.settings.languageMode);
         return MaterialApp(
           debugShowCheckedModeBanner: false,
-          title: 'CheatReader',
+          onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
+          locale: locale,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
           theme: ThemeData(
             brightness: Brightness.dark,
             scaffoldBackgroundColor: Colors.transparent,
@@ -203,7 +215,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
       return;
     }
 
-    _showMessage('没有可导入的电子书文件');
+    _showMessage(AppLocalizations.of(context)!.importNoFiles);
   }
 
   void _handlePointerSignal(PointerSignalEvent signal) {
@@ -324,6 +336,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   Widget build(BuildContext context) {
     final controller = widget.controller;
     final settings = controller.settings;
+    final l10n = AppLocalizations.of(context)!;
     final fontSize = 20.0 * settings.fontScale;
     final readerColors = _resolveReaderColors(settings);
     final readerTextColor = readerColors.text;
@@ -474,9 +487,9 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
                                   color: Colors.black.withValues(alpha: 0.74),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                child: const Text(
-                                  '拖入 txt / epub / html / md / fb2 开始阅读',
-                                  style: TextStyle(color: Colors.white),
+                                child: Text(
+                                  l10n.dropPrompt,
+                                  style: const TextStyle(color: Colors.white),
                                 ),
                               ),
                             ),
@@ -711,13 +724,14 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
   List<Widget> _buildPanelSections(BuildContext context) {
     final controller = widget.controller;
     final windowController = widget.windowController;
+    final l10n = AppLocalizations.of(context)!;
 
     return [
-      _SectionTitle(title: '简单书架'),
+      _SectionTitle(title: l10n.sectionSimpleBookshelf),
       const SizedBox(height: 8),
       if (controller.bookshelf.isEmpty)
-        const Text(
-          '还没有导入过 txt。可以直接拖入窗口，或点上面的导入按钮。',
+        Text(
+          l10n.bookshelfEmpty,
           style: TextStyle(color: Colors.white60),
         )
       else
@@ -731,23 +745,23 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
           ),
         ),
       const SizedBox(height: 20),
-      _SectionTitle(title: '阅读设置'),
+      _SectionTitle(title: l10n.sectionReadingSettings),
       const SizedBox(height: 8),
-      const Text('显示模式切换方式'),
+      Text(l10n.modeToggleMethod),
       const SizedBox(height: 8),
       SegmentedButton<ReaderModeToggleTrigger>(
-        segments: const [
+        segments: [
           ButtonSegment(
             value: ReaderModeToggleTrigger.doubleClick,
-            label: Text('双击'),
+            label: Text(l10n.triggerDoubleClick),
           ),
           ButtonSegment(
             value: ReaderModeToggleTrigger.middleClick,
-            label: Text('中键'),
+            label: Text(l10n.triggerMiddleClick),
           ),
           ButtonSegment(
             value: ReaderModeToggleTrigger.keyboardShortcut,
-            label: Text('快捷键'),
+            label: Text(l10n.triggerKeyboard),
           ),
         ],
         selected: <ReaderModeToggleTrigger>{
@@ -759,8 +773,12 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       ),
       const SizedBox(height: 8),
       Text(
-        '当前${controller.settings.oneLineMode ? '单行' : '多行'}。'
-        '切换方式：${_modeToggleTriggerLabel(controller.settings.modeToggleTrigger)}',
+        l10n.currentModeSummary(
+          controller.settings.oneLineMode
+              ? l10n.modeSingleLine
+              : l10n.modeMultiLine,
+          _modeToggleTriggerLabel(l10n, controller.settings.modeToggleTrigger),
+        ),
         style: Theme.of(
           context,
         ).textTheme.bodySmall?.copyWith(color: Colors.white70),
@@ -771,31 +789,59 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
         onChanged: windowController.supportsFloatingControls
             ? controller.setAlwaysOnTop
             : null,
-        title: const Text('始终置顶'),
+        title: Text(l10n.alwaysOnTopTitle),
         subtitle: Text(
-          windowController.supportsFloatingControls ? '窗口保持浮在最前' : '当前平台暂不支持',
+          windowController.supportsFloatingControls
+              ? l10n.alwaysOnTopSupported
+              : l10n.alwaysOnTopUnsupported,
         ),
       ),
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
         value: controller.settings.transparentModeEnabled,
         onChanged: controller.setTransparentModeEnabled,
-        title: const Text('透明模式'),
-        subtitle: const Text('彻底去掉任何底色，只保留文字'),
+        title: Text(l10n.transparentModeTitle),
+        subtitle: Text(l10n.transparentModeSubtitle),
       ),
       const SizedBox(height: 12),
-      const Text('字体'),
+      Text(l10n.languageTitle),
+      const SizedBox(height: 8),
+      SegmentedButton<ReaderLanguageMode>(
+        segments: [
+          ButtonSegment(
+            value: ReaderLanguageMode.system,
+            label: Text(l10n.languageSystem),
+          ),
+          ButtonSegment(
+            value: ReaderLanguageMode.simplifiedChinese,
+            label: Text(l10n.languageZhHans),
+          ),
+          ButtonSegment(
+            value: ReaderLanguageMode.english,
+            label: Text(l10n.languageEnglish),
+          ),
+        ],
+        selected: <ReaderLanguageMode>{controller.settings.languageMode},
+        onSelectionChanged: (selection) {
+          controller.setLanguageMode(selection.first);
+        },
+      ),
+      const SizedBox(height: 12),
+      Text(l10n.fontTitle),
       const SizedBox(height: 8),
       SegmentedButton<ReaderFontFamilyPreset>(
-        segments: const [
+        segments: [
           ButtonSegment(
             value: ReaderFontFamilyPreset.system,
-            label: Text('默认'),
+            label: Text(l10n.fontDefault),
           ),
-          ButtonSegment(value: ReaderFontFamilyPreset.serif, label: Text('衬线')),
+          ButtonSegment(
+            value: ReaderFontFamilyPreset.serif,
+            label: Text(l10n.fontSerif),
+          ),
           ButtonSegment(
             value: ReaderFontFamilyPreset.monospace,
-            label: Text('等宽'),
+            label: Text(l10n.fontMonospace),
           ),
         ],
         selected: <ReaderFontFamilyPreset>{
@@ -807,23 +853,27 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       ),
       const SizedBox(height: 12),
       _SliderRow(
-        label: '字号',
+        label: l10n.fontScaleLabel,
         value: controller.settings.fontScale,
         min: 0.85,
         max: 1.4,
         divisions: 11,
-        displayValue: '${(controller.settings.fontScale * 100).round()}%',
+        displayValue: l10n.sliderPercent(
+          (controller.settings.fontScale * 100).round(),
+        ),
         onChanged: controller.setFontScale,
       ),
       _SliderRow(
-        label: '背景透明度',
+        label: l10n.windowOpacityLabel,
         value: controller.settings.windowOpacity,
         min: 0.0,
         max: 1.0,
         divisions: 20,
         displayValue: controller.settings.transparentModeEnabled
-            ? '透明模式已接管'
-            : '${(controller.settings.windowOpacity * 100).round()}%',
+            ? l10n.transparentModeOverridesOpacity
+            : l10n.sliderPercent(
+                (controller.settings.windowOpacity * 100).round(),
+              ),
         onChanged: controller.settings.transparentModeEnabled
             ? null
             : controller.setWindowOpacity,
@@ -831,11 +881,14 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     ];
   }
 
-  String _modeToggleTriggerLabel(ReaderModeToggleTrigger trigger) {
+  String _modeToggleTriggerLabel(
+    AppLocalizations l10n,
+    ReaderModeToggleTrigger trigger,
+  ) {
     return switch (trigger) {
-      ReaderModeToggleTrigger.doubleClick => '双击阅读区',
-      ReaderModeToggleTrigger.middleClick => '鼠标中键点击阅读区',
-      ReaderModeToggleTrigger.keyboardShortcut => '按 M 键',
+      ReaderModeToggleTrigger.doubleClick => l10n.triggerDoubleClickLong,
+      ReaderModeToggleTrigger.middleClick => l10n.triggerMiddleClickLong,
+      ReaderModeToggleTrigger.keyboardShortcut => l10n.triggerKeyboardLong,
     };
   }
 
@@ -844,6 +897,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     return AnimatedBuilder(
       animation: widget.controller,
       builder: (context, _) {
+        final l10n = AppLocalizations.of(context)!;
         final viewportSize = MediaQuery.sizeOf(context);
         final panelWidth = math.max(
           280.0,
@@ -873,14 +927,16 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'CheatReader 控制面板',
+                          l10n.controlPanelTitle,
                           style: Theme.of(
                             context,
                           ).textTheme.titleLarge?.copyWith(color: Colors.white),
                         ),
                         const SizedBox(height: 8),
                         Text(
-                          widget.controller.currentDisplayName,
+                          widget.controller.currentDisplayName.isEmpty
+                              ? l10n.panelCurrentBookFallback
+                              : widget.controller.currentDisplayName,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(color: Colors.white70),
                         ),
@@ -888,7 +944,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                         FilledButton.icon(
                           onPressed: () => _importFromPicker(context),
                           icon: const Icon(Icons.upload_file),
-                          label: const Text('导入电子书'),
+                          label: Text(l10n.importEbook),
                         ),
                         const SizedBox(height: 16),
                         ...sectionChildren,
@@ -898,7 +954,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                           child: OutlinedButton.icon(
                             onPressed: _handleExit,
                             icon: const Icon(Icons.close),
-                            label: const Text('退出阅读器'),
+                            label: Text(l10n.quitReader),
                           ),
                         ),
                       ],
@@ -912,14 +968,16 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'CheatReader 控制面板',
+                        l10n.controlPanelTitle,
                         style: Theme.of(
                           context,
                         ).textTheme.titleLarge?.copyWith(color: Colors.white),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        widget.controller.currentDisplayName,
+                        widget.controller.currentDisplayName.isEmpty
+                            ? l10n.panelCurrentBookFallback
+                            : widget.controller.currentDisplayName,
                         style: Theme.of(
                           context,
                         ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
@@ -928,7 +986,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                       FilledButton.icon(
                         onPressed: () => _importFromPicker(context),
                         icon: const Icon(Icons.upload_file),
-                        label: const Text('导入电子书'),
+                        label: Text(l10n.importEbook),
                       ),
                       const SizedBox(height: 16),
                       const Divider(height: 1, color: Color(0x33FFFFFF)),
@@ -952,7 +1010,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                         child: OutlinedButton.icon(
                           onPressed: _handleExit,
                           icon: const Icon(Icons.close),
-                          label: const Text('退出阅读器'),
+                          label: Text(l10n.quitReader),
                         ),
                       ),
                     ],
@@ -1000,20 +1058,23 @@ class _BookshelfTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final subtitleParts = <String>['位置 ${book.lastReadLineIndex + 1}'];
+    final l10n = AppLocalizations.of(context)!;
+    final subtitleParts = <String>[l10n.positionLabel(book.lastReadLineIndex + 1)];
 
     if (isStale) {
-      subtitleParts.add('文件可能已失效');
+      subtitleParts.add(l10n.fileMayBeInvalid);
     }
 
     return Card(
       color: isCurrent ? const Color(0xFF2B3038) : const Color(0xFF22262C),
       child: ListTile(
         onTap: onOpen,
-        title: Text(book.displayName),
+        title: Text(
+          book.displayName.isEmpty ? l10n.untitledText : book.displayName,
+        ),
         subtitle: Text(subtitleParts.join(' · ')),
         trailing: IconButton(
-          tooltip: '移除',
+          tooltip: l10n.removeTooltip,
           onPressed: onRemove,
           icon: Icon(isStale ? Icons.delete_forever : Icons.delete_outline),
         ),

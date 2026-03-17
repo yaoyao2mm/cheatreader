@@ -57,7 +57,7 @@ class ReaderBookRecord {
   factory ReaderBookRecord.fromJson(Map<String, dynamic> json) {
     return ReaderBookRecord(
       path: json['path'] as String? ?? '',
-      displayName: json['displayName'] as String? ?? '未命名文本',
+      displayName: json['displayName'] as String? ?? '',
       lastOpenedAt:
           DateTime.tryParse(json['lastOpenedAt'] as String? ?? '') ??
           DateTime.fromMillisecondsSinceEpoch(0),

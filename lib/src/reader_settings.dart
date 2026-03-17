@@ -1,10 +1,12 @@
 enum ReaderFontFamilyPreset { system, serif, monospace }
 enum ReaderModeToggleTrigger { doubleClick, middleClick, keyboardShortcut }
+enum ReaderLanguageMode { system, simplifiedChinese, english }
 
 class ReaderSettings {
   const ReaderSettings({
     required this.oneLineMode,
     required this.modeToggleTrigger,
+    required this.languageMode,
     required this.alwaysOnTop,
     required this.fontScale,
     required this.windowOpacity,
@@ -15,6 +17,7 @@ class ReaderSettings {
   static const ReaderSettings defaults = ReaderSettings(
     oneLineMode: false,
     modeToggleTrigger: ReaderModeToggleTrigger.doubleClick,
+    languageMode: ReaderLanguageMode.system,
     alwaysOnTop: true,
     fontScale: 1.0,
     windowOpacity: 0.94,
@@ -24,6 +27,7 @@ class ReaderSettings {
 
   final bool oneLineMode;
   final ReaderModeToggleTrigger modeToggleTrigger;
+  final ReaderLanguageMode languageMode;
   final bool alwaysOnTop;
   final double fontScale;
   final double windowOpacity;
@@ -33,6 +37,7 @@ class ReaderSettings {
   ReaderSettings copyWith({
     bool? oneLineMode,
     ReaderModeToggleTrigger? modeToggleTrigger,
+    ReaderLanguageMode? languageMode,
     bool? alwaysOnTop,
     double? fontScale,
     double? windowOpacity,
@@ -42,6 +47,7 @@ class ReaderSettings {
     return ReaderSettings(
       oneLineMode: oneLineMode ?? this.oneLineMode,
       modeToggleTrigger: modeToggleTrigger ?? this.modeToggleTrigger,
+      languageMode: languageMode ?? this.languageMode,
       alwaysOnTop: alwaysOnTop ?? this.alwaysOnTop,
       fontScale: fontScale ?? this.fontScale,
       windowOpacity: windowOpacity ?? this.windowOpacity,

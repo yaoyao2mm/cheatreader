@@ -1,0 +1,70 @@
+{
+  "@@locale": "en",
+  "appTitle": "CheatReader",
+  "demoTitle": "Demo Text",
+  "emptyText": "(Empty text)",
+  "untitledText": "Untitled text",
+  "demoContent": "After finishing work messages, the reader should still be waiting on the same line.\nIt does not need to take over the center of the desktop, and it does not need to remind you that it exists.\nA small readable area in your peripheral vision is enough to keep moving forward.\nSingle-line mode is for hiding sentences at the edge of the screen, while multi-line mode is for brief focused reading.\nScrolling down moves forward by one line, and scrolling up moves back by one line.\nArrow keys should behave exactly the same way.\nPressing PageDown should move the content forward by the visible reading range.\nPageUp should move back toward the top of the previous reading view.\nThe right-click menu carries all immediate settings, with no toolbar and no status bar.\nThe font can be enlarged a little, opacity can be lowered a little, and always-on-top can be switched instantly.\nIf the platform supports a frameless window, let it feel like a floating note.\nIf it does not, at least keep it simple and stable.\nThe first step of this project is not a full library manager, sync service, or rich-format parser.\nIt just aims to be a reader that is light, fast, and easy to ignore.\nWhen you pause, the current position should always be preserved.\nWhen you return, one more scroll should let you continue from the same rhythm.",
+  "importNoFiles": "No importable ebook files found",
+  "importOpenFailure": "Could not open this ebook file",
+  "importFailure": "Could not import this ebook file",
+  "importUnsupportedFormat": "Only txt / epub / html / md / fb2 are supported",
+  "dropPrompt": "Drop txt / epub / html / md / fb2 here to start reading",
+  "controlPanelTitle": "CheatReader Control Panel",
+  "importEbook": "Import ebook",
+  "quitReader": "Quit reader",
+  "bookshelfTitle": "Bookshelf",
+  "bookshelfEmpty": "No imported books yet. You can drag files into the window or use the import button above.",
+  "settingsTitle": "Reading Settings",
+  "modeToggleMethod": "Display mode switch trigger",
+  "triggerDoubleClick": "Double click",
+  "triggerMiddleClick": "Middle click",
+  "triggerKeyboard": "Shortcut",
+  "triggerDoubleClickLong": "Double-click the reader area",
+  "triggerMiddleClickLong": "Middle-click the reader area",
+  "triggerKeyboardLong": "Press M",
+  "modeSingleLine": "single-line",
+  "modeMultiLine": "multi-line",
+  "currentModeSummary": "Current mode: {mode}. Trigger: {trigger}",
+  "@currentModeSummary": {
+    "placeholders": {
+      "mode": {},
+      "trigger": {}
+    }
+  },
+  "languageTitle": "Language",
+  "languageSystem": "System",
+  "languageZhHans": "简体中文",
+  "languageEnglish": "English",
+  "alwaysOnTopTitle": "Always on top",
+  "alwaysOnTopSupported": "Keep the reader floating above other windows",
+  "alwaysOnTopUnsupported": "This platform does not support it right now",
+  "transparentModeTitle": "Transparent mode",
+  "transparentModeSubtitle": "Remove every background tint and keep text only",
+  "fontTitle": "Font",
+  "fontDefault": "Default",
+  "fontSerif": "Serif",
+  "fontMonospace": "Monospace",
+  "fontScaleLabel": "Font size",
+  "windowOpacityLabel": "Background opacity",
+  "transparentModeOverridesOpacity": "Controlled by transparent mode",
+  "positionLabel": "Position {line}",
+  "@positionLabel": {
+    "placeholders": {
+      "line": {}
+    }
+  },
+  "fileMayBeInvalid": "File may no longer be available",
+  "removeTooltip": "Remove",
+  "sectionSimpleBookshelf": "Bookshelf",
+  "sectionReadingSettings": "Reading Settings",
+  "panelCurrentBookFallback": "No book opened",
+  "exitMessage": "Quit reader",
+  "modeToggleKeyLabel": "Press M",
+  "sliderPercent": "{value}%",
+  "@sliderPercent": {
+    "placeholders": {
+      "value": {}
+    }
+  }
+}

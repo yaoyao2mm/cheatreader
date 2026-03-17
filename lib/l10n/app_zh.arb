@@ -1,0 +1,70 @@
+{
+  "@@locale": "zh",
+  "appTitle": "CheatReader",
+  "demoTitle": "演示文本",
+  "emptyText": "（空文本）",
+  "untitledText": "未命名文本",
+  "demoContent": "工作消息刷完以后，阅读器应该还停留在刚才那一行。\n它不需要占据桌面中央，也不需要像传统应用一样提醒存在感。\n只要在余光里保留一小块可阅读的区域，就足够继续向下读。\n一行模式适合把句子藏进屏幕边缘，多行模式适合短暂进入状态。\n滚轮向下时往后读一行，滚轮向上时退回一行。\n按下方向键时也应该得到完全一致的结果。\n按下 PageDown 时，内容整体向前翻过当前可见范围。\n按下 PageUp 时，则回到前一页的顶部附近。\n右键菜单承担所有即时设置，不出现工具栏，也不需要状态栏。\n字体可以略微放大，透明度可以稍微降低，窗口是否置顶也能立刻切换。\n如果平台支持无边框窗口，就让它像一张漂浮的纸条。\n如果平台不支持，也至少保持简洁和稳定。\n这个项目的第一步，不解决书库，不解决同步，也不解决复杂格式。\n它只是一个足够轻、足够快、足够不显眼的阅读器。\n当你暂停阅读时，当前位置应该始终被保留下来。\n当你重新开始时，只需要再次向下滚动，就能顺着刚才的节奏继续。",
+  "importNoFiles": "没有可导入的电子书文件",
+  "importOpenFailure": "无法打开该电子书文件",
+  "importFailure": "无法导入该电子书文件",
+  "importUnsupportedFormat": "仅支持导入 txt / epub / html / md / fb2",
+  "dropPrompt": "拖入 txt / epub / html / md / fb2 开始阅读",
+  "controlPanelTitle": "CheatReader 控制面板",
+  "importEbook": "导入电子书",
+  "quitReader": "退出阅读器",
+  "bookshelfTitle": "简单书架",
+  "bookshelfEmpty": "还没有导入过电子书。可以直接拖入窗口，或点上面的导入按钮。",
+  "settingsTitle": "阅读设置",
+  "modeToggleMethod": "显示模式切换方式",
+  "triggerDoubleClick": "双击",
+  "triggerMiddleClick": "中键",
+  "triggerKeyboard": "快捷键",
+  "triggerDoubleClickLong": "双击阅读区",
+  "triggerMiddleClickLong": "鼠标中键点击阅读区",
+  "triggerKeyboardLong": "按 M 键",
+  "modeSingleLine": "单行",
+  "modeMultiLine": "多行",
+  "currentModeSummary": "当前{mode}。切换方式：{trigger}",
+  "@currentModeSummary": {
+    "placeholders": {
+      "mode": {},
+      "trigger": {}
+    }
+  },
+  "languageTitle": "语言",
+  "languageSystem": "跟随系统",
+  "languageZhHans": "简体中文",
+  "languageEnglish": "English",
+  "alwaysOnTopTitle": "始终置顶",
+  "alwaysOnTopSupported": "窗口保持浮在最前",
+  "alwaysOnTopUnsupported": "当前平台暂不支持",
+  "transparentModeTitle": "透明模式",
+  "transparentModeSubtitle": "彻底去掉任何底色，只保留文字",
+  "fontTitle": "字体",
+  "fontDefault": "默认",
+  "fontSerif": "衬线",
+  "fontMonospace": "等宽",
+  "fontScaleLabel": "字号",
+  "windowOpacityLabel": "背景透明度",
+  "transparentModeOverridesOpacity": "透明模式已接管",
+  "positionLabel": "位置 {line}",
+  "@positionLabel": {
+    "placeholders": {
+      "line": {}
+    }
+  },
+  "fileMayBeInvalid": "文件可能已失效",
+  "removeTooltip": "移除",
+  "sectionSimpleBookshelf": "简单书架",
+  "sectionReadingSettings": "阅读设置",
+  "panelCurrentBookFallback": "未打开书籍",
+  "exitMessage": "退出阅读器",
+  "modeToggleKeyLabel": "按 M 键",
+  "sliderPercent": "{value}%",
+  "@sliderPercent": {
+    "placeholders": {
+      "value": {}
+    }
+  }
+}

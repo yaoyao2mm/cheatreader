@@ -58,6 +58,7 @@ void main() {
       await controller.initialize();
       controller.toggleOneLineMode();
       controller.setModeToggleTrigger(ReaderModeToggleTrigger.middleClick);
+      controller.setLanguageMode(ReaderLanguageMode.english);
       controller.setFontFamilyPreset(ReaderFontFamilyPreset.monospace);
       controller.setFontScale(1.2);
       controller.setWindowOpacity(0.78);
@@ -70,6 +71,7 @@ void main() {
         saved.settings.modeToggleTrigger,
         ReaderModeToggleTrigger.middleClick,
       );
+      expect(saved.settings.languageMode, ReaderLanguageMode.english);
       expect(saved.settings.fontFamilyPreset, ReaderFontFamilyPreset.monospace);
       expect(saved.settings.fontScale, 1.2);
       expect(saved.settings.windowOpacity, 0.78);
@@ -78,6 +80,10 @@ void main() {
       expect(
         windowController.syncedSettings?.modeToggleTrigger,
         ReaderModeToggleTrigger.middleClick,
+      );
+      expect(
+        windowController.syncedSettings?.languageMode,
+        ReaderLanguageMode.english,
       );
       expect(
         windowController.syncedSettings?.fontFamilyPreset,
@@ -224,6 +230,7 @@ void main() {
       const settings = ReaderSettings(
         oneLineMode: true,
         modeToggleTrigger: ReaderModeToggleTrigger.keyboardShortcut,
+        languageMode: ReaderLanguageMode.english,
         alwaysOnTop: false,
         fontScale: 1.2,
         windowOpacity: 0.78,

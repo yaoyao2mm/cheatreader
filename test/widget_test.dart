@@ -13,6 +13,7 @@ import 'package:cheatreader/src/reader_import_service.dart';
 import 'package:cheatreader/src/reader_library_storage.dart';
 import 'package:cheatreader/src/reader_preferences.dart';
 import 'package:cheatreader/src/reader_settings.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -125,6 +126,45 @@ void main() {
         );
     final decoration = readerContainer.decoration! as BoxDecoration;
     expect(decoration.color, Colors.transparent);
+  });
+
+  testWidgets('english language mode localizes the control panel', (
+    WidgetTester tester,
+  ) async {
+    final controller = ReaderController(
+      initialContent: 'Demo line one\nDemo line two',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          languageMode: ReaderLanguageMode.english,
+        ),
+      ),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+
+    await tester.tapAt(tester.getCenter(find.byType(GestureDetector).first));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(tester.getCenter(find.byType(GestureDetector).first));
+    await tester.pump(const Duration(milliseconds: 50));
+    await tester.tapAt(
+      tester.getCenter(find.byType(GestureDetector).first),
+      buttons: kSecondaryMouseButton,
+    );
+    await tester.pumpAndSettle();
+
+    expect(find.text('CheatReader Control Panel'), findsOneWidget);
+    expect(find.text('Import ebook'), findsOneWidget);
+    expect(find.text('Reading Settings'), findsOneWidget);
   });
 }
 
