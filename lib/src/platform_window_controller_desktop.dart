@@ -38,7 +38,18 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     };
   }
 
-  bool get _useFramelessWindow => _isSupportedDesktop;
+  bool get _useNativeLinuxFrameless =>
+      _isSupportedDesktop && defaultTargetPlatform == TargetPlatform.linux;
+
+  bool get _useFramelessWindow {
+    if (!_isSupportedDesktop) {
+      return false;
+    }
+
+    // Linux uses a native undecorated window from the GTK runner instead of
+    // toggling frameless mode after launch through window_manager.
+    return defaultTargetPlatform != TargetPlatform.linux;
+  }
 
   double get _absoluteMinimumOneLineHeight {
     if (defaultTargetPlatform == TargetPlatform.macOS) {
@@ -52,7 +63,8 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   bool get supportsFloatingControls => _isSupportedDesktop;
 
   @override
-  bool get supportsFramelessWindow => _useFramelessWindow;
+  bool get supportsFramelessWindow =>
+      _useFramelessWindow || _useNativeLinuxFrameless;
 
   @override
   bool get supportsManualResize =>
@@ -65,14 +77,15 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     }
 
     await windowManager.ensureInitialized();
+    final titleBarStyle = _useNativeLinuxFrameless
+        ? null
+        : (_useFramelessWindow ? TitleBarStyle.hidden : TitleBarStyle.normal);
     final windowOptions = WindowOptions(
       size: _normalSize,
       center: true,
       backgroundColor: Colors.transparent,
       skipTaskbar: false,
-      titleBarStyle: _useFramelessWindow
-          ? TitleBarStyle.hidden
-          : TitleBarStyle.normal,
+      titleBarStyle: titleBarStyle,
       windowButtonVisibility: !_useFramelessWindow,
     );
 
@@ -236,6 +249,10 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     await windowManager.setAlwaysOnTop(settings.alwaysOnTop);
     await windowManager.setOpacity(1.0);
 
+    if (_controlPanelRestorePosition != null) {
+      return;
+    }
+
     final currentSize = await windowManager.getSize();
     if (_lastOneLineMode != true) {
       _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
@@ -245,10 +262,6 @@ class DesktopPlatformWindowController implements PlatformWindowController {
       settings: settings,
     );
     _lastOneLineMode = settings.oneLineMode;
-
-    if (_controlPanelRestorePosition != null) {
-      return;
-    }
 
     await windowManager.setMinimumSize(_minimumWindowSizeFor(settings));
     await windowManager.setBounds(null, size: targetSize, animate: true);
