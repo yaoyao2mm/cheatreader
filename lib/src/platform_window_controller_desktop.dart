@@ -16,7 +16,6 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   static const double _oneLineHeightSafetyInset = 0;
   static const double _minimumWidth = 320;
   static const double _minimumMultiLineHeight = 84;
-  static const double _absoluteMinimumOneLineHeight = 28;
   static const Size _minimumSize = Size(_minimumWidth, _minimumMultiLineHeight);
   static const Size _normalSize = Size(760, 308);
   static const Size _controlPanelSize = Size(760, 760);
@@ -40,6 +39,14 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   }
 
   bool get _useFramelessWindow => _isSupportedDesktop;
+
+  double get _absoluteMinimumOneLineHeight {
+    if (defaultTargetPlatform == TargetPlatform.macOS) {
+      // Native title bars on macOS consume part of the total window height.
+      return 72;
+    }
+    return 28;
+  }
 
   @override
   bool get supportsFloatingControls => _isSupportedDesktop;

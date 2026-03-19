@@ -43,6 +43,8 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 
 ![CheatReader multi-line demo](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/demo-multi-line.gif)
 
+![CheatReader full-screen demo](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/full-screen-1.gif)
+
 ## Platform Support
 
 | Platform | Status | Notes |
