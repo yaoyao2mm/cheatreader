@@ -11,6 +11,7 @@ import 'package:cheatreader/src/reader_controller.dart';
 import 'package:cheatreader/src/reader_file_bookmark_service.dart';
 import 'package:cheatreader/src/reader_import_service.dart';
 import 'package:cheatreader/src/reader_library_storage.dart';
+import 'package:cheatreader/src/reader_layout_metrics.dart';
 import 'package:cheatreader/src/reader_preferences.dart';
 import 'package:cheatreader/src/reader_settings.dart';
 import 'package:flutter/gestures.dart';
@@ -50,7 +51,10 @@ void main() {
       (container) =>
           (container.decoration as BoxDecoration).color != null &&
           container.padding ==
-              const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+              const EdgeInsets.symmetric(
+                horizontal: readerHorizontalPadding,
+                vertical: readerMultiLineVerticalPadding,
+              ),
     );
     final decoration = readerContainer.decoration! as BoxDecoration;
     expect(decoration.border, isNull);
@@ -74,7 +78,7 @@ void main() {
     await tester.pumpWidget(
       SizedBox(
         width: 320,
-        height: 84,
+        height: 48,
         child: CheatReaderApp(
           controller: controller,
           windowController: _FakePlatformWindowController(),
@@ -82,10 +86,35 @@ void main() {
       ),
     );
 
+    expect(find.textContaining('这是一段很长很长'), findsOneWidget);
     final text = tester.widget<Text>(find.byType(Text).first);
     expect(text.softWrap, isFalse);
     expect(text.maxLines, 1);
     expect(text.overflow, TextOverflow.clip);
+
+    final readerContainer = tester
+        .widgetList<Container>(
+          find.byWidgetPredicate(
+            (widget) =>
+                widget is Container && widget.decoration is BoxDecoration,
+          ),
+        )
+        .firstWhere(
+          (container) =>
+              (container.decoration as BoxDecoration).color != null &&
+              container.padding ==
+                  const EdgeInsets.symmetric(
+                    horizontal: readerHorizontalPadding,
+                    vertical: readerOneLineVerticalPadding,
+                  ),
+        );
+    expect(
+      readerContainer.padding,
+      const EdgeInsets.symmetric(
+        horizontal: readerHorizontalPadding,
+        vertical: readerOneLineVerticalPadding,
+      ),
+    );
   });
 
   testWidgets('transparent mode removes reader background fill', (
@@ -115,14 +144,18 @@ void main() {
     final readerContainer = tester
         .widgetList<Container>(
           find.byWidgetPredicate(
-            (widget) => widget is Container && widget.decoration is BoxDecoration,
+            (widget) =>
+                widget is Container && widget.decoration is BoxDecoration,
           ),
         )
         .firstWhere(
           (container) =>
               (container.decoration as BoxDecoration).color != null &&
               container.padding ==
-                  const EdgeInsets.symmetric(horizontal: 6, vertical: 0),
+                  const EdgeInsets.symmetric(
+                    horizontal: readerHorizontalPadding,
+                    vertical: readerMultiLineVerticalPadding,
+                  ),
         );
     final decoration = readerContainer.decoration! as BoxDecoration;
     expect(decoration.color, Colors.transparent);

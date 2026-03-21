@@ -380,6 +380,66 @@ abstract class AppLocalizations {
   /// **'Reading Settings'**
   String get sectionReadingSettings;
 
+  /// No description provided for @sectionAboutApp.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get sectionAboutApp;
+
+  /// No description provided for @appVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Version'**
+  String get appVersionLabel;
+
+  /// No description provided for @appVersionLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get appVersionLoading;
+
+  /// No description provided for @appVersionUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Unavailable'**
+  String get appVersionUnavailable;
+
+  /// No description provided for @copyVersionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy version'**
+  String get copyVersionLabel;
+
+  /// No description provided for @versionCopiedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Version copied'**
+  String get versionCopiedMessage;
+
+  /// No description provided for @reportBugTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a bug'**
+  String get reportBugTitle;
+
+  /// No description provided for @reportBugSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open GitHub Issues to report a bug or share feedback'**
+  String get reportBugSubtitle;
+
+  /// No description provided for @reportBugAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Open feedback page'**
+  String get reportBugAction;
+
+  /// No description provided for @feedbackOpenFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the feedback page'**
+  String get feedbackOpenFailure;
+
   /// No description provided for @panelCurrentBookFallback.
   ///
   /// In en, this message translates to:

@@ -5,17 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:window_manager/window_manager.dart';
 
 import 'platform_window_controller_base.dart';
+import 'reader_layout_metrics.dart';
 import 'reader_settings.dart';
 
 class DesktopPlatformWindowController implements PlatformWindowController {
-  static const double _baseFontSize = 20;
-  static const double _lineHeight = 1.5;
-  static const double _multiLineHeightSafetyInset = 8;
-  static const int _defaultMultiLineVisibleLines = 5;
-  static const double _oneLineVerticalPadding = 0;
-  static const double _oneLineHeightSafetyInset = 0;
-  static const double _minimumWidth = 320;
-  static const double _minimumMultiLineHeight = 84;
+  static const double _minimumWidth = readerMinimumWidth;
+  static const double _minimumMultiLineHeight = readerMinimumMultiLineHeight;
   static const Size _minimumSize = Size(_minimumWidth, _minimumMultiLineHeight);
   static const Size _normalSize = Size(760, 308);
   static const Size _controlPanelSize = Size(760, 760);
@@ -24,6 +19,7 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   Size? _controlPanelRestoreSize;
   bool? _lastOneLineMode;
   Size? _rememberedMultiLineSize;
+  double? _rememberedOneLineWidth;
 
   bool get _isSupportedDesktop {
     if (kIsWeb) {
@@ -113,7 +109,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
 
     _controlPanelRestorePosition ??= await windowManager.getPosition();
     final currentSize = await windowManager.getSize();
-    if (_lastOneLineMode != true) {
+    if (_lastOneLineMode == true) {
+      _rememberedOneLineWidth = _normalizeOneLineWidth(currentSize.width);
+    } else {
       _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
     }
     _controlPanelRestoreSize ??= currentSize;
@@ -215,7 +213,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
       height = minHeight;
     }
 
-    if (_lastOneLineMode != true) {
+    if (_lastOneLineMode == true) {
+      _rememberedOneLineWidth = _normalizeOneLineWidth(width);
+    } else {
       _rememberedMultiLineSize = _normalizeMultiLineSize(Size(width, height));
     }
 
@@ -254,7 +254,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     }
 
     final currentSize = await windowManager.getSize();
-    if (_lastOneLineMode != true) {
+    if (_lastOneLineMode == true) {
+      _rememberedOneLineWidth = _normalizeOneLineWidth(currentSize.width);
+    } else {
       _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
     }
     final targetSize = _targetReaderSize(
@@ -285,7 +287,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     await windowManager.setAlwaysOnTop(settings.alwaysOnTop);
     await windowManager.setOpacity(1.0);
     final currentSize = restoreSize ?? await windowManager.getSize();
-    if (_lastOneLineMode != true) {
+    if (_lastOneLineMode == true) {
+      _rememberedOneLineWidth = _normalizeOneLineWidth(currentSize.width);
+    } else {
       _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
     }
     final targetSize = _targetReaderSize(
@@ -314,26 +318,32 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     final width = math.max(currentSize.width, _minimumWidth);
     if (_lastOneLineMode == null) {
       return oneLineMode
-          ? Size(_minimumWidth, oneLineHeight)
-          : (_rememberedMultiLineSize ??
-                Size(width, multiLineHeight));
+          ? Size(
+              _targetOneLineWidth(currentWidth: width, settings: settings),
+              oneLineHeight,
+            )
+          : (_rememberedMultiLineSize ?? Size(width, multiLineHeight));
     }
 
     if (_lastOneLineMode == oneLineMode) {
       final minimumHeight = oneLineMode
           ? oneLineHeight
           : _minimumMultiLineHeight;
-      return Size(
-        width,
-        math.max(currentSize.height, minimumHeight),
-      );
+      final targetWidth = oneLineMode
+          ? _normalizeOneLineWidth(currentSize.width)
+          : width;
+      return Size(targetWidth, math.max(currentSize.height, minimumHeight));
     }
 
     if (oneLineMode) {
       _rememberedMultiLineSize = _normalizeMultiLineSize(currentSize);
-      return Size(_minimumWidth, oneLineHeight);
+      return Size(
+        _targetOneLineWidth(currentWidth: width, settings: settings),
+        oneLineHeight,
+      );
     }
 
+    _rememberedOneLineWidth = _normalizeOneLineWidth(currentSize.width);
     return _rememberedMultiLineSize ?? Size(width, multiLineHeight);
   }
 
@@ -348,24 +358,41 @@ class DesktopPlatformWindowController implements PlatformWindowController {
 
   double _oneLineHeightForSettings({ReaderSettings? settings}) {
     final fontScale = settings?.fontScale ?? ReaderSettings.defaults.fontScale;
-    final textHeight = _baseFontSize * fontScale * _lineHeight;
-    final targetHeight =
-        textHeight + (_oneLineVerticalPadding * 2) + _oneLineHeightSafetyInset;
-    return math.max(_absoluteMinimumOneLineHeight, targetHeight);
+    return readerOneLineWindowHeightForFontScale(
+      fontScale: fontScale,
+      absoluteMinimumHeight: _absoluteMinimumOneLineHeight,
+    );
   }
 
-  double _defaultMultiLineHeightForSettings({required ReaderSettings settings}) {
-    final textHeight = _baseFontSize * settings.fontScale * _lineHeight;
-    final targetHeight =
-        (textHeight * _defaultMultiLineVisibleLines) +
-        _multiLineHeightSafetyInset;
-    return math.max(_minimumMultiLineHeight, targetHeight);
+  double _defaultMultiLineHeightForSettings({
+    required ReaderSettings settings,
+  }) {
+    return readerDefaultMultiLineWindowHeightForFontScale(settings.fontScale);
   }
 
   Size _normalizeMultiLineSize(Size size) {
     return Size(
       math.max(size.width, _minimumWidth),
       math.max(size.height, _minimumMultiLineHeight),
+    );
+  }
+
+  double _normalizeOneLineWidth(double width) {
+    return math.max(width, _minimumWidth);
+  }
+
+  double _targetOneLineWidth({
+    required double currentWidth,
+    required ReaderSettings settings,
+  }) {
+    final rememberedWidth = _rememberedOneLineWidth;
+    if (rememberedWidth != null) {
+      return _normalizeOneLineWidth(rememberedWidth);
+    }
+
+    return readerAutomaticSingleLineWidth(
+      currentWidth: currentWidth,
+      fontScale: settings.fontScale,
     );
   }
 }

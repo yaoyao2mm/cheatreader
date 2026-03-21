@@ -126,6 +126,16 @@ flutter build windows
 flutter build linux
 ```
 
+## Todo
+
+This section highlights the feedback that comes up most often, so users can see what we plan to prioritize next.
+
+- [x] Add an in-app About section with version info and a bug-report entry
+- [ ] Improve the bookshelf experience with better organization and recovery for imported books
+- [ ] Add more reading controls such as line spacing, reading width, and shortcut customization
+- [ ] Improve desktop installation and distribution so first-time setup feels easier
+- [ ] Keep improving import stability for edge-case `epub`, `html`, and encoded text files
+
 ## Releases
 
 This repository is configured for automated desktop releases with GitHub Actions.

@@ -162,6 +162,37 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionReadingSettings => 'Reading Settings';
 
   @override
+  String get sectionAboutApp => 'About';
+
+  @override
+  String get appVersionLabel => 'Version';
+
+  @override
+  String get appVersionLoading => 'Loading...';
+
+  @override
+  String get appVersionUnavailable => 'Unavailable';
+
+  @override
+  String get copyVersionLabel => 'Copy version';
+
+  @override
+  String get versionCopiedMessage => 'Version copied';
+
+  @override
+  String get reportBugTitle => 'Report a bug';
+
+  @override
+  String get reportBugSubtitle =>
+      'Open GitHub Issues to report a bug or share feedback';
+
+  @override
+  String get reportBugAction => 'Open feedback page';
+
+  @override
+  String get feedbackOpenFailure => 'Could not open the feedback page';
+
+  @override
   String get panelCurrentBookFallback => 'No book opened';
 
   @override

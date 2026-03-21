@@ -7,12 +7,15 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../l10n/generated/app_localizations.dart';
 import 'platform_window_controller_base.dart';
 import 'reader_book.dart';
 import 'reader_controller.dart';
+import 'reader_layout_metrics.dart';
 import 'reader_localization.dart';
 import 'reader_settings.dart';
 
@@ -31,7 +34,9 @@ class CheatReaderApp extends StatelessWidget {
     return AnimatedBuilder(
       animation: controller,
       builder: (context, _) {
-        final locale = materialLocaleForLanguageMode(controller.settings.languageMode);
+        final locale = materialLocaleForLanguageMode(
+          controller.settings.languageMode,
+        );
         return MaterialApp(
           debugShowCheckedModeBanner: false,
           onGenerateTitle: (context) => AppLocalizations.of(context)!.appTitle,
@@ -84,9 +89,6 @@ class ReaderSurface extends StatefulWidget {
 }
 
 class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
-  static const _horizontalPadding = 6.0;
-  static const _verticalPadding = 0.0;
-
   OverlayEntry? _messageOverlayEntry;
   Timer? _messageTimer;
   bool _windowListenerRegistered = false;
@@ -286,12 +288,10 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   List<String> _cachedOneLineSegments = const <String>[];
 
   @override
-  void onWindowMove() {
-  }
+  void onWindowMove() {}
 
   @override
-  void onWindowMoved() {
-  }
+  void onWindowMoved() {}
 
   ({Color background, Color text, Color dragIndicator}) _resolveReaderColors(
     ReaderSettings settings,
@@ -337,7 +337,10 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final controller = widget.controller;
     final settings = controller.settings;
     final l10n = AppLocalizations.of(context)!;
-    final fontSize = 20.0 * settings.fontScale;
+    final fontSize = readerBaseFontSize * settings.fontScale;
+    final verticalPadding = settings.oneLineMode
+        ? readerOneLineVerticalPadding
+        : readerMultiLineVerticalPadding;
     final readerColors = _resolveReaderColors(settings);
     final readerTextColor = readerColors.text;
     final readerBackgroundColor = readerColors.background;
@@ -362,7 +365,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final textStyle = TextStyle(
       color: readerTextColor,
       fontSize: fontSize,
-      height: 1.5,
+      height: readerTextLineHeight,
       letterSpacing: 0.2,
       fontFamilyFallback: fontFamilyFallback,
     );
@@ -376,7 +379,8 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
         const SingleActivator(LogicalKeyboardKey.space): _advanceReading,
         const SingleActivator(LogicalKeyboardKey.space, shift: true):
             _rewindReading,
-        const SingleActivator(LogicalKeyboardKey.keyM): _handleModeToggleShortcut,
+        const SingleActivator(LogicalKeyboardKey.keyM):
+            _handleModeToggleShortcut,
         const SingleActivator(LogicalKeyboardKey.keyQ, control: true):
             _handleExit,
         const SingleActivator(LogicalKeyboardKey.keyQ, meta: true): _handleExit,
@@ -385,10 +389,12 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
         autofocus: true,
         child: LayoutBuilder(
           builder: (context, constraints) {
-            final estimatedLineHeight = fontSize * 1.5;
+            final estimatedLineHeight = readerTextHeightForFontScale(
+              settings.fontScale,
+            );
             final availableHeight = math.max(
               estimatedLineHeight,
-              constraints.maxHeight - (_verticalPadding * 2),
+              constraints.maxHeight - (verticalPadding * 2),
             );
             final visibleLineCapacity = settings.oneLineMode
                 ? 1
@@ -414,11 +420,13 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
                     onPointerSignal: _handlePointerSignal,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
-                      onDoubleTap: settings.modeToggleTrigger ==
+                      onDoubleTap:
+                          settings.modeToggleTrigger ==
                               ReaderModeToggleTrigger.doubleClick
                           ? controller.toggleOneLineMode
                           : null,
-                      onTertiaryTapDown: settings.modeToggleTrigger ==
+                      onTertiaryTapDown:
+                          settings.modeToggleTrigger ==
                               ReaderModeToggleTrigger.middleClick
                           ? (_) => controller.toggleOneLineMode()
                           : null,
@@ -444,9 +452,9 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
                                     )
                                   : null,
                             ),
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: _horizontalPadding,
-                              vertical: _verticalPadding,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: readerHorizontalPadding,
+                              vertical: verticalPadding,
                             ),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
@@ -464,7 +472,9 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
                                       child: Text(
                                         displayedText,
                                         softWrap: !settings.oneLineMode,
-                                        maxLines: settings.oneLineMode ? 1 : null,
+                                        maxLines: settings.oneLineMode
+                                            ? 1
+                                            : null,
                                         overflow: settings.oneLineMode
                                             ? TextOverflow.clip
                                             : TextOverflow.visible,
@@ -587,7 +597,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     required TextScaler textScaler,
   }) {
     if (text.isEmpty || maxWidth <= 0) {
-      return const <String>[''];
+      return text.isEmpty ? const <String>[''] : <String>[text];
     }
 
     final segments = <String>[];
@@ -690,7 +700,52 @@ class _ReaderControlPanel extends StatefulWidget {
 }
 
 class _ReaderControlPanelState extends State<_ReaderControlPanel> {
+  static final Uri _feedbackUri = Uri.parse(
+    'https://github.com/yaoyao2mm/cheatreader/issues/new',
+  );
+
   late final ScrollController _scrollController = ScrollController();
+  String? _appVersion;
+
+  @override
+  void initState() {
+    super.initState();
+    unawaited(_loadAppVersion());
+  }
+
+  Future<void> _loadAppVersion() async {
+    try {
+      final packageInfo = await PackageInfo.fromPlatform();
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _appVersion = _formatAppVersion(packageInfo);
+      });
+    } catch (_) {
+      if (!mounted) {
+        return;
+      }
+
+      setState(() {
+        _appVersion = '';
+      });
+    }
+  }
+
+  String _formatAppVersion(PackageInfo packageInfo) {
+    final version = packageInfo.version.trim();
+    final buildNumber = packageInfo.buildNumber.trim();
+
+    if (version.isEmpty) {
+      return buildNumber;
+    }
+    if (buildNumber.isEmpty) {
+      return version;
+    }
+    return '$version+$buildNumber';
+  }
 
   void _handleExit() {
     if (widget.windowController.supportsFloatingControls) {
@@ -715,6 +770,43 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     }
   }
 
+  Future<void> _copyAppVersion(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    final version = _resolvedAppVersion(l10n);
+    await Clipboard.setData(ClipboardData(text: version));
+    if (context.mounted) {
+      widget.onMessage(l10n.versionCopiedMessage);
+    }
+  }
+
+  Future<void> _openBugReport(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    try {
+      final didLaunch = await launchUrl(
+        _feedbackUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!didLaunch && context.mounted) {
+        widget.onMessage(l10n.feedbackOpenFailure);
+      }
+    } catch (_) {
+      if (context.mounted) {
+        widget.onMessage(l10n.feedbackOpenFailure);
+      }
+    }
+  }
+
+  String _resolvedAppVersion(AppLocalizations l10n) {
+    if (_appVersion == null) {
+      return l10n.appVersionLoading;
+    }
+    if (_appVersion!.isEmpty) {
+      return l10n.appVersionUnavailable;
+    }
+    return _appVersion!;
+  }
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -730,10 +822,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       _SectionTitle(title: l10n.sectionSimpleBookshelf),
       const SizedBox(height: 8),
       if (controller.bookshelf.isEmpty)
-        Text(
-          l10n.bookshelfEmpty,
-          style: TextStyle(color: Colors.white60),
-        )
+        Text(l10n.bookshelfEmpty, style: TextStyle(color: Colors.white60))
       else
         ...controller.bookshelf.map(
           (book) => _BookshelfTile(
@@ -877,6 +966,64 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
         onChanged: controller.settings.transparentModeEnabled
             ? null
             : controller.setWindowOpacity,
+      ),
+      const SizedBox(height: 20),
+      _SectionTitle(title: l10n.sectionAboutApp),
+      const SizedBox(height: 8),
+      Card(
+        color: const Color(0xFF22262C),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.appVersionLabel,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelLarge?.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: 6),
+              SelectableText(
+                _resolvedAppVersion(l10n),
+                style: Theme.of(
+                  context,
+                ).textTheme.titleMedium?.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                l10n.reportBugTitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(color: Colors.white),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.reportBugSubtitle,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: 12),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                children: [
+                  OutlinedButton.icon(
+                    onPressed: () => _copyAppVersion(context),
+                    icon: const Icon(Icons.content_copy_outlined),
+                    label: Text(l10n.copyVersionLabel),
+                  ),
+                  FilledButton.icon(
+                    onPressed: () => _openBugReport(context),
+                    icon: const Icon(Icons.bug_report_outlined),
+                    label: Text(l10n.reportBugAction),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     ];
   }
@@ -1059,7 +1206,9 @@ class _BookshelfTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final subtitleParts = <String>[l10n.positionLabel(book.lastReadLineIndex + 1)];
+    final subtitleParts = <String>[
+      l10n.positionLabel(book.lastReadLineIndex + 1),
+    ];
 
     if (isStale) {
       subtitleParts.add(l10n.fileMayBeInvalid);

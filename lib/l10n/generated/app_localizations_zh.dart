@@ -155,6 +155,36 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sectionReadingSettings => '阅读设置';
 
   @override
+  String get sectionAboutApp => '关于应用';
+
+  @override
+  String get appVersionLabel => '版本号';
+
+  @override
+  String get appVersionLoading => '读取中…';
+
+  @override
+  String get appVersionUnavailable => '无法读取';
+
+  @override
+  String get copyVersionLabel => '复制版本号';
+
+  @override
+  String get versionCopiedMessage => '版本号已复制';
+
+  @override
+  String get reportBugTitle => '反馈问题';
+
+  @override
+  String get reportBugSubtitle => '打开 GitHub Issues，提交 bug 或改进建议';
+
+  @override
+  String get reportBugAction => '打开反馈页';
+
+  @override
+  String get feedbackOpenFailure => '无法打开反馈页面';
+
+  @override
   String get panelCurrentBookFallback => '未打开书籍';
 
   @override
