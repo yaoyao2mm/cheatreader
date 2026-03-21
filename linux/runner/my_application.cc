@@ -11,6 +11,42 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+static gboolean os_release_contains_value(const gchar* contents,
+                                         const gchar* key,
+                                         const gchar* value) {
+  g_autofree gchar* quoted_pattern =
+      g_strdup_printf("%s=\"%s\"", key, value);
+  g_autofree gchar* plain_pattern = g_strdup_printf("%s=%s", key, value);
+  return g_strstr_len(contents, -1, quoted_pattern) != nullptr ||
+         g_strstr_len(contents, -1, plain_pattern) != nullptr;
+}
+
+static gboolean should_force_software_renderer() {
+  const gchar* renderer = g_getenv("FLUTTER_LINUX_RENDERER");
+  if (renderer != nullptr && renderer[0] != '\0') {
+    return FALSE;
+  }
+
+  g_autofree gchar* os_release_contents = nullptr;
+  if (!g_file_get_contents("/etc/os-release", &os_release_contents, nullptr,
+                           nullptr)) {
+    return FALSE;
+  }
+
+  const gboolean is_ubuntu =
+      os_release_contains_value(os_release_contents, "ID", "ubuntu");
+  const gboolean is_focal =
+      os_release_contains_value(os_release_contents, "VERSION_ID", "20.04") ||
+      os_release_contains_value(os_release_contents, "UBUNTU_CODENAME",
+                                "focal");
+  if (!is_ubuntu || !is_focal) {
+    return FALSE;
+  }
+
+  const gchar* session_type = g_getenv("XDG_SESSION_TYPE");
+  return session_type == nullptr || g_strcmp0(session_type, "x11") == 0;
+}
+
 // Called when first Flutter frame received.
 static void first_frame_cb(MyApplication* self, FlView* view) {
   gtk_widget_show(gtk_widget_get_toplevel(GTK_WIDGET(view)));
@@ -29,6 +65,12 @@ static void my_application_activate(GApplication* application) {
   gtk_window_set_decorated(window, false);
 
   gtk_window_set_default_size(window, 1280, 720);
+
+  if (should_force_software_renderer()) {
+    g_setenv("FLUTTER_LINUX_RENDERER", "software", TRUE);
+    g_message("Ubuntu 20.04 detected, forcing Flutter Linux software renderer "
+              "to avoid libepoxy/OpenGL startup crashes.");
+  }
 
   g_autoptr(FlDartProject) project = fl_dart_project_new();
   fl_dart_project_set_dart_entrypoint_arguments(
