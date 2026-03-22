@@ -1,9 +1,11 @@
 import 'dart:convert';
+
 import 'package:archive/archive.dart';
 import 'package:enough_convert/gbk.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:html/parser.dart' as html_parser;
 import 'package:path/path.dart' as path;
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 import 'package:xml/xml.dart';
 
 class ImportedTextFile {
@@ -36,6 +38,8 @@ class FileSelectorReaderImportService implements ReaderImportService {
     '.xhtml',
     '.fb2',
     '.epub',
+    '.docx',
+    '.pdf',
   };
 
   static const XTypeGroup _bookTypeGroup = XTypeGroup(
@@ -49,18 +53,24 @@ class FileSelectorReaderImportService implements ReaderImportService {
       'xhtml',
       'fb2',
       'epub',
+      'docx',
+      'pdf',
     ],
     uniformTypeIdentifiers: <String>[
       'public.plain-text',
       'public.html',
+      'public.pdf',
       'org.idpf.epub-container',
       'org.fictionbook.fb2+xml',
+      'org.openxmlformats.wordprocessingml.document',
     ],
   );
 
   @override
   bool isSupportedTextFilePath(String filePath) {
-    return _supportedExtensions.contains(path.extension(filePath).toLowerCase());
+    return _supportedExtensions.contains(
+      path.extension(filePath).toLowerCase(),
+    );
   }
 
   @override
@@ -81,24 +91,22 @@ class FileSelectorReaderImportService implements ReaderImportService {
     return ImportedTextFile(
       path: filePath,
       displayName: path.basename(filePath),
-      content: _extractContent(
-        filePath: filePath,
-        bytes: bytes,
-      ),
+      content: _extractContent(filePath: filePath, bytes: bytes),
     );
   }
 
-  String _extractContent({
-    required String filePath,
-    required List<int> bytes,
-  }) {
+  String _extractContent({required String filePath, required List<int> bytes}) {
     final extension = path.extension(filePath).toLowerCase();
     return switch (extension) {
       '.txt' => _decodeTextBytes(bytes),
       '.md' || '.markdown' => _extractMarkdownText(_decodeTextBytes(bytes)),
-      '.html' || '.htm' || '.xhtml' => _extractHtmlText(_decodeTextBytes(bytes)),
+      '.html' ||
+      '.htm' ||
+      '.xhtml' => _extractHtmlText(_decodeTextBytes(bytes)),
       '.fb2' => _extractFb2Text(_decodeTextBytes(bytes)),
       '.epub' => _extractEpubText(bytes),
+      '.docx' => _extractDocxText(bytes),
+      '.pdf' => _extractPdfText(bytes),
       _ => throw UnsupportedError('Unsupported ebook format: $extension'),
     };
   }
@@ -187,8 +195,15 @@ class FileSelectorReaderImportService implements ReaderImportService {
         if (node is XmlText) {
           buffer.write(node.value);
         } else if (node is XmlElement &&
-            const {'section', 'title', 'p', 'subtitle', 'poem', 'stanza', 'v'}
-                .contains(node.name.local.toLowerCase())) {
+            const {
+              'section',
+              'title',
+              'p',
+              'subtitle',
+              'poem',
+              'stanza',
+              'v',
+            }.contains(node.name.local.toLowerCase())) {
           buffer.writeln();
         }
       }
@@ -255,6 +270,97 @@ class FileSelectorReaderImportService implements ReaderImportService {
     return _cleanExtractedText(contentParts.join('\n\n'));
   }
 
+  String _extractDocxText(List<int> bytes) {
+    final archive = ZipDecoder().decodeBytes(bytes);
+    final files = <String, ArchiveFile>{};
+    for (final file in archive) {
+      files[file.name] = file;
+    }
+
+    final documentXml = _archiveFileString(
+      files,
+      'word/document.xml',
+      preferUtf8: true,
+    );
+    final document = XmlDocument.parse(documentXml);
+    final body = document.descendants.whereType<XmlElement>().firstWhere(
+      (element) => element.name.local.toLowerCase() == 'body',
+      orElse: () =>
+          throw const FormatException('Missing document body in docx'),
+    );
+
+    final paragraphs = <String>[];
+    for (final paragraph in body.descendants.whereType<XmlElement>().where(
+      (element) => element.name.local.toLowerCase() == 'p',
+    )) {
+      final paragraphText = _cleanExtractedText(
+        _extractDocxParagraphText(paragraph),
+      );
+      if (paragraphText.isNotEmpty) {
+        paragraphs.add(paragraphText);
+      }
+    }
+
+    final content = _cleanExtractedText(paragraphs.join('\n\n'));
+    if (content.isEmpty) {
+      throw const FormatException('No readable text found in docx');
+    }
+    return content;
+  }
+
+  String _extractDocxParagraphText(XmlNode node) {
+    final buffer = StringBuffer();
+
+    void appendNode(XmlNode current) {
+      if (current is XmlText) {
+        buffer.write(current.value);
+        return;
+      }
+
+      if (current is! XmlElement) {
+        return;
+      }
+
+      switch (current.name.local.toLowerCase()) {
+        case 'tab':
+          buffer.write(' ');
+          break;
+        case 'br':
+        case 'cr':
+          buffer.writeln();
+          break;
+        case 'noBreakHyphen':
+          buffer.write('-');
+          break;
+        default:
+          break;
+      }
+
+      for (final child in current.children) {
+        appendNode(child);
+      }
+    }
+
+    appendNode(node);
+    return buffer.toString();
+  }
+
+  String _extractPdfText(List<int> bytes) {
+    final document = PdfDocument(inputBytes: bytes);
+    try {
+      final extracted = PdfTextExtractor(document).extractText();
+      final content = _cleanExtractedText(
+        extracted.replaceAll('\r\n', '\n').replaceAll('\r', '\n'),
+      );
+      if (content.isEmpty) {
+        throw const FormatException('No readable text found in pdf');
+      }
+      return content;
+    } finally {
+      document.dispose();
+    }
+  }
+
   String _archiveFileString(
     Map<String, ArchiveFile> files,
     String filePath, {
@@ -289,6 +395,7 @@ class FileSelectorReaderImportService implements ReaderImportService {
   String _cleanExtractedText(String text) {
     return text
         .replaceAll('\u00A0', ' ')
+        .replaceAll('\t', ' ')
         .replaceAll(RegExp(r'[ \t]+\n'), '\n')
         .replaceAll(RegExp(r'\n[ \t]+'), '\n')
         .replaceAll(RegExp(r'[ \t]{2,}'), ' ')

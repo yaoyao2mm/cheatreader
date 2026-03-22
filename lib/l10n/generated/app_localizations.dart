@@ -149,13 +149,13 @@ abstract class AppLocalizations {
   /// No description provided for @importUnsupportedFormat.
   ///
   /// In en, this message translates to:
-  /// **'Only txt / epub / html / md / fb2 are supported'**
+  /// **'Only txt / epub / html / md / fb2 / docx / pdf are supported'**
   String get importUnsupportedFormat;
 
   /// No description provided for @dropPrompt.
   ///
   /// In en, this message translates to:
-  /// **'Drop txt / epub / html / md / fb2 here to start reading'**
+  /// **'Drop txt / epub / html / md / fb2 / docx / pdf here to start reading'**
   String get dropPrompt;
 
   /// No description provided for @controlPanelTitle.

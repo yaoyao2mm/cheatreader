@@ -11,6 +11,40 @@ struct _MyApplication {
 
 G_DEFINE_TYPE(MyApplication, my_application, GTK_TYPE_APPLICATION)
 
+static void configure_transparent_window(GtkWindow* window) {
+  GtkWidget* widget = GTK_WIDGET(window);
+  GdkScreen* screen = gtk_widget_get_screen(widget);
+  if (screen == nullptr || !gdk_screen_is_composited(screen)) {
+    return;
+  }
+
+  GdkVisual* visual = gdk_screen_get_rgba_visual(screen);
+  if (visual == nullptr) {
+    return;
+  }
+
+  gtk_widget_set_visual(widget, visual);
+
+  GtkCssProvider* css_provider = gtk_css_provider_new();
+  gtk_css_provider_load_from_data(
+      css_provider,
+      "window.cheatreader-transparent {"
+      "  background-color: rgba(0, 0, 0, 0);"
+      "  background-image: none;"
+      "}"
+      "window.cheatreader-transparent decoration {"
+      "  background-color: rgba(0, 0, 0, 0);"
+      "  box-shadow: none;"
+      "}",
+      -1, nullptr);
+  GtkStyleContext* style_context = gtk_widget_get_style_context(widget);
+  gtk_style_context_add_provider(
+      style_context, GTK_STYLE_PROVIDER(css_provider),
+      GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+  gtk_style_context_add_class(style_context, "cheatreader-transparent");
+  g_object_unref(css_provider);
+}
+
 static gboolean os_release_contains_value(const gchar* contents,
                                          const gchar* key,
                                          const gchar* value) {
@@ -63,6 +97,7 @@ static void my_application_activate(GApplication* application) {
   // unreliable on Ubuntu 20.04 X11/GNOME combinations.
   gtk_window_set_title(window, "cheatreader");
   gtk_window_set_decorated(window, false);
+  configure_transparent_window(window);
 
   gtk_window_set_default_size(window, 1280, 720);
 
@@ -78,9 +113,9 @@ static void my_application_activate(GApplication* application) {
 
   FlView* view = fl_view_new(project);
   GdkRGBA background_color;
-  // Background defaults to black, override it here if necessary, e.g. #00000000
-  // for transparent.
-  gdk_rgba_parse(&background_color, "#000000");
+  // Keep the Flutter view itself transparent so the app can decide whether the
+  // reader surface should paint an opaque background or float as text-only.
+  gdk_rgba_parse(&background_color, "#00000000");
   fl_view_set_background_color(view, &background_color);
   gtk_widget_show(GTK_WIDGET(view));
   gtk_container_add(GTK_CONTAINER(window), GTK_WIDGET(view));

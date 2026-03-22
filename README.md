@@ -17,7 +17,7 @@
 <p align="center">
   <img alt="Platform" src="https://img.shields.io/badge/platform-Flutter-54C5F8?style=flat-square">
   <img alt="Desktop" src="https://img.shields.io/badge/focus-desktop-2F4858?style=flat-square">
-  <img alt="Formats" src="https://img.shields.io/badge/formats-txt%20%7C%20epub%20%7C%20html%20%7C%20md%20%7C%20fb2-B08968?style=flat-square">
+  <img alt="Formats" src="https://img.shields.io/badge/formats-txt%20%7C%20epub%20%7C%20html%20%7C%20md%20%7C%20fb2%20%7C%20docx%20%7C%20pdf-B08968?style=flat-square">
   <img alt="UI" src="https://img.shields.io/badge/mode-transparent%20text--only-F0E6DC?style=flat-square&labelColor=16110F&color=F0E6DC">
 </p>
 
@@ -31,7 +31,7 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Transparent text-only mode that lets the app disappear into your desktop
 - Compact single-line and multi-line reading modes
 - Configurable mode switching via double click, middle click, or keyboard shortcut
-- Support for `txt`, `epub`, `html`, `markdown`, and `fb2`
+- Support for `txt`, `epub`, `html`, `markdown`, `fb2`, `docx`, and `pdf`
 - Local managed library copies so imported books still restore after restart
 - Lightweight desktop-first reading flow with drag-and-drop import
 
@@ -58,6 +58,8 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 | `html` / `htm` / `xhtml` | Text extraction | Ignores page chrome and keeps readable body text |
 | `md` / `markdown` | Text extraction | Strips markdown syntax into plain readable text |
 | `fb2` | Text extraction | Pulls FictionBook section text into the reader |
+| `docx` | Text extraction | Extracts readable document body text into the existing text-first flow |
+| `pdf` | Text extraction | Best-effort text-layer extraction; image-only or layout-heavy PDFs may fail or read imperfectly |
 
 ## Run
 

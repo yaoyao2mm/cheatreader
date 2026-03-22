@@ -315,7 +315,9 @@ class FakeReaderImportService implements ReaderImportService {
         normalized.endsWith('.htm') ||
         normalized.endsWith('.md') ||
         normalized.endsWith('.markdown') ||
-        normalized.endsWith('.fb2');
+        normalized.endsWith('.fb2') ||
+        normalized.endsWith('.docx') ||
+        normalized.endsWith('.pdf');
   }
 
   @override

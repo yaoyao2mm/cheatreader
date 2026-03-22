@@ -35,11 +35,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importUnsupportedFormat =>
-      'Only txt / epub / html / md / fb2 are supported';
+      'Only txt / epub / html / md / fb2 / docx / pdf are supported';
 
   @override
   String get dropPrompt =>
-      'Drop txt / epub / html / md / fb2 here to start reading';
+      'Drop txt / epub / html / md / fb2 / docx / pdf here to start reading';
 
   @override
   String get controlPanelTitle => 'CheatReader Control Panel';

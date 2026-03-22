@@ -34,10 +34,11 @@ class AppLocalizationsZh extends AppLocalizations {
   String get importFailure => '无法导入该电子书文件';
 
   @override
-  String get importUnsupportedFormat => '仅支持导入 txt / epub / html / md / fb2';
+  String get importUnsupportedFormat =>
+      '仅支持导入 txt / epub / html / md / fb2 / docx / pdf';
 
   @override
-  String get dropPrompt => '拖入 txt / epub / html / md / fb2 开始阅读';
+  String get dropPrompt => '拖入 txt / epub / html / md / fb2 / docx / pdf 开始阅读';
 
   @override
   String get controlPanelTitle => 'CheatReader 控制面板';

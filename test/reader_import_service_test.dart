@@ -1,11 +1,13 @@
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui';
 
 import 'package:archive/archive.dart';
 import 'package:cheatreader/src/reader_import_service.dart';
 import 'package:enough_convert/gbk.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 void main() {
   group('FileSelectorReaderImportService', () {
@@ -112,15 +114,18 @@ void main() {
       );
       final file = File('${tempDirectory.path}/novel.epub');
 
-      final containerXml = Uint8List.fromList(utf8.encode('''
+      final containerXml = Uint8List.fromList(
+        utf8.encode('''
 <?xml version="1.0" encoding="UTF-8"?>
 <container version="1.0" xmlns="urn:oasis:names:tc:opendocument:xmlns:container">
   <rootfiles>
     <rootfile full-path="OEBPS/content.opf" media-type="application/oebps-package+xml"/>
   </rootfiles>
 </container>
-'''));
-      final contentOpf = Uint8List.fromList(utf8.encode('''
+'''),
+      );
+      final contentOpf = Uint8List.fromList(
+        utf8.encode('''
 <?xml version="1.0" encoding="utf-8"?>
 <package version="2.0" xmlns="http://www.idpf.org/2007/opf">
   <manifest>
@@ -132,7 +137,8 @@ void main() {
     <itemref idref="chapter2"/>
   </spine>
 </package>
-'''));
+'''),
+      );
       final chapter1 = Uint8List.fromList(
         utf8.encode('<html><body><h1>第一章</h1><p>第一段</p></body></html>'),
       );
@@ -141,7 +147,11 @@ void main() {
       );
       final archive = Archive()
         ..addFile(
-          ArchiveFile('META-INF/container.xml', containerXml.length, containerXml),
+          ArchiveFile(
+            'META-INF/container.xml',
+            containerXml.length,
+            containerXml,
+          ),
         )
         ..addFile(
           ArchiveFile('OEBPS/content.opf', contentOpf.length, contentOpf),
@@ -159,6 +169,86 @@ void main() {
       final imported = await service.openTxtFile(file.path);
 
       expect(imported.content, '第一章\n\n第一段\n\n第二章\n\n第二段');
+
+      await tempDirectory.delete(recursive: true);
+    });
+
+    test('extracts readable text from docx files', () async {
+      final tempDirectory = await Directory.systemTemp.createTemp(
+        'cheatreader-import-test',
+      );
+      final file = File('${tempDirectory.path}/chapter.docx');
+      final documentXml = Uint8List.fromList(
+        utf8.encode('''
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+  <w:body>
+    <w:p><w:r><w:t>Heading</w:t></w:r></w:p>
+    <w:p><w:r><w:t>First paragraph</w:t></w:r></w:p>
+    <w:p><w:r><w:t>Second paragraph</w:t></w:r></w:p>
+  </w:body>
+</w:document>
+'''),
+      );
+      final archive = Archive()
+        ..addFile(
+          ArchiveFile('word/document.xml', documentXml.length, documentXml),
+        );
+      await file.writeAsBytes(ZipEncoder().encode(archive));
+
+      final service = FileSelectorReaderImportService();
+      final imported = await service.openTxtFile(file.path);
+
+      expect(
+        imported.content,
+        'Heading\n\nFirst paragraph\n\nSecond paragraph',
+      );
+
+      await tempDirectory.delete(recursive: true);
+    });
+
+    test('extracts readable text from pdf files', () async {
+      final tempDirectory = await Directory.systemTemp.createTemp(
+        'cheatreader-import-test',
+      );
+      final file = File('${tempDirectory.path}/chapter.pdf');
+      final document = PdfDocument();
+      final page = document.pages.add();
+      page.graphics.drawString(
+        'Chapter One\nFirst paragraph',
+        PdfStandardFont(PdfFontFamily.helvetica, 12),
+        bounds: const Rect.fromLTWH(0, 0, 400, 200),
+      );
+      final bytes = await document.save();
+      document.dispose();
+      await file.writeAsBytes(bytes, flush: true);
+
+      final service = FileSelectorReaderImportService();
+      final imported = await service.openTxtFile(file.path);
+
+      expect(imported.content, contains('Chapter One'));
+      expect(imported.content, contains('First paragraph'));
+
+      await tempDirectory.delete(recursive: true);
+    });
+
+    test('rejects pdf files without readable text', () async {
+      final tempDirectory = await Directory.systemTemp.createTemp(
+        'cheatreader-import-test',
+      );
+      final file = File('${tempDirectory.path}/scan.pdf');
+      final document = PdfDocument();
+      document.pages.add();
+      final bytes = await document.save();
+      document.dispose();
+      await file.writeAsBytes(bytes, flush: true);
+
+      final service = FileSelectorReaderImportService();
+
+      await expectLater(
+        service.openTxtFile(file.path),
+        throwsA(isA<FormatException>()),
+      );
 
       await tempDirectory.delete(recursive: true);
     });

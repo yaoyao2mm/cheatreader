@@ -57,6 +57,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.19.1"
+  convert:
+    dependency: transitive
+    description:
+      name: convert
+      sha256: b30acd5944035672bc15c6b7a8b47d773e41e2f17de064350988c5d02adb1c68
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.1.2"
   cross_file:
     dependency: "direct main"
     description:
@@ -65,6 +73,14 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "0.3.5+2"
+  crypto:
+    dependency: transitive
+    description:
+      name: crypto
+      sha256: c8ea0233063ba03258fbcf2ca4d6dadfefe14f02fab57702265467a19f27fadf
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "3.0.7"
   csslib:
     dependency: transitive
     description:
@@ -538,6 +554,22 @@ packages:
       url: "https://pub.flutter-io.cn"
     source: hosted
     version: "1.4.1"
+  syncfusion_flutter_core:
+    dependency: transitive
+    description:
+      name: syncfusion_flutter_core
+      sha256: "45b87b7c198bf7742a151306edac05b4d2754236a7042baeee28c96663616172"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "33.1.44"
+  syncfusion_flutter_pdf:
+    dependency: "direct main"
+    description:
+      name: syncfusion_flutter_pdf
+      sha256: "3d8d05ffa3f90e5edb93f076b52db78867c7745f6b4fc5c4b7ba02b216e11b85"
+      url: "https://pub.flutter-io.cn"
+    source: hosted
+    version: "33.1.44"
   term_glyph:
     dependency: transitive
     description:

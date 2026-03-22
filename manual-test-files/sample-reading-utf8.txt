@@ -1,0 +1,6 @@
+CheatReader manual test file
+
+This is a plain UTF-8 text sample.
+Line 1.
+Line 2.
+Line 3.
