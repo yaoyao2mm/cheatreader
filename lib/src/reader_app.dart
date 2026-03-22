@@ -18,6 +18,7 @@ import 'reader_controller.dart';
 import 'reader_layout_metrics.dart';
 import 'reader_localization.dart';
 import 'reader_settings.dart';
+import 'reader_shortcuts.dart';
 
 class CheatReaderApp extends StatelessWidget {
   const CheatReaderApp({
@@ -338,6 +339,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final settings = controller.settings;
     final l10n = AppLocalizations.of(context)!;
     final fontSize = readerBaseFontSize * settings.fontScale;
+    final lineSpacing = settings.lineSpacing;
     final verticalPadding = settings.oneLineMode
         ? readerOneLineVerticalPadding
         : readerMultiLineVerticalPadding;
@@ -365,32 +367,20 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final textStyle = TextStyle(
       color: readerTextColor,
       fontSize: fontSize,
-      height: readerTextLineHeight,
+      height: lineSpacing,
       letterSpacing: 0.2,
       fontFamilyFallback: fontFamilyFallback,
     );
 
     return CallbackShortcuts(
-      bindings: {
-        const SingleActivator(LogicalKeyboardKey.arrowDown): _advanceReading,
-        const SingleActivator(LogicalKeyboardKey.arrowUp): _rewindReading,
-        const SingleActivator(LogicalKeyboardKey.pageDown): _advanceReading,
-        const SingleActivator(LogicalKeyboardKey.pageUp): _rewindReading,
-        const SingleActivator(LogicalKeyboardKey.space): _advanceReading,
-        const SingleActivator(LogicalKeyboardKey.space, shift: true):
-            _rewindReading,
-        const SingleActivator(LogicalKeyboardKey.keyM):
-            _handleModeToggleShortcut,
-        const SingleActivator(LogicalKeyboardKey.keyQ, control: true):
-            _handleExit,
-        const SingleActivator(LogicalKeyboardKey.keyQ, meta: true): _handleExit,
-      },
+      bindings: _buildShortcutBindings(settings),
       child: Focus(
         autofocus: true,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final estimatedLineHeight = readerTextHeightForFontScale(
               settings.fontScale,
+              lineSpacing: lineSpacing,
             );
             final availableHeight = math.max(
               estimatedLineHeight,
@@ -458,17 +448,21 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
                             ),
                             child: LayoutBuilder(
                               builder: (context, constraints) {
+                                final textColumnWidth = _resolveTextColumnWidth(
+                                  constraints.maxWidth,
+                                  settings,
+                                );
                                 final displayedText = _resolveDisplayedText(
                                   context: context,
-                                  constraints: constraints,
+                                  maxWidth: textColumnWidth,
                                   settings: settings,
                                   style: textStyle,
                                 );
                                 return ClipRect(
                                   child: Align(
-                                    alignment: Alignment.centerLeft,
+                                    alignment: Alignment.center,
                                     child: SizedBox(
-                                      width: constraints.maxWidth,
+                                      width: textColumnWidth,
                                       child: Text(
                                         displayedText,
                                         softWrap: !settings.oneLineMode,
@@ -537,9 +531,81 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     widget.controller.toggleOneLineMode();
   }
 
+  Future<void> _handleBossKeyShortcut() async {
+    await widget.controller.toggleBossKey();
+  }
+
+  Map<ShortcutActivator, VoidCallback> _buildShortcutBindings(
+    ReaderSettings settings,
+  ) {
+    final bindings = <ShortcutActivator, VoidCallback>{
+      const SingleActivator(LogicalKeyboardKey.arrowDown): _advanceReading,
+      const SingleActivator(LogicalKeyboardKey.arrowUp): _rewindReading,
+      const SingleActivator(LogicalKeyboardKey.pageDown):
+          widget.controller.nextPage,
+      const SingleActivator(LogicalKeyboardKey.pageUp):
+          widget.controller.previousPage,
+      const SingleActivator(LogicalKeyboardKey.space): _advanceReading,
+      const SingleActivator(LogicalKeyboardKey.space, shift: true):
+          _rewindReading,
+      const SingleActivator(LogicalKeyboardKey.keyQ, control: true):
+          _handleExit,
+      const SingleActivator(LogicalKeyboardKey.keyQ, meta: true): _handleExit,
+    };
+
+    void addBinding(ReaderShortcutKey key, VoidCallback callback) {
+      final activator = _activatorForShortcutKey(key);
+      if (activator != null) {
+        bindings[activator] = callback;
+      }
+    }
+
+    final shortcuts = settings.shortcutBindings;
+    addBinding(shortcuts.nextLine, _advanceReading);
+    addBinding(shortcuts.previousLine, _rewindReading);
+    addBinding(shortcuts.nextPage, widget.controller.nextPage);
+    addBinding(shortcuts.previousPage, widget.controller.previousPage);
+    addBinding(shortcuts.toggleMode, _handleModeToggleShortcut);
+    addBinding(shortcuts.bossKey, () {
+      unawaited(_handleBossKeyShortcut());
+    });
+
+    return bindings;
+  }
+
+  ShortcutActivator? _activatorForShortcutKey(ReaderShortcutKey key) {
+    return switch (key) {
+      ReaderShortcutKey.arrowDown => const SingleActivator(
+        LogicalKeyboardKey.arrowDown,
+      ),
+      ReaderShortcutKey.arrowUp => const SingleActivator(
+        LogicalKeyboardKey.arrowUp,
+      ),
+      ReaderShortcutKey.pageDown => const SingleActivator(
+        LogicalKeyboardKey.pageDown,
+      ),
+      ReaderShortcutKey.pageUp => const SingleActivator(
+        LogicalKeyboardKey.pageUp,
+      ),
+      ReaderShortcutKey.space => const SingleActivator(
+        LogicalKeyboardKey.space,
+      ),
+      ReaderShortcutKey.shiftSpace => const SingleActivator(
+        LogicalKeyboardKey.space,
+        shift: true,
+      ),
+      ReaderShortcutKey.keyJ => const SingleActivator(LogicalKeyboardKey.keyJ),
+      ReaderShortcutKey.keyK => const SingleActivator(LogicalKeyboardKey.keyK),
+      ReaderShortcutKey.keyN => const SingleActivator(LogicalKeyboardKey.keyN),
+      ReaderShortcutKey.keyP => const SingleActivator(LogicalKeyboardKey.keyP),
+      ReaderShortcutKey.keyM => const SingleActivator(LogicalKeyboardKey.keyM),
+      ReaderShortcutKey.keyB => const SingleActivator(LogicalKeyboardKey.keyB),
+    };
+  }
+
   String _resolveDisplayedText({
     required BuildContext context,
-    required BoxConstraints constraints,
+    required double maxWidth,
     required ReaderSettings settings,
     required TextStyle style,
   }) {
@@ -556,7 +622,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final sourceLine = visibleLines.isEmpty ? '' : visibleLines.first;
     final segments = _wrapIntoSingleVisualLines(
       text: sourceLine,
-      maxWidth: constraints.maxWidth,
+      maxWidth: maxWidth,
       style: style,
       textDirection: Directionality.of(context),
       textScaler: MediaQuery.textScalerOf(context),
@@ -587,6 +653,14 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     }
 
     return segments[clampedIndex];
+  }
+
+  double _resolveTextColumnWidth(
+    double availableWidth,
+    ReaderSettings settings,
+  ) {
+    final widthFactor = settings.readingWidthFactor.clamp(0.55, 1.0);
+    return (availableWidth * widthFactor).clamp(120.0, availableWidth);
   }
 
   List<String> _wrapIntoSingleVisualLines({
@@ -953,6 +1027,28 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
         onChanged: controller.setFontScale,
       ),
       _SliderRow(
+        label: l10n.lineSpacingLabel,
+        value: controller.settings.lineSpacing,
+        min: 1.2,
+        max: 2.0,
+        divisions: 8,
+        displayValue: l10n.sliderMultiplier(
+          controller.settings.lineSpacing.toStringAsFixed(2),
+        ),
+        onChanged: controller.setLineSpacing,
+      ),
+      _SliderRow(
+        label: l10n.readingWidthLabel,
+        value: controller.settings.readingWidthFactor,
+        min: 0.55,
+        max: 1.0,
+        divisions: 9,
+        displayValue: l10n.sliderPercent(
+          (controller.settings.readingWidthFactor * 100).round(),
+        ),
+        onChanged: controller.setReadingWidthFactor,
+      ),
+      _SliderRow(
         label: l10n.windowOpacityLabel,
         value: controller.settings.windowOpacity,
         min: 0.0,
@@ -967,6 +1063,34 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
             ? null
             : controller.setWindowOpacity,
       ),
+      const SizedBox(height: 20),
+      _SectionTitle(title: l10n.sectionKeyboardControls),
+      const SizedBox(height: 8),
+      ...ReaderShortcutAction.values.map(
+        (action) => Padding(
+          padding: const EdgeInsets.only(bottom: 12),
+          child: _ShortcutDropdown(
+            label: _shortcutActionLabel(l10n, action),
+            value: controller.settings.shortcutBindings.keyForAction(action),
+            keyLabelBuilder: (key) => _shortcutKeyLabel(l10n, key),
+            onChanged: (value) {
+              final message = controller.setShortcutBinding(action, value);
+              if (message != null) {
+                widget.onMessage(message);
+              }
+            },
+          ),
+        ),
+      ),
+      if (windowController.supportsBossKey)
+        FilledButton.icon(
+          onPressed: () {
+            unawaited(controller.toggleBossKey());
+            Navigator.of(context).pop();
+          },
+          icon: const Icon(Icons.visibility_off_outlined),
+          label: Text(l10n.bossKeyHideNow),
+        ),
       const SizedBox(height: 20),
       _SectionTitle(title: l10n.sectionAboutApp),
       const SizedBox(height: 8),
@@ -1035,7 +1159,43 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     return switch (trigger) {
       ReaderModeToggleTrigger.doubleClick => l10n.triggerDoubleClickLong,
       ReaderModeToggleTrigger.middleClick => l10n.triggerMiddleClickLong,
-      ReaderModeToggleTrigger.keyboardShortcut => l10n.triggerKeyboardLong,
+      ReaderModeToggleTrigger.keyboardShortcut => l10n.triggerKeyboardLong(
+        _shortcutKeyLabel(
+          l10n,
+          widget.controller.settings.shortcutBindings.toggleMode,
+        ),
+      ),
+    };
+  }
+
+  String _shortcutActionLabel(
+    AppLocalizations l10n,
+    ReaderShortcutAction action,
+  ) {
+    return switch (action) {
+      ReaderShortcutAction.nextLine => l10n.shortcutNextLine,
+      ReaderShortcutAction.previousLine => l10n.shortcutPreviousLine,
+      ReaderShortcutAction.nextPage => l10n.shortcutNextPage,
+      ReaderShortcutAction.previousPage => l10n.shortcutPreviousPage,
+      ReaderShortcutAction.toggleMode => l10n.shortcutToggleMode,
+      ReaderShortcutAction.bossKey => l10n.shortcutBossKey,
+    };
+  }
+
+  String _shortcutKeyLabel(AppLocalizations l10n, ReaderShortcutKey key) {
+    return switch (key) {
+      ReaderShortcutKey.arrowDown => l10n.shortcutKeyArrowDown,
+      ReaderShortcutKey.arrowUp => l10n.shortcutKeyArrowUp,
+      ReaderShortcutKey.pageDown => l10n.shortcutKeyPageDown,
+      ReaderShortcutKey.pageUp => l10n.shortcutKeyPageUp,
+      ReaderShortcutKey.space => l10n.shortcutKeySpace,
+      ReaderShortcutKey.shiftSpace => l10n.shortcutKeyShiftSpace,
+      ReaderShortcutKey.keyJ => 'J',
+      ReaderShortcutKey.keyK => 'K',
+      ReaderShortcutKey.keyN => 'N',
+      ReaderShortcutKey.keyP => 'P',
+      ReaderShortcutKey.keyM => 'M',
+      ReaderShortcutKey.keyB => 'B',
     };
   }
 
@@ -1268,6 +1428,95 @@ class _SliderRow extends StatelessWidget {
           onChanged: onChanged,
         ),
       ],
+    );
+  }
+}
+
+class _ShortcutDropdown extends StatelessWidget {
+  const _ShortcutDropdown({
+    required this.label,
+    required this.value,
+    required this.keyLabelBuilder,
+    required this.onChanged,
+  });
+
+  final String label;
+  final ReaderShortcutKey value;
+  final String Function(ReaderShortcutKey key) keyLabelBuilder;
+  final ValueChanged<ReaderShortcutKey> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF22262C),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: const Color(0x22FFFFFF)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: textTheme.bodyMedium?.copyWith(color: Colors.white),
+              ),
+            ),
+            const SizedBox(width: 12),
+            PopupMenuButton<ReaderShortcutKey>(
+              tooltip: label,
+              color: const Color(0xFF22262C),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              onSelected: onChanged,
+              itemBuilder: (context) {
+                return ReaderShortcutKey.values
+                    .map(
+                      (key) => PopupMenuItem<ReaderShortcutKey>(
+                        value: key,
+                        child: Text(keyLabelBuilder(key)),
+                      ),
+                    )
+                    .toList(growable: false);
+              },
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1B1D21),
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: const Color(0x22FFFFFF)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        keyLabelBuilder(value),
+                        style: textTheme.labelLarge?.copyWith(
+                          color: Colors.white,
+                          letterSpacing: 0.2,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.keyboard_arrow_down,
+                        size: 18,
+                        color: Colors.white70,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

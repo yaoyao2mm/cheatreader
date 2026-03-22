@@ -22,7 +22,12 @@
   "triggerKeyboard": "Shortcut",
   "triggerDoubleClickLong": "Double-click the reader area",
   "triggerMiddleClickLong": "Middle-click the reader area",
-  "triggerKeyboardLong": "Press M",
+  "triggerKeyboardLong": "Press {shortcut}",
+  "@triggerKeyboardLong": {
+    "placeholders": {
+      "shortcut": {}
+    }
+  },
   "modeSingleLine": "single-line",
   "modeMultiLine": "multi-line",
   "currentModeSummary": "Current mode: {mode}. Trigger: {trigger}",
@@ -46,8 +51,11 @@
   "fontSerif": "Serif",
   "fontMonospace": "Monospace",
   "fontScaleLabel": "Font size",
+  "lineSpacingLabel": "Line spacing",
+  "readingWidthLabel": "Reading width",
   "windowOpacityLabel": "Background opacity",
   "transparentModeOverridesOpacity": "Controlled by transparent mode",
+  "shortcutConflictMessage": "This shortcut is already assigned to another action",
   "positionLabel": "Position {line}",
   "@positionLabel": {
     "placeholders": {
@@ -58,6 +66,7 @@
   "removeTooltip": "Remove",
   "sectionSimpleBookshelf": "Bookshelf",
   "sectionReadingSettings": "Reading Settings",
+  "sectionKeyboardControls": "Keyboard Controls",
   "sectionAboutApp": "About",
   "appVersionLabel": "Version",
   "appVersionLoading": "Loading...",
@@ -71,8 +80,27 @@
   "panelCurrentBookFallback": "No book opened",
   "exitMessage": "Quit reader",
   "modeToggleKeyLabel": "Press M",
+  "bossKeyHideNow": "Hide now",
+  "shortcutNextLine": "Next line",
+  "shortcutPreviousLine": "Previous line",
+  "shortcutNextPage": "Next page",
+  "shortcutPreviousPage": "Previous page",
+  "shortcutToggleMode": "Toggle mode",
+  "shortcutBossKey": "Boss key",
+  "shortcutKeyArrowDown": "Arrow Down",
+  "shortcutKeyArrowUp": "Arrow Up",
+  "shortcutKeyPageDown": "Page Down",
+  "shortcutKeyPageUp": "Page Up",
+  "shortcutKeySpace": "Space",
+  "shortcutKeyShiftSpace": "Shift + Space",
   "sliderPercent": "{value}%",
   "@sliderPercent": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "sliderMultiplier": "{value}x",
+  "@sliderMultiplier": {
     "placeholders": {
       "value": {}
     }

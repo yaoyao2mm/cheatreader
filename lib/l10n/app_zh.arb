@@ -22,7 +22,12 @@
   "triggerKeyboard": "快捷键",
   "triggerDoubleClickLong": "双击阅读区",
   "triggerMiddleClickLong": "鼠标中键点击阅读区",
-  "triggerKeyboardLong": "按 M 键",
+  "triggerKeyboardLong": "按 {shortcut}",
+  "@triggerKeyboardLong": {
+    "placeholders": {
+      "shortcut": {}
+    }
+  },
   "modeSingleLine": "单行",
   "modeMultiLine": "多行",
   "currentModeSummary": "当前{mode}。切换方式：{trigger}",
@@ -46,8 +51,11 @@
   "fontSerif": "衬线",
   "fontMonospace": "等宽",
   "fontScaleLabel": "字号",
+  "lineSpacingLabel": "行距",
+  "readingWidthLabel": "阅读宽度",
   "windowOpacityLabel": "背景透明度",
   "transparentModeOverridesOpacity": "透明模式已接管",
+  "shortcutConflictMessage": "这个快捷键已经分配给其他操作",
   "positionLabel": "位置 {line}",
   "@positionLabel": {
     "placeholders": {
@@ -58,6 +66,7 @@
   "removeTooltip": "移除",
   "sectionSimpleBookshelf": "简单书架",
   "sectionReadingSettings": "阅读设置",
+  "sectionKeyboardControls": "键盘控制",
   "sectionAboutApp": "关于应用",
   "appVersionLabel": "版本号",
   "appVersionLoading": "读取中…",
@@ -71,8 +80,27 @@
   "panelCurrentBookFallback": "未打开书籍",
   "exitMessage": "退出阅读器",
   "modeToggleKeyLabel": "按 M 键",
+  "bossKeyHideNow": "立即隐藏",
+  "shortcutNextLine": "下一行",
+  "shortcutPreviousLine": "上一行",
+  "shortcutNextPage": "下一页",
+  "shortcutPreviousPage": "上一页",
+  "shortcutToggleMode": "切换模式",
+  "shortcutBossKey": "老板键",
+  "shortcutKeyArrowDown": "下方向键",
+  "shortcutKeyArrowUp": "上方向键",
+  "shortcutKeyPageDown": "PageDown",
+  "shortcutKeyPageUp": "PageUp",
+  "shortcutKeySpace": "空格",
+  "shortcutKeyShiftSpace": "Shift + 空格",
   "sliderPercent": "{value}%",
   "@sliderPercent": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "sliderMultiplier": "{value}x",
+  "@sliderMultiplier": {
     "placeholders": {
       "value": {}
     }

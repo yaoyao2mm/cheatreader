@@ -233,8 +233,8 @@ abstract class AppLocalizations {
   /// No description provided for @triggerKeyboardLong.
   ///
   /// In en, this message translates to:
-  /// **'Press M'**
-  String get triggerKeyboardLong;
+  /// **'Press {shortcut}'**
+  String triggerKeyboardLong(Object shortcut);
 
   /// No description provided for @modeSingleLine.
   ///
@@ -338,6 +338,18 @@ abstract class AppLocalizations {
   /// **'Font size'**
   String get fontScaleLabel;
 
+  /// No description provided for @lineSpacingLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Line spacing'**
+  String get lineSpacingLabel;
+
+  /// No description provided for @readingWidthLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading width'**
+  String get readingWidthLabel;
+
   /// No description provided for @windowOpacityLabel.
   ///
   /// In en, this message translates to:
@@ -349,6 +361,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Controlled by transparent mode'**
   String get transparentModeOverridesOpacity;
+
+  /// No description provided for @shortcutConflictMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This shortcut is already assigned to another action'**
+  String get shortcutConflictMessage;
 
   /// No description provided for @positionLabel.
   ///
@@ -379,6 +397,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reading Settings'**
   String get sectionReadingSettings;
+
+  /// No description provided for @sectionKeyboardControls.
+  ///
+  /// In en, this message translates to:
+  /// **'Keyboard Controls'**
+  String get sectionKeyboardControls;
 
   /// No description provided for @sectionAboutApp.
   ///
@@ -458,11 +482,95 @@ abstract class AppLocalizations {
   /// **'Press M'**
   String get modeToggleKeyLabel;
 
+  /// No description provided for @bossKeyHideNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide now'**
+  String get bossKeyHideNow;
+
+  /// No description provided for @shortcutNextLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Next line'**
+  String get shortcutNextLine;
+
+  /// No description provided for @shortcutPreviousLine.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous line'**
+  String get shortcutPreviousLine;
+
+  /// No description provided for @shortcutNextPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Next page'**
+  String get shortcutNextPage;
+
+  /// No description provided for @shortcutPreviousPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous page'**
+  String get shortcutPreviousPage;
+
+  /// No description provided for @shortcutToggleMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Toggle mode'**
+  String get shortcutToggleMode;
+
+  /// No description provided for @shortcutBossKey.
+  ///
+  /// In en, this message translates to:
+  /// **'Boss key'**
+  String get shortcutBossKey;
+
+  /// No description provided for @shortcutKeyArrowDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrow Down'**
+  String get shortcutKeyArrowDown;
+
+  /// No description provided for @shortcutKeyArrowUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Arrow Up'**
+  String get shortcutKeyArrowUp;
+
+  /// No description provided for @shortcutKeyPageDown.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Down'**
+  String get shortcutKeyPageDown;
+
+  /// No description provided for @shortcutKeyPageUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Page Up'**
+  String get shortcutKeyPageUp;
+
+  /// No description provided for @shortcutKeySpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Space'**
+  String get shortcutKeySpace;
+
+  /// No description provided for @shortcutKeyShiftSpace.
+  ///
+  /// In en, this message translates to:
+  /// **'Shift + Space'**
+  String get shortcutKeyShiftSpace;
+
   /// No description provided for @sliderPercent.
   ///
   /// In en, this message translates to:
   /// **'{value}%'**
   String sliderPercent(Object value);
+
+  /// No description provided for @sliderMultiplier.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}x'**
+  String sliderMultiplier(Object value);
 }
 
 class _AppLocalizationsDelegate

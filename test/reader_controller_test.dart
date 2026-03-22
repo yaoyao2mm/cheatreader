@@ -6,6 +6,7 @@ import 'package:cheatreader/src/reader_import_service.dart';
 import 'package:cheatreader/src/reader_library_storage.dart';
 import 'package:cheatreader/src/reader_preferences.dart';
 import 'package:cheatreader/src/reader_settings.dart';
+import 'package:cheatreader/src/reader_shortcuts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -61,8 +62,14 @@ void main() {
       controller.setLanguageMode(ReaderLanguageMode.english);
       controller.setFontFamilyPreset(ReaderFontFamilyPreset.monospace);
       controller.setFontScale(1.2);
+      controller.setLineSpacing(1.8);
+      controller.setReadingWidthFactor(0.7);
       controller.setWindowOpacity(0.78);
       controller.setTransparentModeEnabled(true);
+      final conflictMessage = controller.setShortcutBinding(
+        ReaderShortcutAction.bossKey,
+        ReaderShortcutKey.keyB,
+      );
       await Future<void>.delayed(Duration.zero);
 
       final saved = await store.loadSnapshot();
@@ -74,8 +81,11 @@ void main() {
       expect(saved.settings.languageMode, ReaderLanguageMode.english);
       expect(saved.settings.fontFamilyPreset, ReaderFontFamilyPreset.monospace);
       expect(saved.settings.fontScale, 1.2);
+      expect(saved.settings.lineSpacing, 1.8);
+      expect(saved.settings.readingWidthFactor, 0.7);
       expect(saved.settings.windowOpacity, 0.78);
       expect(saved.settings.transparentModeEnabled, isTrue);
+      expect(conflictMessage, isNull);
       expect(windowController.syncedSettings?.oneLineMode, isTrue);
       expect(
         windowController.syncedSettings?.modeToggleTrigger,
@@ -90,9 +100,59 @@ void main() {
         ReaderFontFamilyPreset.monospace,
       );
       expect(windowController.syncedSettings?.fontScale, 1.2);
+      expect(windowController.syncedSettings?.lineSpacing, 1.8);
+      expect(windowController.syncedSettings?.readingWidthFactor, 0.7);
       expect(windowController.syncedSettings?.windowOpacity, 0.78);
       expect(windowController.syncedSettings?.transparentModeEnabled, isTrue);
     });
+
+    test('rejects conflicting shortcut assignments', () async {
+      final controller = ReaderController(
+        initialContent: 'One\nTwo',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+
+      final message = controller.setShortcutBinding(
+        ReaderShortcutAction.bossKey,
+        ReaderShortcutKey.arrowDown,
+      );
+
+      expect(message, isNotNull);
+      expect(
+        controller.settings.shortcutBindings.bossKey,
+        ReaderShortcutBindings.defaults.bossKey,
+      );
+    });
+
+    test(
+      'boss key toggles hide and restore through window controller',
+      () async {
+        final windowController = FakePlatformWindowController();
+        final controller = ReaderController(
+          initialContent: 'One\nTwo',
+          preferencesStore: MemoryReaderPreferencesStore(),
+          windowController: windowController,
+          fileBookmarkService: FakeReaderFileBookmarkService(),
+          importService: FakeReaderImportService(),
+          libraryStorage: MemoryReaderLibraryStorage(),
+        );
+
+        await controller.initialize();
+        await controller.toggleBossKey();
+        expect(controller.isBossKeyHidden, isTrue);
+        expect(windowController.hideForBossKeyCount, 1);
+
+        await controller.toggleBossKey();
+        expect(controller.isBossKeyHidden, isFalse);
+        expect(windowController.restoreFromBossKeyCount, 1);
+      },
+    );
 
     test('restores saved progress for imported txt files', () async {
       final store = MemoryReaderPreferencesStore(
@@ -233,9 +293,12 @@ void main() {
         languageMode: ReaderLanguageMode.english,
         alwaysOnTop: false,
         fontScale: 1.2,
+        lineSpacing: 1.8,
+        readingWidthFactor: 0.72,
         windowOpacity: 0.78,
         fontFamilyPreset: ReaderFontFamilyPreset.serif,
         transparentModeEnabled: true,
+        shortcutBindings: ReaderShortcutBindings.defaults,
       );
 
       await store.saveSettings(settings);
@@ -259,6 +322,8 @@ void main() {
       );
       expect(loaded.settings.alwaysOnTop, isFalse);
       expect(loaded.settings.fontScale, 1.2);
+      expect(loaded.settings.lineSpacing, 1.8);
+      expect(loaded.settings.readingWidthFactor, 0.72);
       expect(loaded.settings.windowOpacity, 0.78);
       expect(loaded.settings.fontFamilyPreset, ReaderFontFamilyPreset.serif);
       expect(loaded.settings.transparentModeEnabled, isTrue);
@@ -346,6 +411,8 @@ class FakeReaderImportService implements ReaderImportService {
 
 class FakePlatformWindowController implements PlatformWindowController {
   ReaderSettings? syncedSettings;
+  int hideForBossKeyCount = 0;
+  int restoreFromBossKeyCount = 0;
 
   @override
   bool get supportsFloatingControls => true;
@@ -355,6 +422,9 @@ class FakePlatformWindowController implements PlatformWindowController {
 
   @override
   bool get supportsManualResize => true;
+
+  @override
+  bool get supportsBossKey => true;
 
   @override
   Future<void> initialize() async {}
@@ -372,6 +442,16 @@ class FakePlatformWindowController implements PlatformWindowController {
 
   @override
   Future<void> resizeWindow(WindowResizeEdge edge, Offset delta) async {}
+
+  @override
+  Future<void> hideForBossKey(ReaderSettings settings) async {
+    hideForBossKeyCount += 1;
+  }
+
+  @override
+  Future<void> restoreFromBossKey(ReaderSettings settings) async {
+    restoreFromBossKeyCount += 1;
+  }
 
   @override
   Future<void> syncPresentation(ReaderSettings settings) async {

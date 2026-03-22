@@ -31,6 +31,8 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Transparent text-only mode that lets the app disappear into your desktop
 - Compact single-line and multi-line reading modes
 - Configurable mode switching via double click, middle click, or keyboard shortcut
+- Adjustable line spacing, reading width, and keyboard controls for longer sessions
+- Boss-key style hide and restore support without losing reading state
 - Support for `txt`, `epub`, `html`, `markdown`, `fb2`, `docx`, and `pdf`
 - Local managed library copies so imported books still restore after restart
 - Lightweight desktop-first reading flow with drag-and-drop import
@@ -134,7 +136,7 @@ This section highlights the feedback that comes up most often, so users can see 
 
 - [x] Add an in-app About section with version info and a bug-report entry
 - [ ] Improve the bookshelf experience with better organization and recovery for imported books
-- [ ] Add more reading controls such as line spacing, reading width, and shortcut customization
+- [x] Add more reading controls such as line spacing, reading width, and shortcut customization
 - [ ] Improve desktop installation and distribution so first-time setup feels easier
 - [ ] Keep improving import stability for edge-case `epub`, `html`, and encoded text files
 

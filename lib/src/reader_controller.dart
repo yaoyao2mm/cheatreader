@@ -11,6 +11,7 @@ import 'reader_library_storage.dart';
 import 'reader_localization.dart';
 import 'reader_preferences.dart';
 import 'reader_settings.dart';
+import 'reader_shortcuts.dart';
 
 class ReaderController extends ChangeNotifier {
   ReaderController({
@@ -50,11 +51,13 @@ class ReaderController extends ChangeNotifier {
     ReaderSettings.defaults.languageMode,
   ).demoTitle;
   bool _dragTargetActive = false;
+  bool _bossKeyHidden = false;
 
   ReaderSettings get settings => _settings;
   List<ReaderBookRecord> get bookshelf =>
       List<ReaderBookRecord>.unmodifiable(_bookshelf);
   bool get dragTargetActive => _dragTargetActive;
+  bool get isBossKeyHidden => _bossKeyHidden;
   String get currentDisplayName => _currentDisplayName;
   bool get hasImportedBook => _currentBookPath != null;
   ReaderBookRecord? get currentBook => _findBookRecord(_currentBookPath);
@@ -157,12 +160,58 @@ class ReaderController extends ChangeNotifier {
     _updateSettings(_settings.copyWith(fontScale: value));
   }
 
+  void setLineSpacing(double value) {
+    _updateSettings(_settings.copyWith(lineSpacing: value));
+  }
+
+  void setReadingWidthFactor(double value) {
+    _updateSettings(_settings.copyWith(readingWidthFactor: value));
+  }
+
   void setWindowOpacity(double value) {
     _updateSettings(_settings.copyWith(windowOpacity: value));
   }
 
   void setTransparentModeEnabled(bool value) {
     _updateSettings(_settings.copyWith(transparentModeEnabled: value));
+  }
+
+  String? setShortcutBinding(
+    ReaderShortcutAction action,
+    ReaderShortcutKey key,
+  ) {
+    final conflict = _settings.shortcutBindings.conflictingActionFor(
+      key,
+      excluding: action,
+    );
+    if (conflict != null) {
+      return stringsForSettings(_settings).shortcutConflictMessage;
+    }
+
+    _updateSettings(
+      _settings.copyWith(
+        shortcutBindings: _settings.shortcutBindings.copyWithAction(
+          action,
+          key,
+        ),
+      ),
+    );
+    return null;
+  }
+
+  Future<void> toggleBossKey() async {
+    if (!_windowController.supportsBossKey) {
+      return;
+    }
+
+    if (_bossKeyHidden) {
+      _bossKeyHidden = false;
+      await _windowController.restoreFromBossKey(_settings);
+    } else {
+      _bossKeyHidden = true;
+      await _windowController.hideForBossKey(_settings);
+    }
+    notifyListeners();
   }
 
   void setDragTargetActive(bool value) {
@@ -271,9 +320,12 @@ class ReaderController extends ChangeNotifier {
         _settings.languageMode == value.languageMode &&
         _settings.alwaysOnTop == value.alwaysOnTop &&
         _settings.fontScale == value.fontScale &&
+        _settings.lineSpacing == value.lineSpacing &&
+        _settings.readingWidthFactor == value.readingWidthFactor &&
         _settings.windowOpacity == value.windowOpacity &&
         _settings.fontFamilyPreset == value.fontFamilyPreset &&
-        _settings.transparentModeEnabled == value.transparentModeEnabled) {
+        _settings.transparentModeEnabled == value.transparentModeEnabled &&
+        _settings.shortcutBindings == value.shortcutBindings) {
       return;
     }
 
@@ -325,7 +377,8 @@ class ReaderController extends ChangeNotifier {
 
     final storedFile = await _libraryStorage.saveImportedFile(
       file,
-      existingStoredPath: existingStoredFilePath ?? existingRecord?.storedFilePath,
+      existingStoredPath:
+          existingStoredFilePath ?? existingRecord?.storedFilePath,
     );
 
     final bookmark =

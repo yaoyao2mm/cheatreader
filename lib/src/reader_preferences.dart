@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'reader_book.dart';
 import 'reader_settings.dart';
+import 'reader_shortcuts.dart';
 
 class ReaderPreferencesSnapshot {
   const ReaderPreferencesSnapshot({
@@ -32,9 +33,12 @@ class SharedPreferencesReaderPreferencesStore
   static const _languageModeKey = 'reader.languageMode';
   static const _alwaysOnTopKey = 'reader.alwaysOnTop';
   static const _fontScaleKey = 'reader.fontScale';
+  static const _lineSpacingKey = 'reader.lineSpacing';
+  static const _readingWidthFactorKey = 'reader.readingWidthFactor';
   static const _windowOpacityKey = 'reader.windowOpacity';
   static const _fontFamilyPresetKey = 'reader.fontFamilyPreset';
   static const _transparentModeEnabledKey = 'reader.transparentModeEnabled';
+  static const _shortcutBindingsKey = 'reader.shortcutBindings';
   static const _bookshelfKey = 'reader.bookshelf';
 
   final SharedPreferences _preferences;
@@ -70,6 +74,12 @@ class SharedPreferencesReaderPreferencesStore
         fontScale:
             _preferences.getDouble(_fontScaleKey) ??
             ReaderSettings.defaults.fontScale,
+        lineSpacing:
+            _preferences.getDouble(_lineSpacingKey) ??
+            ReaderSettings.defaults.lineSpacing,
+        readingWidthFactor:
+            _preferences.getDouble(_readingWidthFactorKey) ??
+            ReaderSettings.defaults.readingWidthFactor,
         windowOpacity:
             _preferences.getDouble(_windowOpacityKey) ??
             ReaderSettings.defaults.windowOpacity,
@@ -80,6 +90,7 @@ class SharedPreferencesReaderPreferencesStore
         transparentModeEnabled:
             _preferences.getBool(_transparentModeEnabledKey) ??
             ReaderSettings.defaults.transparentModeEnabled,
+        shortcutBindings: _loadShortcutBindings(),
       ),
       bookshelf: decodedBookshelf
           .map(
@@ -99,6 +110,11 @@ class SharedPreferencesReaderPreferencesStore
     await _preferences.setString(_languageModeKey, settings.languageMode.name);
     await _preferences.setBool(_alwaysOnTopKey, settings.alwaysOnTop);
     await _preferences.setDouble(_fontScaleKey, settings.fontScale);
+    await _preferences.setDouble(_lineSpacingKey, settings.lineSpacing);
+    await _preferences.setDouble(
+      _readingWidthFactorKey,
+      settings.readingWidthFactor,
+    );
     await _preferences.setDouble(_windowOpacityKey, settings.windowOpacity);
     await _preferences.setString(
       _fontFamilyPresetKey,
@@ -108,6 +124,10 @@ class SharedPreferencesReaderPreferencesStore
       _transparentModeEnabledKey,
       settings.transparentModeEnabled,
     );
+    await _preferences.setString(
+      _shortcutBindingsKey,
+      jsonEncode(settings.shortcutBindings.toJson()),
+    );
   }
 
   @override
@@ -116,6 +136,24 @@ class SharedPreferencesReaderPreferencesStore
       _bookshelfKey,
       jsonEncode(bookshelf.map((book) => book.toJson()).toList()),
     );
+  }
+
+  ReaderShortcutBindings _loadShortcutBindings() {
+    final rawShortcutBindings = _preferences.getString(_shortcutBindingsKey);
+    if (rawShortcutBindings == null || rawShortcutBindings.isEmpty) {
+      return ReaderShortcutBindings.defaults;
+    }
+
+    final decoded = jsonDecode(rawShortcutBindings);
+    if (decoded is! Map<String, dynamic>) {
+      return ReaderShortcutBindings.defaults;
+    }
+
+    try {
+      return ReaderShortcutBindings.fromJson(decoded);
+    } catch (_) {
+      return ReaderShortcutBindings.defaults;
+    }
   }
 }
 

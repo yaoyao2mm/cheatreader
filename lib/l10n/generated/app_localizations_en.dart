@@ -79,7 +79,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get triggerMiddleClickLong => 'Middle-click the reader area';
 
   @override
-  String get triggerKeyboardLong => 'Press M';
+  String triggerKeyboardLong(Object shortcut) {
+    return 'Press $shortcut';
+  }
 
   @override
   String get modeSingleLine => 'single-line';
@@ -138,11 +140,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fontScaleLabel => 'Font size';
 
   @override
+  String get lineSpacingLabel => 'Line spacing';
+
+  @override
+  String get readingWidthLabel => 'Reading width';
+
+  @override
   String get windowOpacityLabel => 'Background opacity';
 
   @override
   String get transparentModeOverridesOpacity =>
       'Controlled by transparent mode';
+
+  @override
+  String get shortcutConflictMessage =>
+      'This shortcut is already assigned to another action';
 
   @override
   String positionLabel(Object line) {
@@ -160,6 +172,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sectionReadingSettings => 'Reading Settings';
+
+  @override
+  String get sectionKeyboardControls => 'Keyboard Controls';
 
   @override
   String get sectionAboutApp => 'About';
@@ -202,7 +217,51 @@ class AppLocalizationsEn extends AppLocalizations {
   String get modeToggleKeyLabel => 'Press M';
 
   @override
+  String get bossKeyHideNow => 'Hide now';
+
+  @override
+  String get shortcutNextLine => 'Next line';
+
+  @override
+  String get shortcutPreviousLine => 'Previous line';
+
+  @override
+  String get shortcutNextPage => 'Next page';
+
+  @override
+  String get shortcutPreviousPage => 'Previous page';
+
+  @override
+  String get shortcutToggleMode => 'Toggle mode';
+
+  @override
+  String get shortcutBossKey => 'Boss key';
+
+  @override
+  String get shortcutKeyArrowDown => 'Arrow Down';
+
+  @override
+  String get shortcutKeyArrowUp => 'Arrow Up';
+
+  @override
+  String get shortcutKeyPageDown => 'Page Down';
+
+  @override
+  String get shortcutKeyPageUp => 'Page Up';
+
+  @override
+  String get shortcutKeySpace => 'Space';
+
+  @override
+  String get shortcutKeyShiftSpace => 'Shift + Space';
+
+  @override
   String sliderPercent(Object value) {
     return '$value%';
+  }
+
+  @override
+  String sliderMultiplier(Object value) {
+    return '${value}x';
   }
 }

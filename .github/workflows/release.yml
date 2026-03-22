@@ -268,13 +268,33 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ needs.prepare.outputs.release_tag }}
         run: |
+          NOTES_FILE=".github/release-notes/${RELEASE_TAG}.md"
+          if [ -f "$NOTES_FILE" ]; then
+            NOTES_ARGS=(--notes-file "$NOTES_FILE")
+          else
+            NOTES_ARGS=(--generate-notes)
+          fi
+
           if gh release view "$RELEASE_TAG" --repo "${GITHUB_REPOSITORY}" >/dev/null 2>&1; then
             echo "Release $RELEASE_TAG already exists."
+            if [ -f "$NOTES_FILE" ]; then
+              gh release edit "$RELEASE_TAG" \
+                --repo "${GITHUB_REPOSITORY}" \
+                --title "$RELEASE_TAG" \
+                --notes-file "$NOTES_FILE"
+            fi
           else
             if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
-              gh release create "$RELEASE_TAG" --repo "${GITHUB_REPOSITORY}" --target "${GITHUB_SHA}" --title "$RELEASE_TAG" --generate-notes
+              gh release create "$RELEASE_TAG" \
+                --repo "${GITHUB_REPOSITORY}" \
+                --target "${GITHUB_SHA}" \
+                --title "$RELEASE_TAG" \
+                "${NOTES_ARGS[@]}"
             else
-              gh release create "$RELEASE_TAG" --repo "${GITHUB_REPOSITORY}" --title "$RELEASE_TAG" --generate-notes
+              gh release create "$RELEASE_TAG" \
+                --repo "${GITHUB_REPOSITORY}" \
+                --title "$RELEASE_TAG" \
+                "${NOTES_ARGS[@]}"
             fi
           fi
 

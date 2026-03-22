@@ -13,6 +13,9 @@ class UnsupportedPlatformWindowController implements PlatformWindowController {
   bool get supportsManualResize => false;
 
   @override
+  bool get supportsBossKey => false;
+
+  @override
   Future<void> initialize() async {}
 
   @override
@@ -26,6 +29,12 @@ class UnsupportedPlatformWindowController implements PlatformWindowController {
 
   @override
   Future<void> resizeWindow(WindowResizeEdge edge, Offset delta) async {}
+
+  @override
+  Future<void> hideForBossKey(ReaderSettings settings) async {}
+
+  @override
+  Future<void> restoreFromBossKey(ReaderSettings settings) async {}
 
   @override
   Future<void> syncPresentation(ReaderSettings settings) async {}

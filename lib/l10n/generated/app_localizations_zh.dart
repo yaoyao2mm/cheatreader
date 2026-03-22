@@ -77,7 +77,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get triggerMiddleClickLong => '鼠标中键点击阅读区';
 
   @override
-  String get triggerKeyboardLong => '按 M 键';
+  String triggerKeyboardLong(Object shortcut) {
+    return '按 $shortcut';
+  }
 
   @override
   String get modeSingleLine => '单行';
@@ -133,10 +135,19 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fontScaleLabel => '字号';
 
   @override
+  String get lineSpacingLabel => '行距';
+
+  @override
+  String get readingWidthLabel => '阅读宽度';
+
+  @override
   String get windowOpacityLabel => '背景透明度';
 
   @override
   String get transparentModeOverridesOpacity => '透明模式已接管';
+
+  @override
+  String get shortcutConflictMessage => '这个快捷键已经分配给其他操作';
 
   @override
   String positionLabel(Object line) {
@@ -154,6 +165,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sectionReadingSettings => '阅读设置';
+
+  @override
+  String get sectionKeyboardControls => '键盘控制';
 
   @override
   String get sectionAboutApp => '关于应用';
@@ -195,7 +209,51 @@ class AppLocalizationsZh extends AppLocalizations {
   String get modeToggleKeyLabel => '按 M 键';
 
   @override
+  String get bossKeyHideNow => '立即隐藏';
+
+  @override
+  String get shortcutNextLine => '下一行';
+
+  @override
+  String get shortcutPreviousLine => '上一行';
+
+  @override
+  String get shortcutNextPage => '下一页';
+
+  @override
+  String get shortcutPreviousPage => '上一页';
+
+  @override
+  String get shortcutToggleMode => '切换模式';
+
+  @override
+  String get shortcutBossKey => '老板键';
+
+  @override
+  String get shortcutKeyArrowDown => '下方向键';
+
+  @override
+  String get shortcutKeyArrowUp => '上方向键';
+
+  @override
+  String get shortcutKeyPageDown => 'PageDown';
+
+  @override
+  String get shortcutKeyPageUp => 'PageUp';
+
+  @override
+  String get shortcutKeySpace => '空格';
+
+  @override
+  String get shortcutKeyShiftSpace => 'Shift + 空格';
+
+  @override
   String sliderPercent(Object value) {
     return '$value%';
+  }
+
+  @override
+  String sliderMultiplier(Object value) {
+    return '${value}x';
   }
 }

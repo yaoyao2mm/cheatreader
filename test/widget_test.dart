@@ -14,8 +14,10 @@ import 'package:cheatreader/src/reader_library_storage.dart';
 import 'package:cheatreader/src/reader_layout_metrics.dart';
 import 'package:cheatreader/src/reader_preferences.dart';
 import 'package:cheatreader/src/reader_settings.dart';
+import 'package:cheatreader/src/reader_shortcuts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
@@ -161,6 +163,69 @@ void main() {
     expect(decoration.color, Colors.transparent);
   });
 
+  testWidgets('custom shortcut advances reading', (WidgetTester tester) async {
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行\n第三行',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          shortcutBindings: ReaderShortcutBindings.defaults.copyWith(
+            nextLine: ReaderShortcutKey.keyJ,
+          ),
+        ),
+      ),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pump();
+
+    expect(find.textContaining('第二行'), findsOneWidget);
+  });
+
+  testWidgets('boss key shortcut hides through the window controller', (
+    WidgetTester tester,
+  ) async {
+    final windowController = _FakePlatformWindowController();
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行\n第三行',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          shortcutBindings: ReaderShortcutBindings.defaults.copyWith(
+            bossKey: ReaderShortcutKey.keyB,
+          ),
+        ),
+      ),
+      windowController: windowController,
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: windowController,
+      ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+    await tester.pump();
+
+    expect(windowController.hideForBossKeyCount, 1);
+  });
+
   testWidgets('english language mode localizes the control panel', (
     WidgetTester tester,
   ) async {
@@ -235,6 +300,8 @@ class _FakeReaderFileBookmarkService implements ReaderFileBookmarkService {
 }
 
 class _FakePlatformWindowController implements PlatformWindowController {
+  int hideForBossKeyCount = 0;
+
   @override
   bool get supportsFloatingControls => false;
 
@@ -243,6 +310,9 @@ class _FakePlatformWindowController implements PlatformWindowController {
 
   @override
   bool get supportsManualResize => false;
+
+  @override
+  bool get supportsBossKey => true;
 
   @override
   Future<void> initialize() async {}
@@ -258,6 +328,14 @@ class _FakePlatformWindowController implements PlatformWindowController {
 
   @override
   Future<void> resizeWindow(WindowResizeEdge edge, Offset delta) async {}
+
+  @override
+  Future<void> hideForBossKey(ReaderSettings settings) async {
+    hideForBossKeyCount += 1;
+  }
+
+  @override
+  Future<void> restoreFromBossKey(ReaderSettings settings) async {}
 
   @override
   Future<void> syncPresentation(ReaderSettings settings) async {}

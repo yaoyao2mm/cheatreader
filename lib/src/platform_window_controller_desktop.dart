@@ -20,6 +20,7 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   bool? _lastOneLineMode;
   Size? _rememberedMultiLineSize;
   double? _rememberedOneLineWidth;
+  bool _bossKeyHidden = false;
 
   bool get _isSupportedDesktop {
     if (kIsWeb) {
@@ -65,6 +66,9 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   @override
   bool get supportsManualResize =>
       _isSupportedDesktop && defaultTargetPlatform != TargetPlatform.macOS;
+
+  @override
+  bool get supportsBossKey => _isSupportedDesktop;
 
   @override
   Future<void> initialize() async {
@@ -237,8 +241,38 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   }
 
   @override
+  Future<void> hideForBossKey(ReaderSettings settings) async {
+    if (!_isSupportedDesktop || _bossKeyHidden) {
+      return;
+    }
+
+    _bossKeyHidden = true;
+    await windowManager.setAlwaysOnTop(false);
+    await windowManager.setIgnoreMouseEvents(true);
+    await windowManager.setOpacity(0.0);
+  }
+
+  @override
+  Future<void> restoreFromBossKey(ReaderSettings settings) async {
+    if (!_isSupportedDesktop || !_bossKeyHidden) {
+      return;
+    }
+
+    _bossKeyHidden = false;
+    await windowManager.setIgnoreMouseEvents(false);
+    await windowManager.setOpacity(1.0);
+    await syncPresentation(settings);
+    await windowManager.show();
+    await windowManager.focus();
+  }
+
+  @override
   Future<void> syncPresentation(ReaderSettings settings) async {
     if (!_isSupportedDesktop) {
+      return;
+    }
+
+    if (_bossKeyHidden) {
       return;
     }
 
@@ -357,17 +391,21 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   }
 
   double _oneLineHeightForSettings({ReaderSettings? settings}) {
-    final fontScale = settings?.fontScale ?? ReaderSettings.defaults.fontScale;
+    final effectiveSettings = settings ?? ReaderSettings.defaults;
     return readerOneLineWindowHeightForFontScale(
-      fontScale: fontScale,
+      fontScale: effectiveSettings.fontScale,
       absoluteMinimumHeight: _absoluteMinimumOneLineHeight,
+      lineSpacing: effectiveSettings.lineSpacing,
     );
   }
 
   double _defaultMultiLineHeightForSettings({
     required ReaderSettings settings,
   }) {
-    return readerDefaultMultiLineWindowHeightForFontScale(settings.fontScale);
+    return readerDefaultMultiLineWindowHeightForFontScale(
+      settings.fontScale,
+      lineSpacing: settings.lineSpacing,
+    );
   }
 
   Size _normalizeMultiLineSize(Size size) {

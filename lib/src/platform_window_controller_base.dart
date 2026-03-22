@@ -20,6 +20,8 @@ abstract class PlatformWindowController {
 
   bool get supportsManualResize;
 
+  bool get supportsBossKey;
+
   Future<void> initialize();
 
   Future<void> prepareForControlPanel({required Size screenSize});
@@ -31,6 +33,10 @@ abstract class PlatformWindowController {
   Future<void> startDragging();
 
   Future<void> resizeWindow(WindowResizeEdge edge, Offset delta);
+
+  Future<void> hideForBossKey(ReaderSettings settings);
+
+  Future<void> restoreFromBossKey(ReaderSettings settings);
 
   Future<void> closeWindow();
 }

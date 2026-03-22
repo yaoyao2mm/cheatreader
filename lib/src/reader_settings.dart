@@ -1,5 +1,9 @@
+import 'reader_shortcuts.dart';
+
 enum ReaderFontFamilyPreset { system, serif, monospace }
+
 enum ReaderModeToggleTrigger { doubleClick, middleClick, keyboardShortcut }
+
 enum ReaderLanguageMode { system, simplifiedChinese, english }
 
 class ReaderSettings {
@@ -9,9 +13,12 @@ class ReaderSettings {
     required this.languageMode,
     required this.alwaysOnTop,
     required this.fontScale,
+    required this.lineSpacing,
+    required this.readingWidthFactor,
     required this.windowOpacity,
     required this.fontFamilyPreset,
     required this.transparentModeEnabled,
+    required this.shortcutBindings,
   });
 
   static const ReaderSettings defaults = ReaderSettings(
@@ -20,9 +27,12 @@ class ReaderSettings {
     languageMode: ReaderLanguageMode.system,
     alwaysOnTop: true,
     fontScale: 1.0,
+    lineSpacing: 1.5,
+    readingWidthFactor: 1.0,
     windowOpacity: 0.94,
     fontFamilyPreset: ReaderFontFamilyPreset.system,
     transparentModeEnabled: false,
+    shortcutBindings: ReaderShortcutBindings.defaults,
   );
 
   final bool oneLineMode;
@@ -30,9 +40,12 @@ class ReaderSettings {
   final ReaderLanguageMode languageMode;
   final bool alwaysOnTop;
   final double fontScale;
+  final double lineSpacing;
+  final double readingWidthFactor;
   final double windowOpacity;
   final ReaderFontFamilyPreset fontFamilyPreset;
   final bool transparentModeEnabled;
+  final ReaderShortcutBindings shortcutBindings;
 
   ReaderSettings copyWith({
     bool? oneLineMode,
@@ -40,9 +53,12 @@ class ReaderSettings {
     ReaderLanguageMode? languageMode,
     bool? alwaysOnTop,
     double? fontScale,
+    double? lineSpacing,
+    double? readingWidthFactor,
     double? windowOpacity,
     ReaderFontFamilyPreset? fontFamilyPreset,
     bool? transparentModeEnabled,
+    ReaderShortcutBindings? shortcutBindings,
   }) {
     return ReaderSettings(
       oneLineMode: oneLineMode ?? this.oneLineMode,
@@ -50,10 +66,13 @@ class ReaderSettings {
       languageMode: languageMode ?? this.languageMode,
       alwaysOnTop: alwaysOnTop ?? this.alwaysOnTop,
       fontScale: fontScale ?? this.fontScale,
+      lineSpacing: lineSpacing ?? this.lineSpacing,
+      readingWidthFactor: readingWidthFactor ?? this.readingWidthFactor,
       windowOpacity: windowOpacity ?? this.windowOpacity,
       fontFamilyPreset: fontFamilyPreset ?? this.fontFamilyPreset,
       transparentModeEnabled:
           transparentModeEnabled ?? this.transparentModeEnabled,
+      shortcutBindings: shortcutBindings ?? this.shortcutBindings,
     );
   }
 }
