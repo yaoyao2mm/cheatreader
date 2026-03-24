@@ -902,6 +902,9 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
 
     if (_appVersion == null) {
       await _loadAppVersion();
+      if (!mounted) {
+        return;
+      }
     }
 
     final currentVersion = ReaderReleaseChecker.normalizeVersion(
@@ -909,8 +912,8 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     );
     if (currentVersion == null) {
       await _openReleasesFallback(
-        context: context,
         fallbackMessage: l10n.latestVersionReadCurrentFailed,
+        failureMessage: l10n.latestVersionCheckFailed,
       );
       return;
     }
@@ -926,8 +929,8 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       }
       if (latestRelease == null) {
         await _openReleasesFallback(
-          context: context,
           fallbackMessage: l10n.latestVersionOpenedFallback,
+          failureMessage: l10n.latestVersionCheckFailed,
         );
         return;
       }
@@ -959,8 +962,8 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       }
     } catch (_) {
       await _openReleasesFallback(
-        context: context,
         fallbackMessage: l10n.latestVersionOpenedFallback,
+        failureMessage: l10n.latestVersionCheckFailed,
       );
     } finally {
       if (mounted) {
@@ -972,18 +975,16 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
   }
 
   Future<void> _openReleasesFallback({
-    required BuildContext context,
     required String fallbackMessage,
+    required String failureMessage,
   }) async {
-    final l10n = AppLocalizations.of(context)!;
-
     try {
       final didLaunch = await launchUrl(
         _releasesUri,
         mode: LaunchMode.externalApplication,
       );
       if (didLaunch) {
-        if (context.mounted) {
+        if (mounted) {
           widget.onMessage(fallbackMessage);
         }
         return;
@@ -992,8 +993,8 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       // Fall through to the shared failure message below.
     }
 
-    if (context.mounted) {
-      widget.onMessage(l10n.latestVersionCheckFailed);
+    if (mounted) {
+      widget.onMessage(failureMessage);
     }
   }
 
