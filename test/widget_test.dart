@@ -163,6 +163,97 @@ void main() {
     expect(decoration.color, Colors.transparent);
   });
 
+  testWidgets(
+    'automatic text color adapts when the reader background turns light',
+    (WidgetTester tester) async {
+      final controller = ReaderController(
+        initialContent: '自动配色测试',
+        preferencesStore: MemoryReaderPreferencesStore(
+          initialSettings: ReaderSettings.defaults.copyWith(windowOpacity: 0.4),
+        ),
+        windowController: _FakePlatformWindowController(),
+        fileBookmarkService: _FakeReaderFileBookmarkService(),
+        importService: _FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+      await controller.initialize();
+
+      await tester.pumpWidget(
+        CheatReaderApp(
+          controller: controller,
+          windowController: _FakePlatformWindowController(),
+        ),
+      );
+
+      final text = tester.widget<Text>(find.text('自动配色测试'));
+      expect(text.style?.color, const Color(0xFF111111));
+      expect(text.style?.shadows, isEmpty);
+    },
+  );
+
+  testWidgets('custom text color works with custom opacity', (
+    WidgetTester tester,
+  ) async {
+    final controller = ReaderController(
+      initialContent: '自定义字色测试',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          windowOpacity: 0.35,
+          textColorMode: ReaderTextColorMode.custom,
+          customTextColorValue: 0xFFD97706,
+        ),
+      ),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+
+    final text = tester.widget<Text>(find.text('自定义字色测试'));
+    expect(text.style?.color, const Color(0xFFD97706));
+    expect(text.style?.shadows, isEmpty);
+  });
+
+  testWidgets(
+    'transparent mode keeps custom text color readable with shadows',
+    (WidgetTester tester) async {
+      final controller = ReaderController(
+        initialContent: '透明模式测试',
+        preferencesStore: MemoryReaderPreferencesStore(
+          initialSettings: ReaderSettings.defaults.copyWith(
+            transparentModeEnabled: true,
+            textColorMode: ReaderTextColorMode.custom,
+            customTextColorValue: 0xFF111111,
+          ),
+        ),
+        windowController: _FakePlatformWindowController(),
+        fileBookmarkService: _FakeReaderFileBookmarkService(),
+        importService: _FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+      await controller.initialize();
+
+      await tester.pumpWidget(
+        CheatReaderApp(
+          controller: controller,
+          windowController: _FakePlatformWindowController(),
+        ),
+      );
+
+      final text = tester.widget<Text>(find.text('透明模式测试'));
+      expect(text.style?.color, const Color(0xFF111111));
+      expect(text.style?.shadows, isNotEmpty);
+    },
+  );
+
   testWidgets('custom shortcut advances reading', (WidgetTester tester) async {
     final controller = ReaderController(
       initialContent: '第一行\n第二行\n第三行',
@@ -263,6 +354,13 @@ void main() {
     expect(find.text('CheatReader Control Panel'), findsOneWidget);
     expect(find.text('Import ebook'), findsOneWidget);
     expect(find.text('Reading Settings'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Check latest version'),
+      240,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Check latest version'), findsOneWidget);
   });
 }
 

@@ -38,6 +38,8 @@ class SharedPreferencesReaderPreferencesStore
   static const _windowOpacityKey = 'reader.windowOpacity';
   static const _fontFamilyPresetKey = 'reader.fontFamilyPreset';
   static const _transparentModeEnabledKey = 'reader.transparentModeEnabled';
+  static const _textColorModeKey = 'reader.textColorMode';
+  static const _customTextColorValueKey = 'reader.customTextColorValue';
   static const _shortcutBindingsKey = 'reader.shortcutBindings';
   static const _bookshelfKey = 'reader.bookshelf';
 
@@ -90,6 +92,14 @@ class SharedPreferencesReaderPreferencesStore
         transparentModeEnabled:
             _preferences.getBool(_transparentModeEnabledKey) ??
             ReaderSettings.defaults.transparentModeEnabled,
+        textColorMode: ReaderTextColorMode.values.byName(
+          _preferences.getString(_textColorModeKey) ??
+              ReaderSettings.defaults.textColorMode.name,
+        ),
+        customTextColorValue: _normalizeOpaqueColorValue(
+          _preferences.getInt(_customTextColorValueKey) ??
+              ReaderSettings.defaults.customTextColorValue,
+        ),
         shortcutBindings: _loadShortcutBindings(),
       ),
       bookshelf: decodedBookshelf
@@ -125,6 +135,14 @@ class SharedPreferencesReaderPreferencesStore
       settings.transparentModeEnabled,
     );
     await _preferences.setString(
+      _textColorModeKey,
+      settings.textColorMode.name,
+    );
+    await _preferences.setInt(
+      _customTextColorValueKey,
+      _normalizeOpaqueColorValue(settings.customTextColorValue),
+    );
+    await _preferences.setString(
       _shortcutBindingsKey,
       jsonEncode(settings.shortcutBindings.toJson()),
     );
@@ -154,6 +172,10 @@ class SharedPreferencesReaderPreferencesStore
     } catch (_) {
       return ReaderShortcutBindings.defaults;
     }
+  }
+
+  int _normalizeOpaqueColorValue(int value) {
+    return 0xFF000000 | (value & 0x00FFFFFF);
   }
 }
 

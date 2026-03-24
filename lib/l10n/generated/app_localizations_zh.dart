@@ -132,6 +132,39 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fontMonospace => '等宽';
 
   @override
+  String get fontColorTitle => '字体颜色';
+
+  @override
+  String get fontColorAuto => '自动';
+
+  @override
+  String get fontColorCustom => '自定义';
+
+  @override
+  String get fontColorAutoHint => '自动模式会根据当前阅读背景选择更稳妥的字色；透明模式下会额外加阴影增强可读性。';
+
+  @override
+  String get fontColorCustomHint => '自定义颜色会覆盖自动配色；透明模式下仍会保留阴影辅助阅读。';
+
+  @override
+  String get fontColorPreviewLabel => '字色预览';
+
+  @override
+  String get fontColorPreviewSample => '阅读预览';
+
+  @override
+  String get fontColorPresetsLabel => '快捷颜色';
+
+  @override
+  String get fontColorHueLabel => '色相';
+
+  @override
+  String get fontColorSaturationLabel => '饱和度';
+
+  @override
+  String get fontColorLightnessLabel => '亮度';
+
+  @override
   String get fontScaleLabel => '字号';
 
   @override
@@ -182,10 +215,22 @@ class AppLocalizationsZh extends AppLocalizations {
   String get appVersionUnavailable => '无法读取';
 
   @override
-  String get copyVersionLabel => '复制版本号';
+  String get checkLatestVersionLabel => '检测最新版本';
 
   @override
-  String get versionCopiedMessage => '版本号已复制';
+  String get alreadyLatestVersionMessage => '已经是最新版本';
+
+  @override
+  String get latestVersionOpenedFallback => '暂时无法自动检测，已为你打开 Release 页面';
+
+  @override
+  String get latestVersionReadCurrentFailed => '当前版本读取失败，已为你打开 Release 页面';
+
+  @override
+  String get latestVersionCheckFailed => '暂时无法检测最新版本';
+
+  @override
+  String get latestVersionOpenFailure => '检测到新版本，但无法打开 Release 页面';
 
   @override
   String get reportBugTitle => '反馈问题';
@@ -255,5 +300,10 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String sliderMultiplier(Object value) {
     return '${value}x';
+  }
+
+  @override
+  String sliderDegrees(Object value) {
+    return '$value°';
   }
 }

@@ -66,6 +66,8 @@ void main() {
       controller.setReadingWidthFactor(0.7);
       controller.setWindowOpacity(0.78);
       controller.setTransparentModeEnabled(true);
+      controller.setTextColorMode(ReaderTextColorMode.custom);
+      controller.setCustomTextColorValue(0xFF2B6CB0);
       final conflictMessage = controller.setShortcutBinding(
         ReaderShortcutAction.bossKey,
         ReaderShortcutKey.keyB,
@@ -85,6 +87,8 @@ void main() {
       expect(saved.settings.readingWidthFactor, 0.7);
       expect(saved.settings.windowOpacity, 0.78);
       expect(saved.settings.transparentModeEnabled, isTrue);
+      expect(saved.settings.textColorMode, ReaderTextColorMode.custom);
+      expect(saved.settings.customTextColorValue, 0xFF2B6CB0);
       expect(conflictMessage, isNull);
       expect(windowController.syncedSettings?.oneLineMode, isTrue);
       expect(
@@ -104,6 +108,11 @@ void main() {
       expect(windowController.syncedSettings?.readingWidthFactor, 0.7);
       expect(windowController.syncedSettings?.windowOpacity, 0.78);
       expect(windowController.syncedSettings?.transparentModeEnabled, isTrue);
+      expect(
+        windowController.syncedSettings?.textColorMode,
+        ReaderTextColorMode.custom,
+      );
+      expect(windowController.syncedSettings?.customTextColorValue, 0xFF2B6CB0);
     });
 
     test('rejects conflicting shortcut assignments', () async {
@@ -129,6 +138,27 @@ void main() {
         ReaderShortcutBindings.defaults.bossKey,
       );
     });
+
+    test(
+      'entering custom text color mode seeds from the adaptive color',
+      () async {
+        final controller = ReaderController(
+          initialContent: 'One\nTwo',
+          preferencesStore: MemoryReaderPreferencesStore(),
+          windowController: FakePlatformWindowController(),
+          fileBookmarkService: FakeReaderFileBookmarkService(),
+          importService: FakeReaderImportService(),
+          libraryStorage: MemoryReaderLibraryStorage(),
+        );
+
+        await controller.initialize();
+        controller.setWindowOpacity(0.4);
+        controller.setTextColorMode(ReaderTextColorMode.custom);
+
+        expect(controller.settings.textColorMode, ReaderTextColorMode.custom);
+        expect(controller.settings.customTextColorValue, 0xFF111111);
+      },
+    );
 
     test(
       'boss key toggles hide and restore through window controller',
@@ -298,6 +328,8 @@ void main() {
         windowOpacity: 0.78,
         fontFamilyPreset: ReaderFontFamilyPreset.serif,
         transparentModeEnabled: true,
+        textColorMode: ReaderTextColorMode.custom,
+        customTextColorValue: 0xFF0F766E,
         shortcutBindings: ReaderShortcutBindings.defaults,
       );
 
@@ -327,6 +359,8 @@ void main() {
       expect(loaded.settings.windowOpacity, 0.78);
       expect(loaded.settings.fontFamilyPreset, ReaderFontFamilyPreset.serif);
       expect(loaded.settings.transparentModeEnabled, isTrue);
+      expect(loaded.settings.textColorMode, ReaderTextColorMode.custom);
+      expect(loaded.settings.customTextColorValue, 0xFF0F766E);
       expect(loaded.bookshelf.single.path, '/tmp/book.txt');
       expect(loaded.bookshelf.single.burnModeEnabled, isFalse);
       expect(loaded.bookshelf.single.fileBookmark, 'bookmark:/tmp/book.txt');

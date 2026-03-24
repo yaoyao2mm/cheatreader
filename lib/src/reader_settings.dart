@@ -6,6 +6,8 @@ enum ReaderModeToggleTrigger { doubleClick, middleClick, keyboardShortcut }
 
 enum ReaderLanguageMode { system, simplifiedChinese, english }
 
+enum ReaderTextColorMode { adaptive, custom }
+
 class ReaderSettings {
   const ReaderSettings({
     required this.oneLineMode,
@@ -18,8 +20,12 @@ class ReaderSettings {
     required this.windowOpacity,
     required this.fontFamilyPreset,
     required this.transparentModeEnabled,
+    required this.textColorMode,
+    required this.customTextColorValue,
     required this.shortcutBindings,
   });
+
+  static const int defaultCustomTextColorValue = 0xFFF4F4F0;
 
   static const ReaderSettings defaults = ReaderSettings(
     oneLineMode: false,
@@ -32,6 +38,8 @@ class ReaderSettings {
     windowOpacity: 0.94,
     fontFamilyPreset: ReaderFontFamilyPreset.system,
     transparentModeEnabled: false,
+    textColorMode: ReaderTextColorMode.adaptive,
+    customTextColorValue: defaultCustomTextColorValue,
     shortcutBindings: ReaderShortcutBindings.defaults,
   );
 
@@ -45,6 +53,8 @@ class ReaderSettings {
   final double windowOpacity;
   final ReaderFontFamilyPreset fontFamilyPreset;
   final bool transparentModeEnabled;
+  final ReaderTextColorMode textColorMode;
+  final int customTextColorValue;
   final ReaderShortcutBindings shortcutBindings;
 
   ReaderSettings copyWith({
@@ -58,6 +68,8 @@ class ReaderSettings {
     double? windowOpacity,
     ReaderFontFamilyPreset? fontFamilyPreset,
     bool? transparentModeEnabled,
+    ReaderTextColorMode? textColorMode,
+    int? customTextColorValue,
     ReaderShortcutBindings? shortcutBindings,
   }) {
     return ReaderSettings(
@@ -72,6 +84,8 @@ class ReaderSettings {
       fontFamilyPreset: fontFamilyPreset ?? this.fontFamilyPreset,
       transparentModeEnabled:
           transparentModeEnabled ?? this.transparentModeEnabled,
+      textColorMode: textColorMode ?? this.textColorMode,
+      customTextColorValue: customTextColorValue ?? this.customTextColorValue,
       shortcutBindings: shortcutBindings ?? this.shortcutBindings,
     );
   }

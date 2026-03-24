@@ -17,8 +17,81 @@ import 'reader_book.dart';
 import 'reader_controller.dart';
 import 'reader_layout_metrics.dart';
 import 'reader_localization.dart';
+import 'reader_release_checker.dart';
 import 'reader_settings.dart';
 import 'reader_shortcuts.dart';
+
+const _readerDarkTextColor = Color(0xFF111111);
+const _readerLightTextColor = Color(ReaderSettings.defaultCustomTextColorValue);
+const _readerTransparentShadowOffsets = <Offset>[
+  Offset(-1, 0),
+  Offset(1, 0),
+  Offset(0, -1),
+  Offset(0, 1),
+];
+
+const _readerTextColorPresets = <Color>[
+  Color(0xFFF4F4F0),
+  Color(0xFFFFFFFF),
+  Color(0xFF111111),
+  Color(0xFFD97706),
+  Color(0xFFB91C1C),
+  Color(0xFF047857),
+  Color(0xFF0F766E),
+  Color(0xFF1D4ED8),
+];
+
+({Color background, Color text, Color dragIndicator, List<Shadow> textShadows})
+_resolveReaderPresentation(ReaderSettings settings) {
+  final customTextColor = Color(settings.customTextColorValue);
+
+  if (settings.transparentModeEnabled) {
+    final textColor = settings.textColorMode == ReaderTextColorMode.custom
+        ? customTextColor
+        : _readerLightTextColor;
+    final haloIsDark = textColor.computeLuminance() > 0.45;
+    final haloColor = haloIsDark ? Colors.black : Colors.white;
+
+    return (
+      background: Colors.transparent,
+      text: textColor,
+      dragIndicator: haloColor.withValues(alpha: haloIsDark ? 0.78 : 0.68),
+      textShadows: [
+        for (final offset in _readerTransparentShadowOffsets)
+          Shadow(
+            color: haloColor.withValues(alpha: haloIsDark ? 0.72 : 0.62),
+            offset: offset,
+            blurRadius: 1.2,
+          ),
+        Shadow(
+          color: haloColor.withValues(alpha: haloIsDark ? 0.42 : 0.34),
+          offset: const Offset(0, 2),
+          blurRadius: 12,
+        ),
+      ],
+    );
+  }
+
+  final useLightReaderBackground = settings.windowOpacity < 0.78;
+  final automaticTextColor = useLightReaderBackground
+      ? _readerDarkTextColor
+      : _readerLightTextColor;
+  final readerBackgroundColor = useLightReaderBackground
+      ? const Color(0xFFF2F0E8).withValues(alpha: settings.windowOpacity)
+      : Colors.black.withValues(alpha: settings.windowOpacity);
+  final dragIndicatorColor = useLightReaderBackground
+      ? Colors.black.withValues(alpha: 0.55)
+      : Colors.white.withValues(alpha: 0.6);
+
+  return (
+    background: readerBackgroundColor,
+    text: settings.textColorMode == ReaderTextColorMode.custom
+        ? customTextColor
+        : automaticTextColor,
+    dragIndicator: dragIndicatorColor,
+    textShadows: const <Shadow>[],
+  );
+}
 
 class CheatReaderApp extends StatelessWidget {
   const CheatReaderApp({
@@ -294,35 +367,6 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   @override
   void onWindowMoved() {}
 
-  ({Color background, Color text, Color dragIndicator}) _resolveReaderColors(
-    ReaderSettings settings,
-  ) {
-    if (settings.transparentModeEnabled) {
-      return (
-        background: Colors.transparent,
-        text: const Color(0xFFF4F4F0),
-        dragIndicator: Colors.white.withValues(alpha: 0.6),
-      );
-    }
-
-    final useLightReaderBackground = settings.windowOpacity < 0.78;
-    final readerTextColor = useLightReaderBackground
-        ? const Color(0xFF111111)
-        : const Color(0xFFF4F4F0);
-    final readerBackgroundColor = useLightReaderBackground
-        ? const Color(0xFFF2F0E8).withValues(alpha: settings.windowOpacity)
-        : Colors.black.withValues(alpha: settings.windowOpacity);
-    final dragIndicatorColor = useLightReaderBackground
-        ? Colors.black.withValues(alpha: 0.55)
-        : Colors.white.withValues(alpha: 0.6);
-
-    return (
-      background: readerBackgroundColor,
-      text: readerTextColor,
-      dragIndicator: dragIndicatorColor,
-    );
-  }
-
   @override
   void dispose() {
     _messageTimer?.cancel();
@@ -343,7 +387,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final verticalPadding = settings.oneLineMode
         ? readerOneLineVerticalPadding
         : readerMultiLineVerticalPadding;
-    final readerColors = _resolveReaderColors(settings);
+    final readerColors = _resolveReaderPresentation(settings);
     final readerTextColor = readerColors.text;
     final readerBackgroundColor = readerColors.background;
     final dragIndicatorColor = readerColors.dragIndicator;
@@ -369,6 +413,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
       fontSize: fontSize,
       height: lineSpacing,
       letterSpacing: 0.2,
+      shadows: readerColors.textShadows,
       fontFamilyFallback: fontFamilyFallback,
     );
 
@@ -777,9 +822,14 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
   static final Uri _feedbackUri = Uri.parse(
     'https://github.com/yaoyao2mm/cheatreader/issues/new',
   );
+  static final Uri _releasesUri = Uri.parse(
+    'https://github.com/yaoyao2mm/cheatreader/releases',
+  );
 
   late final ScrollController _scrollController = ScrollController();
+  late final ReaderReleaseChecker _releaseChecker = ReaderReleaseChecker();
   String? _appVersion;
+  bool _isCheckingLatestVersion = false;
 
   @override
   void initState() {
@@ -844,12 +894,106 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     }
   }
 
-  Future<void> _copyAppVersion(BuildContext context) async {
+  Future<void> _checkLatestVersion(BuildContext context) async {
     final l10n = AppLocalizations.of(context)!;
-    final version = _resolvedAppVersion(l10n);
-    await Clipboard.setData(ClipboardData(text: version));
+    if (_isCheckingLatestVersion) {
+      return;
+    }
+
+    if (_appVersion == null) {
+      await _loadAppVersion();
+    }
+
+    final currentVersion = ReaderReleaseChecker.normalizeVersion(
+      _appVersion ?? '',
+    );
+    if (currentVersion == null) {
+      await _openReleasesFallback(
+        context: context,
+        fallbackMessage: l10n.latestVersionReadCurrentFailed,
+      );
+      return;
+    }
+
+    setState(() {
+      _isCheckingLatestVersion = true;
+    });
+
+    try {
+      final latestRelease = await _releaseChecker.fetchLatestRelease();
+      if (!mounted) {
+        return;
+      }
+      if (latestRelease == null) {
+        await _openReleasesFallback(
+          context: context,
+          fallbackMessage: l10n.latestVersionOpenedFallback,
+        );
+        return;
+      }
+
+      final hasNewerVersion =
+          ReaderReleaseChecker.compareVersions(
+            latestRelease.version,
+            currentVersion,
+          ) >
+          0;
+      if (!hasNewerVersion) {
+        widget.onMessage(l10n.alreadyLatestVersionMessage);
+        return;
+      }
+
+      final didLaunch = await launchUrl(
+        latestRelease.url,
+        mode: LaunchMode.externalApplication,
+      );
+      if (!didLaunch) {
+        final didLaunchFallback = await launchUrl(
+          _releasesUri,
+          mode: LaunchMode.externalApplication,
+        );
+        if (!didLaunchFallback && mounted) {
+          widget.onMessage(l10n.latestVersionOpenFailure);
+        }
+        return;
+      }
+    } catch (_) {
+      await _openReleasesFallback(
+        context: context,
+        fallbackMessage: l10n.latestVersionOpenedFallback,
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isCheckingLatestVersion = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _openReleasesFallback({
+    required BuildContext context,
+    required String fallbackMessage,
+  }) async {
+    final l10n = AppLocalizations.of(context)!;
+
+    try {
+      final didLaunch = await launchUrl(
+        _releasesUri,
+        mode: LaunchMode.externalApplication,
+      );
+      if (didLaunch) {
+        if (context.mounted) {
+          widget.onMessage(fallbackMessage);
+        }
+        return;
+      }
+    } catch (_) {
+      // Fall through to the shared failure message below.
+    }
+
     if (context.mounted) {
-      widget.onMessage(l10n.versionCopiedMessage);
+      widget.onMessage(l10n.latestVersionCheckFailed);
     }
   }
 
@@ -881,8 +1025,29 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     return _appVersion!;
   }
 
+  void _updateCustomTextColor(HSLColor Function(HSLColor current) updateColor) {
+    final currentColor = HSLColor.fromColor(
+      Color(widget.controller.settings.customTextColorValue),
+    );
+    widget.controller.setCustomTextColorValue(
+      updateColor(currentColor).toColor().toARGB32(),
+    );
+  }
+
+  String _textColorModeHint(AppLocalizations l10n, ReaderSettings settings) {
+    return settings.textColorMode == ReaderTextColorMode.adaptive
+        ? l10n.fontColorAutoHint
+        : l10n.fontColorCustomHint;
+  }
+
+  String _formatHexColor(int argbValue) {
+    final rgbValue = argbValue & 0x00FFFFFF;
+    return '#${rgbValue.toRadixString(16).padLeft(6, '0').toUpperCase()}';
+  }
+
   @override
   void dispose() {
+    _releaseChecker.dispose();
     _scrollController.dispose();
     super.dispose();
   }
@@ -891,6 +1056,10 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     final controller = widget.controller;
     final windowController = widget.windowController;
     final l10n = AppLocalizations.of(context)!;
+    final settings = controller.settings;
+    final readerPresentation = _resolveReaderPresentation(settings);
+    final customTextColor = Color(settings.customTextColorValue);
+    final customTextColorHsl = HSLColor.fromColor(customTextColor);
 
     return [
       _SectionTitle(title: l10n.sectionSimpleBookshelf),
@@ -1015,51 +1184,138 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
         },
       ),
       const SizedBox(height: 12),
+      Text(l10n.fontColorTitle),
+      const SizedBox(height: 8),
+      SegmentedButton<ReaderTextColorMode>(
+        segments: [
+          ButtonSegment(
+            value: ReaderTextColorMode.adaptive,
+            label: Text(l10n.fontColorAuto),
+          ),
+          ButtonSegment(
+            value: ReaderTextColorMode.custom,
+            label: Text(l10n.fontColorCustom),
+          ),
+        ],
+        selected: <ReaderTextColorMode>{settings.textColorMode},
+        onSelectionChanged: (selection) {
+          controller.setTextColorMode(selection.first);
+        },
+      ),
+      const SizedBox(height: 8),
+      Text(
+        _textColorModeHint(l10n, settings),
+        style: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: Colors.white70),
+      ),
+      const SizedBox(height: 12),
+      _TextColorPreviewCard(
+        label: l10n.fontColorPreviewLabel,
+        sampleText: l10n.fontColorPreviewSample,
+        hexValue: _formatHexColor(readerPresentation.text.toARGB32()),
+        textColor: readerPresentation.text,
+        textShadows: readerPresentation.textShadows,
+      ),
+      if (settings.textColorMode == ReaderTextColorMode.custom) ...[
+        const SizedBox(height: 12),
+        Text(l10n.fontColorPresetsLabel),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 10,
+          runSpacing: 10,
+          children: _readerTextColorPresets
+              .map(
+                (color) => _TextColorPresetButton(
+                  color: color,
+                  isSelected: color.toARGB32() == customTextColor.toARGB32(),
+                  onTap: () =>
+                      controller.setCustomTextColorValue(color.toARGB32()),
+                ),
+              )
+              .toList(growable: false),
+        ),
+        const SizedBox(height: 12),
+        _SliderRow(
+          label: l10n.fontColorHueLabel,
+          value: customTextColorHsl.hue,
+          min: 0,
+          max: 360,
+          divisions: 72,
+          displayValue: l10n.sliderDegrees(customTextColorHsl.hue.round()),
+          onChanged: (value) {
+            _updateCustomTextColor((current) => current.withHue(value));
+          },
+        ),
+        _SliderRow(
+          label: l10n.fontColorSaturationLabel,
+          value: customTextColorHsl.saturation,
+          min: 0,
+          max: 1,
+          divisions: 20,
+          displayValue: l10n.sliderPercent(
+            (customTextColorHsl.saturation * 100).round(),
+          ),
+          onChanged: (value) {
+            _updateCustomTextColor((current) => current.withSaturation(value));
+          },
+        ),
+        _SliderRow(
+          label: l10n.fontColorLightnessLabel,
+          value: customTextColorHsl.lightness,
+          min: 0,
+          max: 1,
+          divisions: 20,
+          displayValue: l10n.sliderPercent(
+            (customTextColorHsl.lightness * 100).round(),
+          ),
+          onChanged: (value) {
+            _updateCustomTextColor((current) => current.withLightness(value));
+          },
+        ),
+      ],
+      const SizedBox(height: 12),
       _SliderRow(
         label: l10n.fontScaleLabel,
-        value: controller.settings.fontScale,
+        value: settings.fontScale,
         min: 0.85,
         max: 1.4,
         divisions: 11,
-        displayValue: l10n.sliderPercent(
-          (controller.settings.fontScale * 100).round(),
-        ),
+        displayValue: l10n.sliderPercent((settings.fontScale * 100).round()),
         onChanged: controller.setFontScale,
       ),
       _SliderRow(
         label: l10n.lineSpacingLabel,
-        value: controller.settings.lineSpacing,
+        value: settings.lineSpacing,
         min: 1.2,
         max: 2.0,
         divisions: 8,
         displayValue: l10n.sliderMultiplier(
-          controller.settings.lineSpacing.toStringAsFixed(2),
+          settings.lineSpacing.toStringAsFixed(2),
         ),
         onChanged: controller.setLineSpacing,
       ),
       _SliderRow(
         label: l10n.readingWidthLabel,
-        value: controller.settings.readingWidthFactor,
+        value: settings.readingWidthFactor,
         min: 0.55,
         max: 1.0,
         divisions: 9,
         displayValue: l10n.sliderPercent(
-          (controller.settings.readingWidthFactor * 100).round(),
+          (settings.readingWidthFactor * 100).round(),
         ),
         onChanged: controller.setReadingWidthFactor,
       ),
       _SliderRow(
         label: l10n.windowOpacityLabel,
-        value: controller.settings.windowOpacity,
+        value: settings.windowOpacity,
         min: 0.0,
         max: 1.0,
         divisions: 20,
-        displayValue: controller.settings.transparentModeEnabled
+        displayValue: settings.transparentModeEnabled
             ? l10n.transparentModeOverridesOpacity
-            : l10n.sliderPercent(
-                (controller.settings.windowOpacity * 100).round(),
-              ),
-        onChanged: controller.settings.transparentModeEnabled
+            : l10n.sliderPercent((settings.windowOpacity * 100).round()),
+        onChanged: settings.transparentModeEnabled
             ? null
             : controller.setWindowOpacity,
       ),
@@ -1134,9 +1390,17 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                 runSpacing: 8,
                 children: [
                   OutlinedButton.icon(
-                    onPressed: () => _copyAppVersion(context),
-                    icon: const Icon(Icons.content_copy_outlined),
-                    label: Text(l10n.copyVersionLabel),
+                    onPressed: _isCheckingLatestVersion
+                        ? null
+                        : () => _checkLatestVersion(context),
+                    icon: _isCheckingLatestVersion
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          )
+                        : const Icon(Icons.system_update_alt_outlined),
+                    label: Text(l10n.checkLatestVersionLabel),
                   ),
                   FilledButton.icon(
                     onPressed: () => _openBugReport(context),
@@ -1428,6 +1692,142 @@ class _SliderRow extends StatelessWidget {
           onChanged: onChanged,
         ),
       ],
+    );
+  }
+}
+
+class _TextColorPreviewCard extends StatelessWidget {
+  const _TextColorPreviewCard({
+    required this.label,
+    required this.sampleText,
+    required this.hexValue,
+    required this.textColor,
+    required this.textShadows,
+  });
+
+  final String label;
+  final String sampleText;
+  final String hexValue;
+  final Color textColor;
+  final List<Shadow> textShadows;
+
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    final previewStyle = textTheme.titleMedium?.copyWith(
+      color: textColor,
+      shadows: textShadows,
+      fontWeight: FontWeight.w600,
+      letterSpacing: 0.2,
+    );
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF22262C),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0x22FFFFFF)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  label,
+                  style: textTheme.labelMedium?.copyWith(color: Colors.white70),
+                ),
+                Text(
+                  hexValue,
+                  style: textTheme.labelMedium?.copyWith(color: Colors.white70),
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: SizedBox(
+                height: 72,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: ColoredBox(
+                        color: const Color(0xFFF4F1E8),
+                        child: Center(
+                          child: Text(
+                            sampleText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: previewStyle,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: ColoredBox(
+                        color: const Color(0xFF111318),
+                        child: Center(
+                          child: Text(
+                            sampleText,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: previewStyle,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TextColorPresetButton extends StatelessWidget {
+  const _TextColorPresetButton({
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(
+            color: isSelected ? Colors.white : const Color(0x33FFFFFF),
+            width: isSelected ? 2.4 : 1.2,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.28),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(3),
+          child: Container(
+            width: 24,
+            height: 24,
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          ),
+        ),
+      ),
     );
   }
 }

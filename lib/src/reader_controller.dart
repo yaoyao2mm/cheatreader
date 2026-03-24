@@ -176,6 +176,31 @@ class ReaderController extends ChangeNotifier {
     _updateSettings(_settings.copyWith(transparentModeEnabled: value));
   }
 
+  void setTextColorMode(ReaderTextColorMode value) {
+    if (value == ReaderTextColorMode.custom &&
+        _settings.textColorMode != ReaderTextColorMode.custom &&
+        _settings.customTextColorValue ==
+            ReaderSettings.defaults.customTextColorValue) {
+      _updateSettings(
+        _settings.copyWith(
+          textColorMode: value,
+          customTextColorValue: _adaptiveTextColorValueFor(_settings),
+        ),
+      );
+      return;
+    }
+
+    _updateSettings(_settings.copyWith(textColorMode: value));
+  }
+
+  void setCustomTextColorValue(int value) {
+    _updateSettings(
+      _settings.copyWith(
+        customTextColorValue: _normalizeOpaqueColorValue(value),
+      ),
+    );
+  }
+
   String? setShortcutBinding(
     ReaderShortcutAction action,
     ReaderShortcutKey key,
@@ -325,6 +350,8 @@ class ReaderController extends ChangeNotifier {
         _settings.windowOpacity == value.windowOpacity &&
         _settings.fontFamilyPreset == value.fontFamilyPreset &&
         _settings.transparentModeEnabled == value.transparentModeEnabled &&
+        _settings.textColorMode == value.textColorMode &&
+        _settings.customTextColorValue == value.customTextColorValue &&
         _settings.shortcutBindings == value.shortcutBindings) {
       return;
     }
@@ -343,6 +370,20 @@ class ReaderController extends ChangeNotifier {
   Future<void> _persistSettings() async {
     await _preferencesStore.saveSettings(_settings);
     await _windowController.syncPresentation(_settings);
+  }
+
+  int _adaptiveTextColorValueFor(ReaderSettings settings) {
+    if (settings.transparentModeEnabled) {
+      return ReaderSettings.defaults.customTextColorValue;
+    }
+
+    return settings.windowOpacity < 0.78
+        ? 0xFF111111
+        : ReaderSettings.defaults.customTextColorValue;
+  }
+
+  int _normalizeOpaqueColorValue(int value) {
+    return 0xFF000000 | (value & 0x00FFFFFF);
   }
 
   Future<void> _persistCurrentBookProgress() async {

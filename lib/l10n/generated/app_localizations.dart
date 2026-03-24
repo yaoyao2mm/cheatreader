@@ -332,6 +332,72 @@ abstract class AppLocalizations {
   /// **'Monospace'**
   String get fontMonospace;
 
+  /// No description provided for @fontColorTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text color'**
+  String get fontColorTitle;
+
+  /// No description provided for @fontColorAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic'**
+  String get fontColorAuto;
+
+  /// No description provided for @fontColorCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get fontColorCustom;
+
+  /// No description provided for @fontColorAutoHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic mode keeps choosing a safer text color for the current reader background. Transparent mode also adds a readability shadow.'**
+  String get fontColorAutoHint;
+
+  /// No description provided for @fontColorCustomHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom mode overrides automatic text color selection. Transparent mode still keeps the readability shadow.'**
+  String get fontColorCustomHint;
+
+  /// No description provided for @fontColorPreviewLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview'**
+  String get fontColorPreviewLabel;
+
+  /// No description provided for @fontColorPreviewSample.
+  ///
+  /// In en, this message translates to:
+  /// **'Reader preview'**
+  String get fontColorPreviewSample;
+
+  /// No description provided for @fontColorPresetsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Quick colors'**
+  String get fontColorPresetsLabel;
+
+  /// No description provided for @fontColorHueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Hue'**
+  String get fontColorHueLabel;
+
+  /// No description provided for @fontColorSaturationLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturation'**
+  String get fontColorSaturationLabel;
+
+  /// No description provided for @fontColorLightnessLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Lightness'**
+  String get fontColorLightnessLabel;
+
   /// No description provided for @fontScaleLabel.
   ///
   /// In en, this message translates to:
@@ -428,17 +494,41 @@ abstract class AppLocalizations {
   /// **'Unavailable'**
   String get appVersionUnavailable;
 
-  /// No description provided for @copyVersionLabel.
+  /// No description provided for @checkLatestVersionLabel.
   ///
   /// In en, this message translates to:
-  /// **'Copy version'**
-  String get copyVersionLabel;
+  /// **'Check latest version'**
+  String get checkLatestVersionLabel;
 
-  /// No description provided for @versionCopiedMessage.
+  /// No description provided for @alreadyLatestVersionMessage.
   ///
   /// In en, this message translates to:
-  /// **'Version copied'**
-  String get versionCopiedMessage;
+  /// **'You already have the latest version'**
+  String get alreadyLatestVersionMessage;
+
+  /// No description provided for @latestVersionOpenedFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Automatic checking is unavailable right now. The Releases page has been opened for you'**
+  String get latestVersionOpenedFallback;
+
+  /// No description provided for @latestVersionReadCurrentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The current app version could not be read. The Releases page has been opened for you'**
+  String get latestVersionReadCurrentFailed;
+
+  /// No description provided for @latestVersionCheckFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not check the latest version right now'**
+  String get latestVersionCheckFailed;
+
+  /// No description provided for @latestVersionOpenFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'A newer version was found, but the Releases page could not be opened'**
+  String get latestVersionOpenFailure;
 
   /// No description provided for @reportBugTitle.
   ///
@@ -571,6 +661,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{value}x'**
   String sliderMultiplier(Object value);
+
+  /// No description provided for @sliderDegrees.
+  ///
+  /// In en, this message translates to:
+  /// **'{value}°'**
+  String sliderDegrees(Object value);
 }
 
 class _AppLocalizationsDelegate

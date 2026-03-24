@@ -50,6 +50,17 @@
   "fontDefault": "默认",
   "fontSerif": "衬线",
   "fontMonospace": "等宽",
+  "fontColorTitle": "字体颜色",
+  "fontColorAuto": "自动",
+  "fontColorCustom": "自定义",
+  "fontColorAutoHint": "自动模式会根据当前阅读背景选择更稳妥的字色；透明模式下会额外加阴影增强可读性。",
+  "fontColorCustomHint": "自定义颜色会覆盖自动配色；透明模式下仍会保留阴影辅助阅读。",
+  "fontColorPreviewLabel": "字色预览",
+  "fontColorPreviewSample": "阅读预览",
+  "fontColorPresetsLabel": "快捷颜色",
+  "fontColorHueLabel": "色相",
+  "fontColorSaturationLabel": "饱和度",
+  "fontColorLightnessLabel": "亮度",
   "fontScaleLabel": "字号",
   "lineSpacingLabel": "行距",
   "readingWidthLabel": "阅读宽度",
@@ -71,8 +82,12 @@
   "appVersionLabel": "版本号",
   "appVersionLoading": "读取中…",
   "appVersionUnavailable": "无法读取",
-  "copyVersionLabel": "复制版本号",
-  "versionCopiedMessage": "版本号已复制",
+  "checkLatestVersionLabel": "检测最新版本",
+  "alreadyLatestVersionMessage": "已经是最新版本",
+  "latestVersionOpenedFallback": "暂时无法自动检测，已为你打开 Release 页面",
+  "latestVersionReadCurrentFailed": "当前版本读取失败，已为你打开 Release 页面",
+  "latestVersionCheckFailed": "暂时无法检测最新版本",
+  "latestVersionOpenFailure": "检测到新版本，但无法打开 Release 页面",
   "reportBugTitle": "反馈问题",
   "reportBugSubtitle": "打开 GitHub Issues，提交 bug 或改进建议",
   "reportBugAction": "打开反馈页",
@@ -101,6 +116,12 @@
   },
   "sliderMultiplier": "{value}x",
   "@sliderMultiplier": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "sliderDegrees": "{value}°",
+  "@sliderDegrees": {
     "placeholders": {
       "value": {}
     }

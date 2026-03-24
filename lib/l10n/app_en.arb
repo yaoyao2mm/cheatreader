@@ -50,6 +50,17 @@
   "fontDefault": "Default",
   "fontSerif": "Serif",
   "fontMonospace": "Monospace",
+  "fontColorTitle": "Text color",
+  "fontColorAuto": "Automatic",
+  "fontColorCustom": "Custom",
+  "fontColorAutoHint": "Automatic mode keeps choosing a safer text color for the current reader background. Transparent mode also adds a readability shadow.",
+  "fontColorCustomHint": "Custom mode overrides automatic text color selection. Transparent mode still keeps the readability shadow.",
+  "fontColorPreviewLabel": "Preview",
+  "fontColorPreviewSample": "Reader preview",
+  "fontColorPresetsLabel": "Quick colors",
+  "fontColorHueLabel": "Hue",
+  "fontColorSaturationLabel": "Saturation",
+  "fontColorLightnessLabel": "Lightness",
   "fontScaleLabel": "Font size",
   "lineSpacingLabel": "Line spacing",
   "readingWidthLabel": "Reading width",
@@ -71,8 +82,12 @@
   "appVersionLabel": "Version",
   "appVersionLoading": "Loading...",
   "appVersionUnavailable": "Unavailable",
-  "copyVersionLabel": "Copy version",
-  "versionCopiedMessage": "Version copied",
+  "checkLatestVersionLabel": "Check latest version",
+  "alreadyLatestVersionMessage": "You already have the latest version",
+  "latestVersionOpenedFallback": "Automatic checking is unavailable right now. The Releases page has been opened for you",
+  "latestVersionReadCurrentFailed": "The current app version could not be read. The Releases page has been opened for you",
+  "latestVersionCheckFailed": "Could not check the latest version right now",
+  "latestVersionOpenFailure": "A newer version was found, but the Releases page could not be opened",
   "reportBugTitle": "Report a bug",
   "reportBugSubtitle": "Open GitHub Issues to report a bug or share feedback",
   "reportBugAction": "Open feedback page",
@@ -101,6 +116,12 @@
   },
   "sliderMultiplier": "{value}x",
   "@sliderMultiplier": {
+    "placeholders": {
+      "value": {}
+    }
+  },
+  "sliderDegrees": "{value}°",
+  "@sliderDegrees": {
     "placeholders": {
       "value": {}
     }

@@ -137,6 +137,41 @@ class AppLocalizationsEn extends AppLocalizations {
   String get fontMonospace => 'Monospace';
 
   @override
+  String get fontColorTitle => 'Text color';
+
+  @override
+  String get fontColorAuto => 'Automatic';
+
+  @override
+  String get fontColorCustom => 'Custom';
+
+  @override
+  String get fontColorAutoHint =>
+      'Automatic mode keeps choosing a safer text color for the current reader background. Transparent mode also adds a readability shadow.';
+
+  @override
+  String get fontColorCustomHint =>
+      'Custom mode overrides automatic text color selection. Transparent mode still keeps the readability shadow.';
+
+  @override
+  String get fontColorPreviewLabel => 'Preview';
+
+  @override
+  String get fontColorPreviewSample => 'Reader preview';
+
+  @override
+  String get fontColorPresetsLabel => 'Quick colors';
+
+  @override
+  String get fontColorHueLabel => 'Hue';
+
+  @override
+  String get fontColorSaturationLabel => 'Saturation';
+
+  @override
+  String get fontColorLightnessLabel => 'Lightness';
+
+  @override
   String get fontScaleLabel => 'Font size';
 
   @override
@@ -189,10 +224,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appVersionUnavailable => 'Unavailable';
 
   @override
-  String get copyVersionLabel => 'Copy version';
+  String get checkLatestVersionLabel => 'Check latest version';
 
   @override
-  String get versionCopiedMessage => 'Version copied';
+  String get alreadyLatestVersionMessage =>
+      'You already have the latest version';
+
+  @override
+  String get latestVersionOpenedFallback =>
+      'Automatic checking is unavailable right now. The Releases page has been opened for you';
+
+  @override
+  String get latestVersionReadCurrentFailed =>
+      'The current app version could not be read. The Releases page has been opened for you';
+
+  @override
+  String get latestVersionCheckFailed =>
+      'Could not check the latest version right now';
+
+  @override
+  String get latestVersionOpenFailure =>
+      'A newer version was found, but the Releases page could not be opened';
 
   @override
   String get reportBugTitle => 'Report a bug';
@@ -263,5 +315,10 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String sliderMultiplier(Object value) {
     return '${value}x';
+  }
+
+  @override
+  String sliderDegrees(Object value) {
+    return '$value°';
   }
 }
