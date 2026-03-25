@@ -120,6 +120,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transparentModeSubtitle => '彻底去掉任何底色，只保留文字';
 
   @override
+  String get transparentTextShadowTitle => '透明模式文字描边';
+
+  @override
+  String get transparentTextShadowSubtitle => '阅读器没有底色时，为文字补一层可读性光晕';
+
+  @override
   String get fontTitle => '字体';
 
   @override
@@ -130,6 +136,24 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get fontMonospace => '等宽';
+
+  @override
+  String get fontCustom => '自定义';
+
+  @override
+  String get customFontChooseAction => '选择字体';
+
+  @override
+  String get customFontReplaceAction => '替换字体';
+
+  @override
+  String get customFontRemoveAction => '移除字体';
+
+  @override
+  String get customFontPickFailure => '无法打开字体选择器';
+
+  @override
+  String get customFontLoadFailure => '无法加载这个字体文件';
 
   @override
   String get fontColorTitle => '字体颜色';
@@ -197,6 +221,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get sectionSimpleBookshelf => '简单书架';
 
   @override
+  String get sectionReadingPosition => '阅读定位';
+
+  @override
+  String get readingPositionLineStat => '行号';
+
+  @override
+  String get readingPositionPageStat => '页号';
+
+  @override
+  String get readingPositionProgressStat => '进度';
+
+  @override
   String get sectionReadingSettings => '阅读设置';
 
   @override
@@ -204,6 +240,80 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get sectionAboutApp => '关于应用';
+
+  @override
+  String currentLineSummary(Object current, Object total) {
+    return '当前第 $current 行，共 $total 行';
+  }
+
+  @override
+  String currentPageSummary(Object current, Object total) {
+    return '当前第 $current 页，共 $total 页';
+  }
+
+  @override
+  String currentProgressSummary(Object percent) {
+    return '当前进度 $percent%';
+  }
+
+  @override
+  String get jumpToLineLabel => '跳到行号';
+
+  @override
+  String jumpToLineHint(Object max) {
+    return '输入 1 到 $max';
+  }
+
+  @override
+  String get jumpToPageLabel => '跳到页号';
+
+  @override
+  String jumpToPageHint(Object max) {
+    return '输入 1 到 $max';
+  }
+
+  @override
+  String get jumpToPercentLabel => '跳到百分比';
+
+  @override
+  String get jumpToPercentHint => '输入 0 到 100';
+
+  @override
+  String get jumpAction => '跳转';
+
+  @override
+  String get jumpInputInvalid => '请输入整数';
+
+  @override
+  String get searchLabel => '搜索';
+
+  @override
+  String get searchHint => '搜索文本';
+
+  @override
+  String get searchPreviousAction => '上一个';
+
+  @override
+  String get searchNextAction => '下一个';
+
+  @override
+  String get searchEmptyQuery => '请输入要搜索的文本';
+
+  @override
+  String get searchNotFound => '没有找到匹配文本';
+
+  @override
+  String jumpLineOutOfRange(Object max) {
+    return '行号范围应为 1 到 $max';
+  }
+
+  @override
+  String jumpPageOutOfRange(Object max) {
+    return '页号范围应为 1 到 $max';
+  }
+
+  @override
+  String get jumpPercentOutOfRange => '百分比范围应为 0 到 100';
 
   @override
   String get appVersionLabel => '版本号';

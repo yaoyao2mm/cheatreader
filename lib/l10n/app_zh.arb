@@ -46,10 +46,18 @@
   "alwaysOnTopUnsupported": "当前平台暂不支持",
   "transparentModeTitle": "透明模式",
   "transparentModeSubtitle": "彻底去掉任何底色，只保留文字",
+  "transparentTextShadowTitle": "透明模式文字描边",
+  "transparentTextShadowSubtitle": "阅读器没有底色时，为文字补一层可读性光晕",
   "fontTitle": "字体",
   "fontDefault": "默认",
   "fontSerif": "衬线",
   "fontMonospace": "等宽",
+  "fontCustom": "自定义",
+  "customFontChooseAction": "选择字体",
+  "customFontReplaceAction": "替换字体",
+  "customFontRemoveAction": "移除字体",
+  "customFontPickFailure": "无法打开字体选择器",
+  "customFontLoadFailure": "无法加载这个字体文件",
   "fontColorTitle": "字体颜色",
   "fontColorAuto": "自动",
   "fontColorCustom": "自定义",
@@ -76,9 +84,70 @@
   "fileMayBeInvalid": "文件可能已失效",
   "removeTooltip": "移除",
   "sectionSimpleBookshelf": "简单书架",
+  "sectionReadingPosition": "阅读定位",
+  "readingPositionLineStat": "行号",
+  "readingPositionPageStat": "页号",
+  "readingPositionProgressStat": "进度",
   "sectionReadingSettings": "阅读设置",
   "sectionKeyboardControls": "键盘控制",
   "sectionAboutApp": "关于应用",
+  "currentLineSummary": "当前第 {current} 行，共 {total} 行",
+  "@currentLineSummary": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "currentPageSummary": "当前第 {current} 页，共 {total} 页",
+  "@currentPageSummary": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "currentProgressSummary": "当前进度 {percent}%",
+  "@currentProgressSummary": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "jumpToLineLabel": "跳到行号",
+  "jumpToLineHint": "输入 1 到 {max}",
+  "@jumpToLineHint": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpToPageLabel": "跳到页号",
+  "jumpToPageHint": "输入 1 到 {max}",
+  "@jumpToPageHint": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpToPercentLabel": "跳到百分比",
+  "jumpToPercentHint": "输入 0 到 100",
+  "jumpAction": "跳转",
+  "jumpInputInvalid": "请输入整数",
+  "searchLabel": "搜索",
+  "searchHint": "搜索文本",
+  "searchPreviousAction": "上一个",
+  "searchNextAction": "下一个",
+  "searchEmptyQuery": "请输入要搜索的文本",
+  "searchNotFound": "没有找到匹配文本",
+  "jumpLineOutOfRange": "行号范围应为 1 到 {max}",
+  "@jumpLineOutOfRange": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpPageOutOfRange": "页号范围应为 1 到 {max}",
+  "@jumpPageOutOfRange": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpPercentOutOfRange": "百分比范围应为 0 到 100",
   "appVersionLabel": "版本号",
   "appVersionLoading": "读取中…",
   "appVersionUnavailable": "无法读取",

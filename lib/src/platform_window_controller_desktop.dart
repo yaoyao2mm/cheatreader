@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
@@ -21,6 +22,7 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   Size? _rememberedMultiLineSize;
   double? _rememberedOneLineWidth;
   bool _bossKeyHidden = false;
+  bool? _shouldAvoidLinuxModeResizeCache;
 
   bool get _isSupportedDesktop {
     if (kIsWeb) {
@@ -37,6 +39,22 @@ class DesktopPlatformWindowController implements PlatformWindowController {
 
   bool get _useNativeLinuxFrameless =>
       _isSupportedDesktop && defaultTargetPlatform == TargetPlatform.linux;
+
+  bool get _shouldAvoidLinuxModeResize {
+    final cached = _shouldAvoidLinuxModeResizeCache;
+    if (cached != null) {
+      return cached;
+    }
+
+    final result =
+        Platform.isLinux &&
+        _matchesOsRelease('ID', 'ubuntu') &&
+        (_matchesOsRelease('VERSION_ID', '20.04') ||
+            _matchesOsRelease('UBUNTU_CODENAME', 'focal')) &&
+        _isX11Session;
+    _shouldAvoidLinuxModeResizeCache = result;
+    return result;
+  }
 
   bool get _useFramelessWindow {
     if (!_isSupportedDesktop) {
@@ -344,6 +362,13 @@ class DesktopPlatformWindowController implements PlatformWindowController {
     required Size currentSize,
     required ReaderSettings settings,
   }) {
+    if (_shouldAvoidLinuxModeResize) {
+      return Size(
+        math.max(currentSize.width, _minimumWidth),
+        math.max(currentSize.height, _minimumMultiLineHeight),
+      );
+    }
+
     final oneLineMode = settings.oneLineMode;
     final oneLineHeight = _oneLineHeightForSettings(settings: settings);
     final multiLineHeight = _defaultMultiLineHeightForSettings(
@@ -432,6 +457,21 @@ class DesktopPlatformWindowController implements PlatformWindowController {
       currentWidth: currentWidth,
       fontScale: settings.fontScale,
     );
+  }
+
+  bool get _isX11Session {
+    final sessionType = Platform.environment['XDG_SESSION_TYPE'];
+    return sessionType == null || sessionType.toLowerCase() == 'x11';
+  }
+
+  bool _matchesOsRelease(String key, String value) {
+    try {
+      final contents = File('/etc/os-release').readAsStringSync();
+      return contents.contains('$key=$value') ||
+          contents.contains('$key="$value"');
+    } catch (_) {
+      return false;
+    }
   }
 }
 

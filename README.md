@@ -32,6 +32,8 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Compact single-line and multi-line reading modes
 - Configurable mode switching via double click, middle click, or keyboard shortcut
 - Adjustable line spacing, reading width, and keyboard controls for longer sessions
+- Direct jump by line, page, percentage, and text search with previous/next match navigation
+- Built-in custom font loading with a dedicated user-selected font option
 - Boss-key style hide and restore support without losing reading state
 - Support for `txt`, `epub`, `html`, `markdown`, `fb2`, `docx`, and `pdf`
 - Local managed library copies so imported books still restore after restart
@@ -49,7 +51,7 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 | --- | --- | --- |
 | macOS | Best supported | Transparent overlay mode is fully tuned here |
 | Windows | Supported | Same reading flow, frameless desktop window, test recommended on target machine |
-| Linux | Supported | Same reading flow, frameless desktop window, test recommended on target machine |
+| Linux | Supported | Same reading flow, frameless desktop window, Ubuntu startup now prefers multi-line recovery-safe behavior |
 
 ## Supported Formats
 
@@ -94,6 +96,13 @@ flutter run -d windows
 ```bash
 flutter config --enable-linux-desktop
 flutter run -d linux
+```
+
+If a saved floating-window layout becomes hard to find, you can reset just the
+display-related settings without wiping the bookshelf:
+
+```bash
+cheatreader --reset-display
 ```
 
 ## Desktop Prerequisites

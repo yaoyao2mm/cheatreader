@@ -308,6 +308,18 @@ abstract class AppLocalizations {
   /// **'Remove every background tint and keep text only'**
   String get transparentModeSubtitle;
 
+  /// No description provided for @transparentTextShadowTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Text outline in transparent mode'**
+  String get transparentTextShadowTitle;
+
+  /// No description provided for @transparentTextShadowSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a readability halo around letters when the reader has no background'**
+  String get transparentTextShadowSubtitle;
+
   /// No description provided for @fontTitle.
   ///
   /// In en, this message translates to:
@@ -331,6 +343,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Monospace'**
   String get fontMonospace;
+
+  /// No description provided for @fontCustom.
+  ///
+  /// In en, this message translates to:
+  /// **'Custom'**
+  String get fontCustom;
+
+  /// No description provided for @customFontChooseAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose font'**
+  String get customFontChooseAction;
+
+  /// No description provided for @customFontReplaceAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Replace font'**
+  String get customFontReplaceAction;
+
+  /// No description provided for @customFontRemoveAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove font'**
+  String get customFontRemoveAction;
+
+  /// No description provided for @customFontPickFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open the font picker'**
+  String get customFontPickFailure;
+
+  /// No description provided for @customFontLoadFailure.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load this font file'**
+  String get customFontLoadFailure;
 
   /// No description provided for @fontColorTitle.
   ///
@@ -458,6 +506,30 @@ abstract class AppLocalizations {
   /// **'Bookshelf'**
   String get sectionSimpleBookshelf;
 
+  /// No description provided for @sectionReadingPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading Position'**
+  String get sectionReadingPosition;
+
+  /// No description provided for @readingPositionLineStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Line'**
+  String get readingPositionLineStat;
+
+  /// No description provided for @readingPositionPageStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Page'**
+  String get readingPositionPageStat;
+
+  /// No description provided for @readingPositionProgressStat.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress'**
+  String get readingPositionProgressStat;
+
   /// No description provided for @sectionReadingSettings.
   ///
   /// In en, this message translates to:
@@ -475,6 +547,126 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'About'**
   String get sectionAboutApp;
+
+  /// No description provided for @currentLineSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Line {current} / {total}'**
+  String currentLineSummary(Object current, Object total);
+
+  /// No description provided for @currentPageSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Page {current} / {total}'**
+  String currentPageSummary(Object current, Object total);
+
+  /// No description provided for @currentProgressSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress {percent}%'**
+  String currentProgressSummary(Object percent);
+
+  /// No description provided for @jumpToLineLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to line'**
+  String get jumpToLineLabel;
+
+  /// No description provided for @jumpToLineHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1 to {max}'**
+  String jumpToLineHint(Object max);
+
+  /// No description provided for @jumpToPageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to page'**
+  String get jumpToPageLabel;
+
+  /// No description provided for @jumpToPageHint.
+  ///
+  /// In en, this message translates to:
+  /// **'1 to {max}'**
+  String jumpToPageHint(Object max);
+
+  /// No description provided for @jumpToPercentLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Jump to percent'**
+  String get jumpToPercentLabel;
+
+  /// No description provided for @jumpToPercentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'0 to 100'**
+  String get jumpToPercentHint;
+
+  /// No description provided for @jumpAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Go'**
+  String get jumpAction;
+
+  /// No description provided for @jumpInputInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a whole number'**
+  String get jumpInputInvalid;
+
+  /// No description provided for @searchLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchLabel;
+
+  /// No description provided for @searchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Find text'**
+  String get searchHint;
+
+  /// No description provided for @searchPreviousAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous'**
+  String get searchPreviousAction;
+
+  /// No description provided for @searchNextAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Next'**
+  String get searchNextAction;
+
+  /// No description provided for @searchEmptyQuery.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter text to search'**
+  String get searchEmptyQuery;
+
+  /// No description provided for @searchNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching text found'**
+  String get searchNotFound;
+
+  /// No description provided for @jumpLineOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Line must be between 1 and {max}'**
+  String jumpLineOutOfRange(Object max);
+
+  /// No description provided for @jumpPageOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Page must be between 1 and {max}'**
+  String jumpPageOutOfRange(Object max);
+
+  /// No description provided for @jumpPercentOutOfRange.
+  ///
+  /// In en, this message translates to:
+  /// **'Percent must be between 0 and 100'**
+  String get jumpPercentOutOfRange;
 
   /// No description provided for @appVersionLabel.
   ///

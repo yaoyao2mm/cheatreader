@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:math' as math;
 
-import 'package:cross_file/cross_file.dart';
 import 'package:desktop_drop/desktop_drop.dart';
+import 'package:file_selector/file_selector.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -15,6 +15,7 @@ import '../l10n/generated/app_localizations.dart';
 import 'platform_window_controller_base.dart';
 import 'reader_book.dart';
 import 'reader_controller.dart';
+import 'reader_custom_font.dart';
 import 'reader_layout_metrics.dart';
 import 'reader_localization.dart';
 import 'reader_release_checker.dart';
@@ -41,6 +42,15 @@ const _readerTextColorPresets = <Color>[
   Color(0xFF1D4ED8),
 ];
 
+const XTypeGroup _fontFileTypeGroup = XTypeGroup(
+  label: 'font',
+  extensions: <String>['ttf', 'otf'],
+  uniformTypeIdentifiers: <String>[
+    'public.truetype-font',
+    'public.opentype-font',
+  ],
+);
+
 ({Color background, Color text, Color dragIndicator, List<Shadow> textShadows})
 _resolveReaderPresentation(ReaderSettings settings) {
   final customTextColor = Color(settings.customTextColorValue);
@@ -51,24 +61,27 @@ _resolveReaderPresentation(ReaderSettings settings) {
         : _readerLightTextColor;
     final haloIsDark = textColor.computeLuminance() > 0.45;
     final haloColor = haloIsDark ? Colors.black : Colors.white;
+    final textShadows = settings.transparentTextShadowEnabled
+        ? [
+            for (final offset in _readerTransparentShadowOffsets)
+              Shadow(
+                color: haloColor.withValues(alpha: haloIsDark ? 0.72 : 0.62),
+                offset: offset,
+                blurRadius: 1.2,
+              ),
+            Shadow(
+              color: haloColor.withValues(alpha: haloIsDark ? 0.42 : 0.34),
+              offset: const Offset(0, 2),
+              blurRadius: 12,
+            ),
+          ]
+        : const <Shadow>[];
 
     return (
       background: Colors.transparent,
       text: textColor,
       dragIndicator: haloColor.withValues(alpha: haloIsDark ? 0.78 : 0.68),
-      textShadows: [
-        for (final offset in _readerTransparentShadowOffsets)
-          Shadow(
-            color: haloColor.withValues(alpha: haloIsDark ? 0.72 : 0.62),
-            offset: offset,
-            blurRadius: 1.2,
-          ),
-        Shadow(
-          color: haloColor.withValues(alpha: haloIsDark ? 0.42 : 0.34),
-          offset: const Offset(0, 2),
-          blurRadius: 12,
-        ),
-      ],
+      textShadows: textShadows,
     );
   }
 
@@ -391,8 +404,17 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final readerTextColor = readerColors.text;
     final readerBackgroundColor = readerColors.background;
     final dragIndicatorColor = readerColors.dragIndicator;
+    final customFontFamily =
+        settings.customFontPath == null || settings.customFontPath!.isEmpty
+        ? null
+        : readerCustomFontFamilyForPath(settings.customFontPath!);
+    final fontFamily = switch (settings.fontFamilyPreset) {
+      ReaderFontFamilyPreset.custom => customFontFamily,
+      _ => null,
+    };
     final fontFamilyFallback = switch (settings.fontFamilyPreset) {
-      ReaderFontFamilyPreset.system => const <String>[],
+      ReaderFontFamilyPreset.system ||
+      ReaderFontFamilyPreset.custom => const <String>[],
       ReaderFontFamilyPreset.serif => const <String>[
         'Songti SC',
         'STSong',
@@ -414,6 +436,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
       height: lineSpacing,
       letterSpacing: 0.2,
       shadows: readerColors.textShadows,
+      fontFamily: fontFamily,
       fontFamilyFallback: fontFamilyFallback,
     );
 
@@ -828,8 +851,17 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
 
   late final ScrollController _scrollController = ScrollController();
   late final ReaderReleaseChecker _releaseChecker = ReaderReleaseChecker();
+  late final TextEditingController _lineJumpController =
+      TextEditingController();
+  late final TextEditingController _pageJumpController =
+      TextEditingController();
+  late final TextEditingController _percentJumpController =
+      TextEditingController();
+  late final TextEditingController _searchController = TextEditingController();
   String? _appVersion;
   bool _isCheckingLatestVersion = false;
+  String? _lastSearchQuery;
+  int? _lastSearchMatchIndex;
 
   @override
   void initState() {
@@ -884,6 +916,28 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
     final message = await widget.controller.importFromPicker();
     if (message != null && context.mounted) {
       widget.onMessage(message);
+    }
+  }
+
+  Future<void> _pickCustomFont(BuildContext context) async {
+    final l10n = AppLocalizations.of(context)!;
+    try {
+      final file = await openFile(
+        acceptedTypeGroups: const <XTypeGroup>[_fontFileTypeGroup],
+      );
+      if (file == null) {
+        return;
+      }
+
+      final didLoad = await ensureReaderCustomFontLoaded(file.path);
+      if (!didLoad) {
+        widget.onMessage(l10n.customFontLoadFailure);
+        return;
+      }
+
+      widget.controller.setCustomFont(path: file.path, displayName: file.name);
+    } catch (_) {
+      widget.onMessage(l10n.customFontPickFailure);
     }
   }
 
@@ -1050,7 +1104,97 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
   void dispose() {
     _releaseChecker.dispose();
     _scrollController.dispose();
+    _lineJumpController.dispose();
+    _pageJumpController.dispose();
+    _percentJumpController.dispose();
+    _searchController.dispose();
     super.dispose();
+  }
+
+  void _submitLineJump(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final lineNumber = int.tryParse(_lineJumpController.text.trim());
+    if (lineNumber == null) {
+      widget.onMessage(l10n.jumpInputInvalid);
+      return;
+    }
+    if (lineNumber < 1 || lineNumber > widget.controller.totalLineCount) {
+      widget.onMessage(
+        l10n.jumpLineOutOfRange(widget.controller.totalLineCount),
+      );
+      return;
+    }
+
+    widget.controller.jumpToLineNumber(lineNumber);
+    _lineJumpController.clear();
+    FocusScope.of(context).unfocus();
+  }
+
+  void _submitPageJump(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final pageNumber = int.tryParse(_pageJumpController.text.trim());
+    if (pageNumber == null) {
+      widget.onMessage(l10n.jumpInputInvalid);
+      return;
+    }
+    if (pageNumber < 1 || pageNumber > widget.controller.totalPageCount) {
+      widget.onMessage(
+        l10n.jumpPageOutOfRange(widget.controller.totalPageCount),
+      );
+      return;
+    }
+
+    widget.controller.jumpToPageNumber(pageNumber);
+    _pageJumpController.clear();
+    FocusScope.of(context).unfocus();
+  }
+
+  void _submitPercentJump(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    final percent = int.tryParse(_percentJumpController.text.trim());
+    if (percent == null) {
+      widget.onMessage(l10n.jumpInputInvalid);
+      return;
+    }
+    if (percent < 0 || percent > 100) {
+      widget.onMessage(l10n.jumpPercentOutOfRange);
+      return;
+    }
+
+    widget.controller.jumpToProgressPercent(percent);
+    _percentJumpController.clear();
+    FocusScope.of(context).unfocus();
+  }
+
+  void _searchMatch(BuildContext context, {required bool forward}) {
+    final l10n = AppLocalizations.of(context)!;
+    final query = _searchController.text.trim();
+    if (query.isEmpty) {
+      widget.onMessage(l10n.searchEmptyQuery);
+      return;
+    }
+
+    final isRepeatedQuery =
+        _lastSearchQuery == query && _lastSearchMatchIndex != null;
+    final matchedIndex = widget.controller.jumpToSearchMatch(
+      query,
+      forward: forward,
+      anchorLineIndex: isRepeatedQuery
+          ? _lastSearchMatchIndex
+          : widget.controller.currentLineIndex,
+      includeAnchor: !isRepeatedQuery,
+    );
+
+    if (matchedIndex == null) {
+      _lastSearchQuery = null;
+      _lastSearchMatchIndex = null;
+      widget.onMessage(l10n.searchNotFound);
+      return;
+    }
+
+    _lastSearchQuery = query;
+    _lastSearchMatchIndex = matchedIndex;
+    FocusScope.of(context).unfocus();
   }
 
   List<Widget> _buildPanelSections(BuildContext context) {
@@ -1077,6 +1221,114 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
             onRemove: () => controller.removeBookshelfEntry(book.path),
           ),
         ),
+      const SizedBox(height: 20),
+      _SectionTitle(title: l10n.sectionReadingPosition),
+      const SizedBox(height: 8),
+      DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF22262C),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: const Color(0x22FFFFFF)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.currentProgressSummary(controller.currentProgressPercent),
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                l10n.currentLineSummary(
+                  controller.currentLineNumber,
+                  controller.totalLineCount,
+                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
+              ),
+              const SizedBox(height: 12),
+              _ReadingProgressBar(progress: controller.currentProgressPercent),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: _ReadingPositionStatCard(
+                      icon: Icons.format_list_numbered_rounded,
+                      label: l10n.readingPositionLineStat,
+                      value:
+                          '${controller.currentLineNumber}/${controller.totalLineCount}',
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _ReadingPositionStatCard(
+                      icon: Icons.menu_book_rounded,
+                      label: l10n.readingPositionPageStat,
+                      value:
+                          '${controller.currentPageNumber}/${controller.totalPageCount}',
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _ReadingPositionStatCard(
+                      icon: Icons.track_changes_rounded,
+                      label: l10n.readingPositionProgressStat,
+                      value: '${controller.currentProgressPercent}%',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              _JumpInputRow(
+                controller: _lineJumpController,
+                label: l10n.jumpToLineLabel,
+                hintText: l10n.jumpToLineHint(controller.totalLineCount),
+                buttonLabel: l10n.jumpAction,
+                icon: Icons.format_list_numbered_rounded,
+                accentColor: const Color(0xFF7F8A99),
+                onSubmitted: () => _submitLineJump(context),
+              ),
+              const SizedBox(height: 12),
+              _JumpInputRow(
+                controller: _pageJumpController,
+                label: l10n.jumpToPageLabel,
+                hintText: l10n.jumpToPageHint(controller.totalPageCount),
+                buttonLabel: l10n.jumpAction,
+                icon: Icons.menu_book_rounded,
+                accentColor: const Color(0xFF7F8A99),
+                onSubmitted: () => _submitPageJump(context),
+              ),
+              const SizedBox(height: 12),
+              _JumpInputRow(
+                controller: _percentJumpController,
+                label: l10n.jumpToPercentLabel,
+                hintText: l10n.jumpToPercentHint,
+                buttonLabel: l10n.jumpAction,
+                icon: Icons.track_changes_rounded,
+                accentColor: const Color(0xFF7F8A99),
+                onSubmitted: () => _submitPercentJump(context),
+              ),
+              const SizedBox(height: 12),
+              _SearchInputRow(
+                controller: _searchController,
+                label: l10n.searchLabel,
+                hintText: l10n.searchHint,
+                previousLabel: l10n.searchPreviousAction,
+                nextLabel: l10n.searchNextAction,
+                icon: Icons.search_rounded,
+                onPrevious: () => _searchMatch(context, forward: false),
+                onNext: () => _searchMatch(context, forward: true),
+              ),
+            ],
+          ),
+        ),
+      ),
       const SizedBox(height: 20),
       _SectionTitle(title: l10n.sectionReadingSettings),
       const SizedBox(height: 8),
@@ -1136,6 +1388,13 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
         title: Text(l10n.transparentModeTitle),
         subtitle: Text(l10n.transparentModeSubtitle),
       ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: controller.settings.transparentTextShadowEnabled,
+        onChanged: controller.setTransparentTextShadowEnabled,
+        title: Text(l10n.transparentTextShadowTitle),
+        subtitle: Text(l10n.transparentTextShadowSubtitle),
+      ),
       const SizedBox(height: 12),
       Text(l10n.languageTitle),
       const SizedBox(height: 8),
@@ -1176,12 +1435,21 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
             value: ReaderFontFamilyPreset.monospace,
             label: Text(l10n.fontMonospace),
           ),
+          ButtonSegment(
+            value: ReaderFontFamilyPreset.custom,
+            label: Text(l10n.fontCustom),
+          ),
         ],
         selected: <ReaderFontFamilyPreset>{
           controller.settings.fontFamilyPreset,
         },
         onSelectionChanged: (selection) {
-          controller.setFontFamilyPreset(selection.first);
+          final nextPreset = selection.first;
+          if (nextPreset == ReaderFontFamilyPreset.custom) {
+            unawaited(_pickCustomFont(context));
+            return;
+          }
+          controller.setFontFamilyPreset(nextPreset);
         },
       ),
       const SizedBox(height: 12),
@@ -1693,6 +1961,346 @@ class _SliderRow extends StatelessWidget {
           onChanged: onChanged,
         ),
       ],
+    );
+  }
+}
+
+class _JumpInputRow extends StatelessWidget {
+  const _JumpInputRow({
+    required this.controller,
+    required this.label,
+    required this.hintText,
+    required this.buttonLabel,
+    required this.icon,
+    required this.accentColor,
+    required this.onSubmitted,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String hintText;
+  final String buttonLabel;
+  final IconData icon;
+  final Color accentColor;
+  final VoidCallback onSubmitted;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1D2026),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: const Color(0x18FFFFFF)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Icon(icon, size: 18, color: Colors.white54),
+            const SizedBox(width: 8),
+            SizedBox(
+              width: 72,
+              child: Text(
+                label,
+                style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: TextField(
+                controller: controller,
+                keyboardType: TextInputType.number,
+                textInputAction: TextInputAction.done,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onSubmitted: (_) => onSubmitted(),
+                decoration: InputDecoration(
+                  hintText: hintText,
+                  isDense: true,
+                  filled: true,
+                  fillColor: const Color(0xFF17191F),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(
+                      color: Colors.white.withValues(alpha: 0.05),
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide(color: accentColor, width: 1.0),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            FilledButton(
+              style: FilledButton.styleFrom(
+                backgroundColor: const Color(0xFF2A2E36),
+                foregroundColor: Colors.white,
+                minimumSize: const Size(64, 44),
+                padding: const EdgeInsets.symmetric(horizontal: 14),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onPressed: onSubmitted,
+              child: Text(buttonLabel),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchInputRow extends StatelessWidget {
+  const _SearchInputRow({
+    required this.controller,
+    required this.label,
+    required this.hintText,
+    required this.previousLabel,
+    required this.nextLabel,
+    required this.icon,
+    required this.onPrevious,
+    required this.onNext,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final String hintText;
+  final String previousLabel;
+  final String nextLabel;
+  final IconData icon;
+  final VoidCallback onPrevious;
+  final VoidCallback onNext;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final compact = constraints.maxWidth < 360;
+        return DecoratedBox(
+          decoration: BoxDecoration(
+            color: const Color(0xFF1D2026),
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0x18FFFFFF)),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Icon(icon, size: 18, color: Colors.white54),
+                const SizedBox(width: 8),
+                SizedBox(
+                  width: compact ? 48 : 72,
+                  child: Text(
+                    label,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: controller,
+                    textInputAction: TextInputAction.search,
+                    onSubmitted: (_) => onNext(),
+                    decoration: InputDecoration(
+                      hintText: hintText,
+                      isDense: true,
+                      filled: true,
+                      fillColor: const Color(0xFF17191F),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide.none,
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.05),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: BorderSide(
+                          color: const Color(0xFF7F8A99),
+                          width: 1.0,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                if (compact) ...[
+                  Tooltip(
+                    message: previousLabel,
+                    child: OutlinedButton(
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(44, 44),
+                        padding: EdgeInsets.zero,
+                        side: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.10),
+                        ),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: onPrevious,
+                      child: const Icon(Icons.keyboard_arrow_up_rounded),
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Tooltip(
+                    message: nextLabel,
+                    child: FilledButton(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: const Color(0xFF2A2E36),
+                        foregroundColor: Colors.white,
+                        minimumSize: const Size(44, 44),
+                        padding: EdgeInsets.zero,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: onNext,
+                      child: const Icon(Icons.keyboard_arrow_down_rounded),
+                    ),
+                  ),
+                ] else ...[
+                  OutlinedButton(
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(64, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      side: BorderSide(
+                        color: Colors.white.withValues(alpha: 0.10),
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: onPrevious,
+                    child: Text(previousLabel),
+                  ),
+                  const SizedBox(width: 8),
+                  FilledButton(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: const Color(0xFF2A2E36),
+                      foregroundColor: Colors.white,
+                      minimumSize: const Size(64, 44),
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    onPressed: onNext,
+                    child: Text(nextLabel),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ReadingProgressBar extends StatelessWidget {
+  const _ReadingProgressBar({required this.progress});
+
+  final int progress;
+
+  @override
+  Widget build(BuildContext context) {
+    final progressValue = (progress.clamp(0, 100) / 100).toDouble();
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(999),
+      child: SizedBox(
+        height: 10,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            ColoredBox(color: Colors.white.withValues(alpha: 0.08)),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: progressValue,
+                child: const DecoratedBox(
+                  decoration: BoxDecoration(color: Color(0xFF7F8A99)),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ReadingPositionStatCard extends StatelessWidget {
+  const _ReadingPositionStatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
+
+  final IconData icon;
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: const Color(0xFF1D2026),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.06)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, size: 16, color: Colors.white54),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: Colors.white60),
+            ),
+            const SizedBox(height: 2),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

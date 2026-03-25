@@ -353,6 +353,12 @@ void main() {
 
     expect(find.text('CheatReader Control Panel'), findsOneWidget);
     expect(find.text('Import ebook'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Reading Settings'),
+      180,
+      scrollable: find.byType(Scrollable).first,
+    );
+    await tester.pumpAndSettle();
     expect(find.text('Reading Settings'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Check latest version'),

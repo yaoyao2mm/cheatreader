@@ -37,7 +37,11 @@ class SharedPreferencesReaderPreferencesStore
   static const _readingWidthFactorKey = 'reader.readingWidthFactor';
   static const _windowOpacityKey = 'reader.windowOpacity';
   static const _fontFamilyPresetKey = 'reader.fontFamilyPreset';
+  static const _customFontPathKey = 'reader.customFontPath';
+  static const _customFontDisplayNameKey = 'reader.customFontDisplayName';
   static const _transparentModeEnabledKey = 'reader.transparentModeEnabled';
+  static const _transparentTextShadowEnabledKey =
+      'reader.transparentTextShadowEnabled';
   static const _textColorModeKey = 'reader.textColorMode';
   static const _customTextColorValueKey = 'reader.customTextColorValue';
   static const _shortcutBindingsKey = 'reader.shortcutBindings';
@@ -89,9 +93,16 @@ class SharedPreferencesReaderPreferencesStore
           _preferences.getString(_fontFamilyPresetKey) ??
               ReaderSettings.defaults.fontFamilyPreset.name,
         ),
+        customFontPath: _preferences.getString(_customFontPathKey),
+        customFontDisplayName: _preferences.getString(
+          _customFontDisplayNameKey,
+        ),
         transparentModeEnabled:
             _preferences.getBool(_transparentModeEnabledKey) ??
             ReaderSettings.defaults.transparentModeEnabled,
+        transparentTextShadowEnabled:
+            _preferences.getBool(_transparentTextShadowEnabledKey) ??
+            ReaderSettings.defaults.transparentTextShadowEnabled,
         textColorMode: ReaderTextColorMode.values.byName(
           _preferences.getString(_textColorModeKey) ??
               ReaderSettings.defaults.textColorMode.name,
@@ -130,9 +141,30 @@ class SharedPreferencesReaderPreferencesStore
       _fontFamilyPresetKey,
       settings.fontFamilyPreset.name,
     );
+    if (settings.customFontPath == null || settings.customFontPath!.isEmpty) {
+      await _preferences.remove(_customFontPathKey);
+    } else {
+      await _preferences.setString(
+        _customFontPathKey,
+        settings.customFontPath!,
+      );
+    }
+    if (settings.customFontDisplayName == null ||
+        settings.customFontDisplayName!.isEmpty) {
+      await _preferences.remove(_customFontDisplayNameKey);
+    } else {
+      await _preferences.setString(
+        _customFontDisplayNameKey,
+        settings.customFontDisplayName!,
+      );
+    }
     await _preferences.setBool(
       _transparentModeEnabledKey,
       settings.transparentModeEnabled,
+    );
+    await _preferences.setBool(
+      _transparentTextShadowEnabledKey,
+      settings.transparentTextShadowEnabled,
     );
     await _preferences.setString(
       _textColorModeKey,

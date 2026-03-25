@@ -223,6 +223,12 @@ jobs:
             echo 'Type=Application'
             echo 'Categories=Office;Viewer;Utility;'
             echo 'StartupNotify=true'
+            echo 'Actions=ResetDisplay;'
+            echo
+            echo '[Desktop Action ResetDisplay]'
+            echo 'Name=Recover Display'
+            echo 'Exec=/usr/bin/cheatreader --reset-display'
+            echo 'Icon=cheatreader'
           } > "$DESKTOP_DIR/cheatreader.desktop"
 
           {

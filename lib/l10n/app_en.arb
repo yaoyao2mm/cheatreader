@@ -46,10 +46,18 @@
   "alwaysOnTopUnsupported": "This platform does not support it right now",
   "transparentModeTitle": "Transparent mode",
   "transparentModeSubtitle": "Remove every background tint and keep text only",
+  "transparentTextShadowTitle": "Text outline in transparent mode",
+  "transparentTextShadowSubtitle": "Add a readability halo around letters when the reader has no background",
   "fontTitle": "Font",
   "fontDefault": "Default",
   "fontSerif": "Serif",
   "fontMonospace": "Monospace",
+  "fontCustom": "Custom",
+  "customFontChooseAction": "Choose font",
+  "customFontReplaceAction": "Replace font",
+  "customFontRemoveAction": "Remove font",
+  "customFontPickFailure": "Could not open the font picker",
+  "customFontLoadFailure": "Could not load this font file",
   "fontColorTitle": "Text color",
   "fontColorAuto": "Automatic",
   "fontColorCustom": "Custom",
@@ -76,9 +84,70 @@
   "fileMayBeInvalid": "File may no longer be available",
   "removeTooltip": "Remove",
   "sectionSimpleBookshelf": "Bookshelf",
+  "sectionReadingPosition": "Reading Position",
+  "readingPositionLineStat": "Line",
+  "readingPositionPageStat": "Page",
+  "readingPositionProgressStat": "Progress",
   "sectionReadingSettings": "Reading Settings",
   "sectionKeyboardControls": "Keyboard Controls",
   "sectionAboutApp": "About",
+  "currentLineSummary": "Line {current} / {total}",
+  "@currentLineSummary": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "currentPageSummary": "Page {current} / {total}",
+  "@currentPageSummary": {
+    "placeholders": {
+      "current": {},
+      "total": {}
+    }
+  },
+  "currentProgressSummary": "Progress {percent}%",
+  "@currentProgressSummary": {
+    "placeholders": {
+      "percent": {}
+    }
+  },
+  "jumpToLineLabel": "Jump to line",
+  "jumpToLineHint": "1 to {max}",
+  "@jumpToLineHint": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpToPageLabel": "Jump to page",
+  "jumpToPageHint": "1 to {max}",
+  "@jumpToPageHint": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpToPercentLabel": "Jump to percent",
+  "jumpToPercentHint": "0 to 100",
+  "jumpAction": "Go",
+  "jumpInputInvalid": "Enter a whole number",
+  "searchLabel": "Search",
+  "searchHint": "Find text",
+  "searchPreviousAction": "Previous",
+  "searchNextAction": "Next",
+  "searchEmptyQuery": "Enter text to search",
+  "searchNotFound": "No matching text found",
+  "jumpLineOutOfRange": "Line must be between 1 and {max}",
+  "@jumpLineOutOfRange": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpPageOutOfRange": "Page must be between 1 and {max}",
+  "@jumpPageOutOfRange": {
+    "placeholders": {
+      "max": {}
+    }
+  },
+  "jumpPercentOutOfRange": "Percent must be between 0 and 100",
   "appVersionLabel": "Version",
   "appVersionLoading": "Loading...",
   "appVersionUnavailable": "Unavailable",

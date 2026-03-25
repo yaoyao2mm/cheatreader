@@ -65,6 +65,16 @@ class ReaderController extends ChangeNotifier {
   int get currentLineIndex => _activeStartLineIndex;
   int get totalLineCount => _lines.length;
   int get visibleLineCount => _settings.oneLineMode ? 1 : _pageLineCount;
+  int get currentLineNumber => currentLineIndex + 1;
+  int get currentPageNumber => ((currentLineIndex ~/ visibleLineCount) + 1);
+  int get totalPageCount =>
+      math.max(1, ((totalLineCount - 1) ~/ visibleLineCount) + 1);
+  int get currentProgressPercent {
+    if (totalLineCount <= 1) {
+      return 100;
+    }
+    return ((currentLineIndex / (totalLineCount - 1)) * 100).round();
+  }
 
   int get _activeStartLineIndex =>
       burnModeEnabled ? _burnedLineCount : _readLineIndex;
@@ -132,8 +142,80 @@ class ReaderController extends ChangeNotifier {
 
   void previousPage() => moveByLines(-visibleLineCount);
 
+  void jumpToLineNumber(int lineNumber) {
+    final normalizedLineNumber = lineNumber.clamp(1, totalLineCount);
+    final targetIndex = _clampLineIndex(normalizedLineNumber - 1);
+    if (targetIndex == _readLineIndex) {
+      return;
+    }
+
+    _readLineIndex = targetIndex;
+    _burnedLineCount = _clampLineIndex(_burnedLineCount);
+    _onProgressUpdated();
+  }
+
+  void jumpToPageNumber(int pageNumber) {
+    final normalizedPageNumber = pageNumber.clamp(1, totalPageCount);
+    final targetIndex = _clampLineIndex(
+      (normalizedPageNumber - 1) * visibleLineCount,
+    );
+    if (targetIndex == _readLineIndex) {
+      return;
+    }
+
+    _readLineIndex = targetIndex;
+    _burnedLineCount = _clampLineIndex(_burnedLineCount);
+    _onProgressUpdated();
+  }
+
+  void jumpToProgressPercent(int percent) {
+    final normalizedPercent = percent.clamp(0, 100);
+    final targetIndex = totalLineCount <= 1
+        ? 0
+        : ((totalLineCount - 1) * (normalizedPercent / 100)).round();
+    final clampedIndex = _clampLineIndex(targetIndex);
+    if (clampedIndex == _readLineIndex) {
+      return;
+    }
+
+    _readLineIndex = clampedIndex;
+    _burnedLineCount = _clampLineIndex(_burnedLineCount);
+    _onProgressUpdated();
+  }
+
+  int? jumpToSearchMatch(
+    String query, {
+    required bool forward,
+    int? anchorLineIndex,
+    bool includeAnchor = true,
+  }) {
+    final normalizedQuery = query.trim().toLowerCase();
+    if (normalizedQuery.isEmpty || _lines.isEmpty) {
+      return null;
+    }
+
+    final anchor = _clampLineIndex(anchorLineIndex ?? currentLineIndex);
+    for (var step = 0; step < _lines.length; step += 1) {
+      final offset = includeAnchor ? step : step + 1;
+      final index = _wrappedLineIndex(anchor, offset, forward: forward);
+      if (_lineContainsQuery(index, normalizedQuery)) {
+        _readLineIndex = index;
+        _burnedLineCount = _clampLineIndex(_burnedLineCount);
+        _onProgressUpdated();
+        return index;
+      }
+    }
+
+    return null;
+  }
+
   void toggleOneLineMode() {
-    _updateSettings(_settings.copyWith(oneLineMode: !_settings.oneLineMode));
+    final nextOneLineMode = !_settings.oneLineMode;
+    if (nextOneLineMode) {
+      _readLineIndex = _preferredOneLineEntryIndex();
+      _burnedLineCount = _clampLineIndex(_burnedLineCount);
+    }
+    _updateSettings(_settings.copyWith(oneLineMode: nextOneLineMode));
   }
 
   void setModeToggleTrigger(ReaderModeToggleTrigger value) {
@@ -156,6 +238,29 @@ class ReaderController extends ChangeNotifier {
     _updateSettings(_settings.copyWith(fontFamilyPreset: value));
   }
 
+  void setCustomFont({required String path, required String displayName}) {
+    _updateSettings(
+      _settings.copyWith(
+        fontFamilyPreset: ReaderFontFamilyPreset.custom,
+        customFontPath: path,
+        customFontDisplayName: displayName,
+      ),
+    );
+  }
+
+  void clearCustomFont() {
+    _updateSettings(
+      _settings.copyWith(
+        fontFamilyPreset:
+            _settings.fontFamilyPreset == ReaderFontFamilyPreset.custom
+            ? ReaderFontFamilyPreset.system
+            : _settings.fontFamilyPreset,
+        customFontPath: null,
+        customFontDisplayName: null,
+      ),
+    );
+  }
+
   void setFontScale(double value) {
     _updateSettings(_settings.copyWith(fontScale: value));
   }
@@ -174,6 +279,10 @@ class ReaderController extends ChangeNotifier {
 
   void setTransparentModeEnabled(bool value) {
     _updateSettings(_settings.copyWith(transparentModeEnabled: value));
+  }
+
+  void setTransparentTextShadowEnabled(bool value) {
+    _updateSettings(_settings.copyWith(transparentTextShadowEnabled: value));
   }
 
   void setTextColorMode(ReaderTextColorMode value) {
@@ -349,7 +458,11 @@ class ReaderController extends ChangeNotifier {
         _settings.readingWidthFactor == value.readingWidthFactor &&
         _settings.windowOpacity == value.windowOpacity &&
         _settings.fontFamilyPreset == value.fontFamilyPreset &&
+        _settings.customFontPath == value.customFontPath &&
+        _settings.customFontDisplayName == value.customFontDisplayName &&
         _settings.transparentModeEnabled == value.transparentModeEnabled &&
+        _settings.transparentTextShadowEnabled ==
+            value.transparentTextShadowEnabled &&
         _settings.textColorMode == value.textColorMode &&
         _settings.customTextColorValue == value.customTextColorValue &&
         _settings.shortcutBindings == value.shortcutBindings) {
@@ -536,6 +649,58 @@ class ReaderController extends ChangeNotifier {
     final sorted = List<ReaderBookRecord>.from(bookshelf);
     sorted.sort((a, b) => b.lastOpenedAt.compareTo(a.lastOpenedAt));
     return List<ReaderBookRecord>.unmodifiable(sorted);
+  }
+
+  int _preferredOneLineEntryIndex() {
+    final currentIndex = _clampLineIndex(_readLineIndex);
+    final currentWindowEnd = math.min(
+      currentIndex + visibleLineCount,
+      _lines.length,
+    );
+    for (var index = currentIndex; index < currentWindowEnd; index += 1) {
+      if (_lineHasVisibleText(index)) {
+        return index;
+      }
+    }
+
+    if (_lineHasVisibleText(currentIndex)) {
+      return currentIndex;
+    }
+
+    for (var distance = 1; distance < _lines.length; distance += 1) {
+      final forward = currentIndex + distance;
+      if (forward < _lines.length && _lineHasVisibleText(forward)) {
+        return forward;
+      }
+
+      final backward = currentIndex - distance;
+      if (backward >= 0 && _lineHasVisibleText(backward)) {
+        return backward;
+      }
+    }
+
+    return currentIndex;
+  }
+
+  bool _lineHasVisibleText(int index) {
+    if (index < 0 || index >= _lines.length) {
+      return false;
+    }
+    return _lines[index].trim().isNotEmpty;
+  }
+
+  bool _lineContainsQuery(int index, String normalizedQuery) {
+    if (index < 0 || index >= _lines.length) {
+      return false;
+    }
+    return _lines[index].toLowerCase().contains(normalizedQuery);
+  }
+
+  int _wrappedLineIndex(int anchor, int offset, {required bool forward}) {
+    final delta = forward ? offset : -offset;
+    final raw = anchor + delta;
+    final count = _lines.length;
+    return ((raw % count) + count) % count;
   }
 
   static List<String> _splitLines(

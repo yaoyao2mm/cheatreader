@@ -44,6 +44,148 @@ void main() {
       expect(controller.currentLineIndex, 2);
     });
 
+    test('jumps to requested line number and clamps page metadata', () async {
+      final controller = ReaderController(
+        initialContent: 'A\nB\nC\nD\nE\nF\nG',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+      controller.updateVisibleLineCapacity(3);
+
+      expect(controller.currentLineNumber, 1);
+      expect(controller.currentPageNumber, 1);
+      expect(controller.totalPageCount, 3);
+
+      controller.jumpToLineNumber(5);
+
+      expect(controller.currentLineIndex, 4);
+      expect(controller.currentLineNumber, 5);
+      expect(controller.currentPageNumber, 2);
+
+      controller.jumpToLineNumber(99);
+
+      expect(controller.currentLineIndex, 6);
+      expect(controller.currentLineNumber, 7);
+      expect(controller.currentPageNumber, 3);
+    });
+
+    test('jumps to requested page number using visible line count', () async {
+      final controller = ReaderController(
+        initialContent: 'A\nB\nC\nD\nE\nF\nG\nH\nI',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+      controller.updateVisibleLineCapacity(4);
+
+      controller.jumpToPageNumber(2);
+      expect(controller.currentLineIndex, 4);
+      expect(controller.currentPageNumber, 2);
+
+      controller.jumpToPageNumber(99);
+      expect(controller.currentLineIndex, 8);
+      expect(controller.currentPageNumber, 3);
+    });
+
+    test('jumps to requested progress percent across the full book', () async {
+      final controller = ReaderController(
+        initialContent: 'A\nB\nC\nD\nE\nF\nG\nH\nI',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+
+      expect(controller.currentProgressPercent, 0);
+
+      controller.jumpToProgressPercent(50);
+      expect(controller.currentLineIndex, 4);
+      expect(controller.currentProgressPercent, 50);
+
+      controller.jumpToProgressPercent(100);
+      expect(controller.currentLineIndex, 8);
+      expect(controller.currentProgressPercent, 100);
+    });
+
+    test(
+      'search jumps to next and previous matching lines with wrap-around',
+      () async {
+        final controller = ReaderController(
+          initialContent: 'Alpha\nBeta target\nGamma\ntarget delta',
+          preferencesStore: MemoryReaderPreferencesStore(),
+          windowController: FakePlatformWindowController(),
+          fileBookmarkService: FakeReaderFileBookmarkService(),
+          importService: FakeReaderImportService(),
+          libraryStorage: MemoryReaderLibraryStorage(),
+        );
+
+        await controller.initialize();
+
+        final first = controller.jumpToSearchMatch('target', forward: true);
+        expect(first, 1);
+        expect(controller.currentLineIndex, 1);
+
+        final second = controller.jumpToSearchMatch(
+          'target',
+          forward: true,
+          anchorLineIndex: first,
+          includeAnchor: false,
+        );
+        expect(second, 3);
+        expect(controller.currentLineIndex, 3);
+
+        final wrapped = controller.jumpToSearchMatch(
+          'target',
+          forward: true,
+          anchorLineIndex: second,
+          includeAnchor: false,
+        );
+        expect(wrapped, 1);
+
+        final previous = controller.jumpToSearchMatch(
+          'target',
+          forward: false,
+          anchorLineIndex: wrapped,
+          includeAnchor: false,
+        );
+        expect(previous, 3);
+        expect(controller.currentLineIndex, 3);
+      },
+    );
+
+    test('entering one-line mode prefers a nearby non-empty line', () async {
+      final controller = ReaderController(
+        initialContent: '\n\n第一段\n第二段',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+      controller.updateVisibleLineCapacity(3);
+
+      expect(controller.currentLineIndex, 0);
+      controller.toggleOneLineMode();
+
+      expect(controller.settings.oneLineMode, isTrue);
+      expect(controller.currentLineIndex, 2);
+      expect(controller.visibleLines.first, '第一段');
+    });
+
     test('persists settings changes and syncs window presentation', () async {
       final store = MemoryReaderPreferencesStore();
       final windowController = FakePlatformWindowController();
@@ -61,11 +203,16 @@ void main() {
       controller.setModeToggleTrigger(ReaderModeToggleTrigger.middleClick);
       controller.setLanguageMode(ReaderLanguageMode.english);
       controller.setFontFamilyPreset(ReaderFontFamilyPreset.monospace);
+      controller.setCustomFont(
+        path: '/tmp/fonts/demo.ttf',
+        displayName: 'demo.ttf',
+      );
       controller.setFontScale(1.2);
       controller.setLineSpacing(1.8);
       controller.setReadingWidthFactor(0.7);
       controller.setWindowOpacity(0.78);
       controller.setTransparentModeEnabled(true);
+      controller.setTransparentTextShadowEnabled(false);
       controller.setTextColorMode(ReaderTextColorMode.custom);
       controller.setCustomTextColorValue(0xFF2B6CB0);
       final conflictMessage = controller.setShortcutBinding(
@@ -81,12 +228,15 @@ void main() {
         ReaderModeToggleTrigger.middleClick,
       );
       expect(saved.settings.languageMode, ReaderLanguageMode.english);
-      expect(saved.settings.fontFamilyPreset, ReaderFontFamilyPreset.monospace);
+      expect(saved.settings.fontFamilyPreset, ReaderFontFamilyPreset.custom);
+      expect(saved.settings.customFontPath, '/tmp/fonts/demo.ttf');
+      expect(saved.settings.customFontDisplayName, 'demo.ttf');
       expect(saved.settings.fontScale, 1.2);
       expect(saved.settings.lineSpacing, 1.8);
       expect(saved.settings.readingWidthFactor, 0.7);
       expect(saved.settings.windowOpacity, 0.78);
       expect(saved.settings.transparentModeEnabled, isTrue);
+      expect(saved.settings.transparentTextShadowEnabled, isFalse);
       expect(saved.settings.textColorMode, ReaderTextColorMode.custom);
       expect(saved.settings.customTextColorValue, 0xFF2B6CB0);
       expect(conflictMessage, isNull);
@@ -101,13 +251,25 @@ void main() {
       );
       expect(
         windowController.syncedSettings?.fontFamilyPreset,
-        ReaderFontFamilyPreset.monospace,
+        ReaderFontFamilyPreset.custom,
+      );
+      expect(
+        windowController.syncedSettings?.customFontPath,
+        '/tmp/fonts/demo.ttf',
+      );
+      expect(
+        windowController.syncedSettings?.customFontDisplayName,
+        'demo.ttf',
       );
       expect(windowController.syncedSettings?.fontScale, 1.2);
       expect(windowController.syncedSettings?.lineSpacing, 1.8);
       expect(windowController.syncedSettings?.readingWidthFactor, 0.7);
       expect(windowController.syncedSettings?.windowOpacity, 0.78);
       expect(windowController.syncedSettings?.transparentModeEnabled, isTrue);
+      expect(
+        windowController.syncedSettings?.transparentTextShadowEnabled,
+        isFalse,
+      );
       expect(
         windowController.syncedSettings?.textColorMode,
         ReaderTextColorMode.custom,
@@ -137,6 +299,33 @@ void main() {
         controller.settings.shortcutBindings.bossKey,
         ReaderShortcutBindings.defaults.bossKey,
       );
+    });
+
+    test('clearing a custom font falls back to the system preset', () async {
+      final controller = ReaderController(
+        initialContent: 'One\nTwo',
+        preferencesStore: MemoryReaderPreferencesStore(
+          initialSettings: ReaderSettings.defaults.copyWith(
+            fontFamilyPreset: ReaderFontFamilyPreset.custom,
+            customFontPath: '/tmp/fonts/demo.ttf',
+            customFontDisplayName: 'demo.ttf',
+          ),
+        ),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+      controller.clearCustomFont();
+
+      expect(
+        controller.settings.fontFamilyPreset,
+        ReaderFontFamilyPreset.system,
+      );
+      expect(controller.settings.customFontPath, isNull);
+      expect(controller.settings.customFontDisplayName, isNull);
     });
 
     test(
@@ -327,7 +516,10 @@ void main() {
         readingWidthFactor: 0.72,
         windowOpacity: 0.78,
         fontFamilyPreset: ReaderFontFamilyPreset.serif,
+        customFontPath: '/tmp/fonts/book.ttf',
+        customFontDisplayName: 'book.ttf',
         transparentModeEnabled: true,
+        transparentTextShadowEnabled: false,
         textColorMode: ReaderTextColorMode.custom,
         customTextColorValue: 0xFF0F766E,
         shortcutBindings: ReaderShortcutBindings.defaults,
@@ -358,7 +550,10 @@ void main() {
       expect(loaded.settings.readingWidthFactor, 0.72);
       expect(loaded.settings.windowOpacity, 0.78);
       expect(loaded.settings.fontFamilyPreset, ReaderFontFamilyPreset.serif);
+      expect(loaded.settings.customFontPath, '/tmp/fonts/book.ttf');
+      expect(loaded.settings.customFontDisplayName, 'book.ttf');
       expect(loaded.settings.transparentModeEnabled, isTrue);
+      expect(loaded.settings.transparentTextShadowEnabled, isFalse);
       expect(loaded.settings.textColorMode, ReaderTextColorMode.custom);
       expect(loaded.settings.customTextColorValue, 0xFF0F766E);
       expect(loaded.bookshelf.single.path, '/tmp/book.txt');

@@ -125,6 +125,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Remove every background tint and keep text only';
 
   @override
+  String get transparentTextShadowTitle => 'Text outline in transparent mode';
+
+  @override
+  String get transparentTextShadowSubtitle =>
+      'Add a readability halo around letters when the reader has no background';
+
+  @override
   String get fontTitle => 'Font';
 
   @override
@@ -135,6 +142,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get fontMonospace => 'Monospace';
+
+  @override
+  String get fontCustom => 'Custom';
+
+  @override
+  String get customFontChooseAction => 'Choose font';
+
+  @override
+  String get customFontReplaceAction => 'Replace font';
+
+  @override
+  String get customFontRemoveAction => 'Remove font';
+
+  @override
+  String get customFontPickFailure => 'Could not open the font picker';
+
+  @override
+  String get customFontLoadFailure => 'Could not load this font file';
 
   @override
   String get fontColorTitle => 'Text color';
@@ -206,6 +231,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get sectionSimpleBookshelf => 'Bookshelf';
 
   @override
+  String get sectionReadingPosition => 'Reading Position';
+
+  @override
+  String get readingPositionLineStat => 'Line';
+
+  @override
+  String get readingPositionPageStat => 'Page';
+
+  @override
+  String get readingPositionProgressStat => 'Progress';
+
+  @override
   String get sectionReadingSettings => 'Reading Settings';
 
   @override
@@ -213,6 +250,80 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get sectionAboutApp => 'About';
+
+  @override
+  String currentLineSummary(Object current, Object total) {
+    return 'Line $current / $total';
+  }
+
+  @override
+  String currentPageSummary(Object current, Object total) {
+    return 'Page $current / $total';
+  }
+
+  @override
+  String currentProgressSummary(Object percent) {
+    return 'Progress $percent%';
+  }
+
+  @override
+  String get jumpToLineLabel => 'Jump to line';
+
+  @override
+  String jumpToLineHint(Object max) {
+    return '1 to $max';
+  }
+
+  @override
+  String get jumpToPageLabel => 'Jump to page';
+
+  @override
+  String jumpToPageHint(Object max) {
+    return '1 to $max';
+  }
+
+  @override
+  String get jumpToPercentLabel => 'Jump to percent';
+
+  @override
+  String get jumpToPercentHint => '0 to 100';
+
+  @override
+  String get jumpAction => 'Go';
+
+  @override
+  String get jumpInputInvalid => 'Enter a whole number';
+
+  @override
+  String get searchLabel => 'Search';
+
+  @override
+  String get searchHint => 'Find text';
+
+  @override
+  String get searchPreviousAction => 'Previous';
+
+  @override
+  String get searchNextAction => 'Next';
+
+  @override
+  String get searchEmptyQuery => 'Enter text to search';
+
+  @override
+  String get searchNotFound => 'No matching text found';
+
+  @override
+  String jumpLineOutOfRange(Object max) {
+    return 'Line must be between 1 and $max';
+  }
+
+  @override
+  String jumpPageOutOfRange(Object max) {
+    return 'Page must be between 1 and $max';
+  }
+
+  @override
+  String get jumpPercentOutOfRange => 'Percent must be between 0 and 100';
 
   @override
   String get appVersionLabel => 'Version';
