@@ -21,6 +21,13 @@
   <img alt="UI" src="https://img.shields.io/badge/mode-transparent%20text--only-F0E6DC?style=flat-square&labelColor=16110F&color=F0E6DC">
 </p>
 
+> [!IMPORTANT]
+> CheatReader is only a local multi-format file reader.
+> It does not support importing books or content from any URL, web link, online source, or remote feed.
+> It does not support, encourage, or endorse any act that infringes the lawful rights of writers, publishers, or other copyright holders.
+> This project is shared for learning and technical exchange only.
+> The author does not intend to use this software for commercial activity or to profit from it.
+
 ## Why It Exists
 
 Traditional reading apps want your full attention.
@@ -159,6 +166,12 @@ This repository is configured for automated desktop releases with GitHub Actions
 - GitHub Release assets are uploaded automatically
 
 You can also trigger the workflow manually from the Actions tab with a tag name.
+
+## License
+
+This repository is licensed under the [CheatReader Non-Commercial License](./LICENSE).
+You may use, study, modify, and share this code for personal learning and other non-commercial purposes only.
+Commercial use, resale, paid distribution, sublicensing, or using this project and its derivatives to generate revenue is not permitted without prior written permission from the copyright holder.
 
 ## Project Direction
 

@@ -21,6 +21,13 @@
   <img alt="UI" src="https://img.shields.io/badge/mode-transparent%20text--only-F0E6DC?style=flat-square&labelColor=16110F&color=F0E6DC">
 </p>
 
+> [!IMPORTANT]
+> CheatReader 仅是一个本地多文件格式阅读器。
+> 它不支持任何 URL、网页链接、在线书源或其他远程内容导入。
+> 它不支持、鼓励或认可任何侵犯文字工作者、出版机构及其他著作权人的合法权益的行为。
+> 本项目仅供学习交流使用。
+> 作者本人不会将本软件用于任何商业用途，也不会依靠本软件获利。
+
 ## 这个项目解决什么问题
 
 大多数阅读器都希望你“进入阅读状态”，占据主要注意力。
@@ -159,6 +166,12 @@ flutter build linux
 - 自动上传到 GitHub Release
 
 也可以在 Actions 页面手动触发，并指定 tag 名称。
+
+## 许可证
+
+本仓库采用 [CheatReader Non-Commercial License](./LICENSE)。
+你可以基于个人学习、研究、交流等非商业目的使用、阅读、修改和分发本代码。
+未经著作权人事先书面许可，禁止将本项目或其衍生版本用于商业用途、售卖、付费分发、再授权，或用于直接或间接获取收益。
 
 ## 项目方向
 

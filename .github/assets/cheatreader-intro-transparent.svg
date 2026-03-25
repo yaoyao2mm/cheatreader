@@ -12,11 +12,11 @@
   <text x="214" y="296" fill="#D8C8BA" font-family="Arial, sans-serif" font-size="21">Text only. No tinted card. The desktop behind it stays visible.</text>
 
   <rect x="250" y="382" width="560" height="48" rx="24" fill="#000000" fill-opacity="0.08"/>
-  <text x="278" y="414" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="24">第1章 引子</text>
+  <text x="278" y="414" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="24">Chapter 1  Opening</text>
 
-  <text x="278" y="484" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">云南是个出古城的地方。</text>
-  <text x="278" y="524" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">自打丽江走红、大理行俏之后，方圆左近，能抬出来开发成古城的去处，</text>
-  <text x="278" y="564" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">都一一收成登场，因着各有特色，居然也逐个打出了名号。</text>
+  <text x="278" y="484" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">Old towns have a way of gathering stories.</text>
+  <text x="278" y="524" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">Once one place becomes famous, nearby streets and squares</text>
+  <text x="278" y="564" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">begin to reveal their own names, rhythms, and histories.</text>
 
   <defs>
     <linearGradient id="bg" x1="86" y1="48" x2="1354" y2="858" gradientUnits="userSpaceOnUse">
