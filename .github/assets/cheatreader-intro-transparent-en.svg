@@ -12,7 +12,7 @@
   <text x="214" y="296" fill="#D8C8BA" font-family="Arial, sans-serif" font-size="21">Text only. No tinted card. The desktop behind it stays visible.</text>
 
   <rect x="250" y="382" width="560" height="48" rx="24" fill="#000000" fill-opacity="0.08"/>
-  <text x="278" y="414" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="24">Chapter 1  Opening</text>
+  <text x="278" y="414" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="24">Chapter 1: Opening</text>
 
   <text x="278" y="484" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">Old towns have a way of gathering stories.</text>
   <text x="278" y="524" fill="#FFF9F2" font-family="Georgia, 'Times New Roman', serif" font-size="22">Once one place becomes famous, nearby streets and squares</text>

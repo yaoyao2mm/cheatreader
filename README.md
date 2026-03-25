@@ -47,7 +47,7 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Lightweight desktop-first reading flow with drag-and-drop import
 
 <p align="center">
-  <img src=".github/assets/cheatreader-intro-transparent.svg" alt="CheatReader transparent mode intro" />
+  <img src=".github/assets/cheatreader-intro-transparent-en.svg" alt="CheatReader transparent mode intro" />
 </p>
 
 ![CheatReader full-screen demo](https://raw.githubusercontent.com/yaoyao2mm/cheatreader/main/.github/assets/full-screen-1.gif)
