@@ -126,6 +126,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transparentTextShadowSubtitle => '阅读器没有底色时，为文字补一层可读性光晕';
 
   @override
+  String get readingAnimationTitle => '阅读过渡动画';
+
+  @override
+  String get readingAnimationSubtitle => '轻微滑动效';
+
+  @override
   String get fontTitle => '字体';
 
   @override

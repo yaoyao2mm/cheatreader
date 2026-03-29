@@ -48,6 +48,8 @@
   "transparentModeSubtitle": "Remove every background tint and keep text only",
   "transparentTextShadowTitle": "Text outline in transparent mode",
   "transparentTextShadowSubtitle": "Add a readability halo around letters when the reader has no background",
+  "readingAnimationTitle": "Reading transition animation",
+  "readingAnimationSubtitle": "Use only a slight slide to soften line changes",
   "fontTitle": "Font",
   "fontDefault": "Default",
   "fontSerif": "Serif",

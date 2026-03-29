@@ -279,8 +279,111 @@ void main() {
     );
 
     await tester.sendKeyEvent(LogicalKeyboardKey.keyJ);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('第二行'), findsOneWidget);
+  });
+
+  testWidgets('reading animation is disabled by default', (
+    WidgetTester tester,
+  ) async {
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行\n第三行',
+      preferencesStore: MemoryReaderPreferencesStore(),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+
+    expect(controller.settings.readingAnimationEnabled, isFalse);
+    expect(find.byType(TweenAnimationBuilder<double>), findsNothing);
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
     await tester.pump();
 
+    expect(find.textContaining('第二行'), findsOneWidget);
+    expect(find.byType(TweenAnimationBuilder<double>), findsNothing);
+  });
+
+  testWidgets(
+    'multi-line mode advances wrapped text one visual line at a time',
+    (WidgetTester tester) async {
+      final controller = ReaderController(
+        initialContent: '这是一段很长很长很长很长很长很长的文本，用来验证多行模式会按视觉行推进，而不是整段突然跳走。\n第二段',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: _FakePlatformWindowController(),
+        fileBookmarkService: _FakeReaderFileBookmarkService(),
+        importService: _FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+      await controller.initialize();
+
+      await tester.pumpWidget(
+        SizedBox(
+          width: 220,
+          height: 72,
+          child: CheatReaderApp(
+            controller: controller,
+            windowController: _FakePlatformWindowController(),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(TweenAnimationBuilder<double>), findsNothing);
+
+      final beforeText = tester.widget<Text>(find.byType(Text).first).data;
+
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.pumpAndSettle();
+
+      final afterText = tester.widget<Text>(find.byType(Text).first).data;
+      expect(beforeText, isNotNull);
+      expect(afterText, isNotNull);
+      expect(afterText, isNot(beforeText));
+      expect(controller.currentLineIndex, 0);
+    },
+  );
+
+  testWidgets('reading animation can be enabled explicitly', (
+    WidgetTester tester,
+  ) async {
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行\n第三行',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          readingAnimationEnabled: true,
+        ),
+      ),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+    await tester.pump();
+
+    expect(find.byType(TweenAnimationBuilder<double>), findsOneWidget);
+
+    await tester.pumpAndSettle();
     expect(find.textContaining('第二行'), findsOneWidget);
   });
 

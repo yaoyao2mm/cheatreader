@@ -132,6 +132,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'Add a readability halo around letters when the reader has no background';
 
   @override
+  String get readingAnimationTitle => 'Reading transition animation';
+
+  @override
+  String get readingAnimationSubtitle =>
+      'Off by default. When enabled, use only a slight slide to soften line changes without trailing ghosts';
+
+  @override
   String get fontTitle => 'Font';
 
   @override

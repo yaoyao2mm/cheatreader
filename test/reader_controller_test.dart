@@ -203,6 +203,7 @@ void main() {
       controller.setModeToggleTrigger(ReaderModeToggleTrigger.middleClick);
       controller.setLanguageMode(ReaderLanguageMode.english);
       controller.setFontFamilyPreset(ReaderFontFamilyPreset.monospace);
+      controller.setReadingAnimationEnabled(true);
       controller.setCustomFont(
         path: '/tmp/fonts/demo.ttf',
         displayName: 'demo.ttf',
@@ -229,6 +230,7 @@ void main() {
       );
       expect(saved.settings.languageMode, ReaderLanguageMode.english);
       expect(saved.settings.fontFamilyPreset, ReaderFontFamilyPreset.custom);
+      expect(saved.settings.readingAnimationEnabled, isTrue);
       expect(saved.settings.customFontPath, '/tmp/fonts/demo.ttf');
       expect(saved.settings.customFontDisplayName, 'demo.ttf');
       expect(saved.settings.fontScale, 1.2);
@@ -253,6 +255,7 @@ void main() {
         windowController.syncedSettings?.fontFamilyPreset,
         ReaderFontFamilyPreset.custom,
       );
+      expect(windowController.syncedSettings?.readingAnimationEnabled, isTrue);
       expect(
         windowController.syncedSettings?.customFontPath,
         '/tmp/fonts/demo.ttf',
@@ -511,6 +514,7 @@ void main() {
         modeToggleTrigger: ReaderModeToggleTrigger.keyboardShortcut,
         languageMode: ReaderLanguageMode.english,
         alwaysOnTop: false,
+        readingAnimationEnabled: true,
         fontScale: 1.2,
         lineSpacing: 1.8,
         readingWidthFactor: 0.72,

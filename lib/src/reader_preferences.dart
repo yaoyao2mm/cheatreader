@@ -32,6 +32,7 @@ class SharedPreferencesReaderPreferencesStore
   static const _modeToggleTriggerKey = 'reader.modeToggleTrigger';
   static const _languageModeKey = 'reader.languageMode';
   static const _alwaysOnTopKey = 'reader.alwaysOnTop';
+  static const _readingAnimationEnabledKey = 'reader.readingAnimationEnabled';
   static const _fontScaleKey = 'reader.fontScale';
   static const _lineSpacingKey = 'reader.lineSpacing';
   static const _readingWidthFactorKey = 'reader.readingWidthFactor';
@@ -77,6 +78,9 @@ class SharedPreferencesReaderPreferencesStore
         alwaysOnTop:
             _preferences.getBool(_alwaysOnTopKey) ??
             ReaderSettings.defaults.alwaysOnTop,
+        readingAnimationEnabled:
+            _preferences.getBool(_readingAnimationEnabledKey) ??
+            ReaderSettings.defaults.readingAnimationEnabled,
         fontScale:
             _preferences.getDouble(_fontScaleKey) ??
             ReaderSettings.defaults.fontScale,
@@ -130,6 +134,10 @@ class SharedPreferencesReaderPreferencesStore
     );
     await _preferences.setString(_languageModeKey, settings.languageMode.name);
     await _preferences.setBool(_alwaysOnTopKey, settings.alwaysOnTop);
+    await _preferences.setBool(
+      _readingAnimationEnabledKey,
+      settings.readingAnimationEnabled,
+    );
     await _preferences.setDouble(_fontScaleKey, settings.fontScale);
     await _preferences.setDouble(_lineSpacingKey, settings.lineSpacing);
     await _preferences.setDouble(

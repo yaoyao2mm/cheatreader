@@ -320,6 +320,18 @@ abstract class AppLocalizations {
   /// **'Add a readability halo around letters when the reader has no background'**
   String get transparentTextShadowSubtitle;
 
+  /// No description provided for @readingAnimationTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reading transition animation'**
+  String get readingAnimationTitle;
+
+  /// No description provided for @readingAnimationSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Off by default. When enabled, use only a slight slide to soften line changes without trailing ghosts'**
+  String get readingAnimationSubtitle;
+
   /// No description provided for @fontTitle.
   ///
   /// In en, this message translates to:

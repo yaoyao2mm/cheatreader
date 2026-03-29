@@ -14,6 +14,7 @@ class ReaderSettings {
     required this.modeToggleTrigger,
     required this.languageMode,
     required this.alwaysOnTop,
+    required this.readingAnimationEnabled,
     required this.fontScale,
     required this.lineSpacing,
     required this.readingWidthFactor,
@@ -35,6 +36,7 @@ class ReaderSettings {
     modeToggleTrigger: ReaderModeToggleTrigger.doubleClick,
     languageMode: ReaderLanguageMode.system,
     alwaysOnTop: true,
+    readingAnimationEnabled: false,
     fontScale: 1.0,
     lineSpacing: 1.5,
     readingWidthFactor: 1.0,
@@ -53,6 +55,7 @@ class ReaderSettings {
   final ReaderModeToggleTrigger modeToggleTrigger;
   final ReaderLanguageMode languageMode;
   final bool alwaysOnTop;
+  final bool readingAnimationEnabled;
   final double fontScale;
   final double lineSpacing;
   final double readingWidthFactor;
@@ -73,6 +76,7 @@ class ReaderSettings {
     ReaderModeToggleTrigger? modeToggleTrigger,
     ReaderLanguageMode? languageMode,
     bool? alwaysOnTop,
+    bool? readingAnimationEnabled,
     double? fontScale,
     double? lineSpacing,
     double? readingWidthFactor,
@@ -91,6 +95,8 @@ class ReaderSettings {
       modeToggleTrigger: modeToggleTrigger ?? this.modeToggleTrigger,
       languageMode: languageMode ?? this.languageMode,
       alwaysOnTop: alwaysOnTop ?? this.alwaysOnTop,
+      readingAnimationEnabled:
+          readingAnimationEnabled ?? this.readingAnimationEnabled,
       fontScale: fontScale ?? this.fontScale,
       lineSpacing: lineSpacing ?? this.lineSpacing,
       readingWidthFactor: readingWidthFactor ?? this.readingWidthFactor,

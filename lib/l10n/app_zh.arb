@@ -48,6 +48,8 @@
   "transparentModeSubtitle": "彻底去掉任何底色，只保留文字",
   "transparentTextShadowTitle": "透明模式文字描边",
   "transparentTextShadowSubtitle": "阅读器没有底色时，为文字补一层可读性光晕",
+  "readingAnimationTitle": "阅读过渡动画",
+  "readingAnimationSubtitle": "滑动动效",
   "fontTitle": "字体",
   "fontDefault": "默认",
   "fontSerif": "衬线",

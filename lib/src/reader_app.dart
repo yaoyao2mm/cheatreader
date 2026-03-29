@@ -51,6 +51,8 @@ const XTypeGroup _fontFileTypeGroup = XTypeGroup(
   ],
 );
 
+enum _ReaderTransitionDirection { idle, forward, backward }
+
 ({Color background, Color text, Color dragIndicator, List<Shadow> textShadows})
 _resolveReaderPresentation(ReaderSettings settings) {
   final customTextColor = Color(settings.customTextColorValue);
@@ -176,12 +178,23 @@ class ReaderSurface extends StatefulWidget {
 }
 
 class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
+  static const Duration _readerLineTransitionDuration = Duration(
+    milliseconds: 90,
+  );
   OverlayEntry? _messageOverlayEntry;
   Timer? _messageTimer;
   bool _windowListenerRegistered = false;
   int? _lastOneLineSourceIndex;
   int _oneLineSegmentIndex = 0;
-  bool _jumpToTailOnNextSourceLine = false;
+  bool _jumpToTailOnNextOneLineSource = false;
+  int? _lastMultiLineSourceIndex;
+  int _multiLineSegmentIndex = 0;
+  bool _jumpToTailOnNextMultiLineSource = false;
+  int _visibleVisualLineCapacity = readerDefaultMultiLineVisibleLines;
+  List<String> _cachedMultiLineSourceSegments = const <String>[];
+  int _readerTransitionToken = 0;
+  _ReaderTransitionDirection _readerTransitionDirection =
+      _ReaderTransitionDirection.idle;
 
   @override
   void initState() {
@@ -331,40 +344,163 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   }
 
   void _advanceReading() {
+    _advanceReadingInternal(animate: true);
+  }
+
+  bool _advanceReadingInternal({required bool animate}) {
     final controller = widget.controller;
     if (!controller.settings.oneLineMode) {
-      controller.nextLine();
-      return;
+      return _advanceMultiLineReading(animate: animate);
     }
 
     final segmentCount = _visibleOneLineSegmentCount;
     if (_oneLineSegmentIndex < segmentCount - 1) {
+      _prepareReaderTransition(
+        _ReaderTransitionDirection.forward,
+        animate: animate,
+      );
       setState(() {
         _oneLineSegmentIndex += 1;
       });
-      return;
+      return true;
     }
 
+    if (controller.currentLineIndex >= controller.totalLineCount - 1) {
+      return false;
+    }
+
+    _prepareReaderTransition(
+      _ReaderTransitionDirection.forward,
+      animate: animate,
+    );
     _oneLineSegmentIndex = 0;
     controller.nextLine();
+    return true;
   }
 
   void _rewindReading() {
+    _rewindReadingInternal(animate: true);
+  }
+
+  bool _rewindReadingInternal({required bool animate}) {
     final controller = widget.controller;
     if (!controller.settings.oneLineMode) {
-      controller.previousLine();
-      return;
+      return _rewindMultiLineReading(animate: animate);
     }
 
     if (_oneLineSegmentIndex > 0) {
+      _prepareReaderTransition(
+        _ReaderTransitionDirection.backward,
+        animate: animate,
+      );
       setState(() {
         _oneLineSegmentIndex -= 1;
       });
+      return true;
+    }
+
+    if (controller.currentLineIndex == 0) {
+      return false;
+    }
+
+    _prepareReaderTransition(
+      _ReaderTransitionDirection.backward,
+      animate: animate,
+    );
+    _jumpToTailOnNextOneLineSource = true;
+    controller.previousLine();
+    return true;
+  }
+
+  bool _advanceMultiLineReading({required bool animate}) {
+    final controller = widget.controller;
+    final segmentCount = _cachedMultiLineSourceSegments.isEmpty
+        ? 1
+        : _cachedMultiLineSourceSegments.length;
+    if (_multiLineSegmentIndex < segmentCount - 1) {
+      _prepareReaderTransition(
+        _ReaderTransitionDirection.forward,
+        animate: animate,
+      );
+      setState(() {
+        _multiLineSegmentIndex += 1;
+      });
+      return true;
+    }
+
+    if (controller.currentLineIndex >= controller.totalLineCount - 1) {
+      return false;
+    }
+
+    _prepareReaderTransition(
+      _ReaderTransitionDirection.forward,
+      animate: animate,
+    );
+    _multiLineSegmentIndex = 0;
+    controller.nextLine();
+    return true;
+  }
+
+  bool _rewindMultiLineReading({required bool animate}) {
+    final controller = widget.controller;
+    if (_multiLineSegmentIndex > 0) {
+      _prepareReaderTransition(
+        _ReaderTransitionDirection.backward,
+        animate: animate,
+      );
+      setState(() {
+        _multiLineSegmentIndex -= 1;
+      });
+      return true;
+    }
+
+    if (controller.currentLineIndex == 0) {
+      return false;
+    }
+
+    _prepareReaderTransition(
+      _ReaderTransitionDirection.backward,
+      animate: animate,
+    );
+    _jumpToTailOnNextMultiLineSource = true;
+    controller.previousLine();
+    return true;
+  }
+
+  void _advanceReadingPage() {
+    final stepCount = math.max(1, _visibleVisualLineCapacity);
+    var animated = false;
+    for (var index = 0; index < stepCount; index += 1) {
+      final moved = _advanceReadingInternal(animate: !animated);
+      if (!moved) {
+        break;
+      }
+      animated = true;
+    }
+  }
+
+  void _rewindReadingPage() {
+    final stepCount = math.max(1, _visibleVisualLineCapacity);
+    var animated = false;
+    for (var index = 0; index < stepCount; index += 1) {
+      final moved = _rewindReadingInternal(animate: !animated);
+      if (!moved) {
+        break;
+      }
+      animated = true;
+    }
+  }
+
+  void _prepareReaderTransition(
+    _ReaderTransitionDirection direction, {
+    required bool animate,
+  }) {
+    if (!animate) {
       return;
     }
 
-    _jumpToTailOnNextSourceLine = true;
-    controller.previousLine();
+    _readerTransitionDirection = direction;
+    _readerTransitionToken += 1;
   }
 
   int get _visibleOneLineSegmentCount {
@@ -457,6 +593,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
             final visibleLineCapacity = settings.oneLineMode
                 ? 1
                 : math.max(1, (availableHeight / estimatedLineHeight).floor());
+            _visibleVisualLineCapacity = visibleLineCapacity;
 
             WidgetsBinding.instance.addPostFrameCallback((_) {
               if (mounted) {
@@ -520,27 +657,25 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
                                   constraints.maxWidth,
                                   settings,
                                 );
-                                final displayedText = _resolveDisplayedText(
+                                final displayedLines = _resolveDisplayedLines(
                                   context: context,
                                   maxWidth: textColumnWidth,
                                   settings: settings,
                                   style: textStyle,
+                                  visibleLineCapacity: visibleLineCapacity,
                                 );
                                 return ClipRect(
                                   child: Align(
                                     alignment: Alignment.center,
                                     child: SizedBox(
                                       width: textColumnWidth,
-                                      child: Text(
-                                        displayedText,
-                                        softWrap: !settings.oneLineMode,
+                                      child: _buildAnimatedReaderText(
+                                        text: displayedLines.join('\n'),
+                                        style: textStyle,
                                         maxLines: settings.oneLineMode
                                             ? 1
-                                            : null,
-                                        overflow: settings.oneLineMode
-                                            ? TextOverflow.clip
-                                            : TextOverflow.visible,
-                                        style: textStyle,
+                                            : visibleLineCapacity,
+                                        lineHeight: estimatedLineHeight,
                                       ),
                                     ),
                                   ),
@@ -609,10 +744,8 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final bindings = <ShortcutActivator, VoidCallback>{
       const SingleActivator(LogicalKeyboardKey.arrowDown): _advanceReading,
       const SingleActivator(LogicalKeyboardKey.arrowUp): _rewindReading,
-      const SingleActivator(LogicalKeyboardKey.pageDown):
-          widget.controller.nextPage,
-      const SingleActivator(LogicalKeyboardKey.pageUp):
-          widget.controller.previousPage,
+      const SingleActivator(LogicalKeyboardKey.pageDown): _advanceReadingPage,
+      const SingleActivator(LogicalKeyboardKey.pageUp): _rewindReadingPage,
       const SingleActivator(LogicalKeyboardKey.space): _advanceReading,
       const SingleActivator(LogicalKeyboardKey.space, shift: true):
           _rewindReading,
@@ -631,8 +764,8 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final shortcuts = settings.shortcutBindings;
     addBinding(shortcuts.nextLine, _advanceReading);
     addBinding(shortcuts.previousLine, _rewindReading);
-    addBinding(shortcuts.nextPage, widget.controller.nextPage);
-    addBinding(shortcuts.previousPage, widget.controller.previousPage);
+    addBinding(shortcuts.nextPage, _advanceReadingPage);
+    addBinding(shortcuts.previousPage, _rewindReadingPage);
     addBinding(shortcuts.toggleMode, _handleModeToggleShortcut);
     addBinding(shortcuts.bossKey, () {
       unawaited(_handleBossKeyShortcut());
@@ -671,20 +804,46 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     };
   }
 
-  String _resolveDisplayedText({
+  List<String> _resolveDisplayedLines({
     required BuildContext context,
     required double maxWidth,
     required ReaderSettings settings,
     required TextStyle style,
+    required int visibleLineCapacity,
+  }) {
+    if (settings.oneLineMode) {
+      _cachedMultiLineSourceSegments = const <String>[];
+      _lastMultiLineSourceIndex = null;
+      _multiLineSegmentIndex = 0;
+      _jumpToTailOnNextMultiLineSource = false;
+      return <String>[
+        _resolveDisplayedOneLine(
+          context: context,
+          maxWidth: maxWidth,
+          style: style,
+        ),
+      ];
+    }
+
+    _cachedOneLineSegments = const <String>[];
+    _lastOneLineSourceIndex = null;
+    _oneLineSegmentIndex = 0;
+    _jumpToTailOnNextOneLineSource = false;
+
+    return _resolveDisplayedMultiLine(
+      context: context,
+      maxWidth: maxWidth,
+      style: style,
+      visibleLineCapacity: visibleLineCapacity,
+    );
+  }
+
+  String _resolveDisplayedOneLine({
+    required BuildContext context,
+    required double maxWidth,
+    required TextStyle style,
   }) {
     final controller = widget.controller;
-    if (!settings.oneLineMode) {
-      _cachedOneLineSegments = const <String>[];
-      _lastOneLineSourceIndex = null;
-      _oneLineSegmentIndex = 0;
-      _jumpToTailOnNextSourceLine = false;
-      return controller.visibleText;
-    }
 
     final visibleLines = controller.visibleLines;
     final sourceLine = visibleLines.isEmpty ? '' : visibleLines.first;
@@ -700,8 +859,8 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     final sourceIndex = controller.currentLineIndex;
     var targetIndex = _oneLineSegmentIndex;
     if (_lastOneLineSourceIndex != sourceIndex) {
-      targetIndex = _jumpToTailOnNextSourceLine ? segments.length - 1 : 0;
-      _jumpToTailOnNextSourceLine = false;
+      targetIndex = _jumpToTailOnNextOneLineSource ? segments.length - 1 : 0;
+      _jumpToTailOnNextOneLineSource = false;
       _lastOneLineSourceIndex = sourceIndex;
     }
 
@@ -721,6 +880,121 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     }
 
     return segments[clampedIndex];
+  }
+
+  List<String> _resolveDisplayedMultiLine({
+    required BuildContext context,
+    required double maxWidth,
+    required TextStyle style,
+    required int visibleLineCapacity,
+  }) {
+    final controller = widget.controller;
+    final sourceIndex = controller.currentLineIndex;
+    final currentSourceSegments = _wrapIntoSingleVisualLines(
+      text: controller.lineAt(sourceIndex),
+      maxWidth: maxWidth,
+      style: style,
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+    );
+    _cachedMultiLineSourceSegments = currentSourceSegments;
+
+    var targetIndex = _multiLineSegmentIndex;
+    if (_lastMultiLineSourceIndex != sourceIndex) {
+      targetIndex = _jumpToTailOnNextMultiLineSource
+          ? currentSourceSegments.length - 1
+          : 0;
+      _jumpToTailOnNextMultiLineSource = false;
+      _lastMultiLineSourceIndex = sourceIndex;
+    }
+
+    final clampedIndex = math.min(
+      math.max(0, targetIndex),
+      math.max(0, currentSourceSegments.length - 1),
+    );
+    if (clampedIndex != _multiLineSegmentIndex) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) {
+          return;
+        }
+        setState(() {
+          _multiLineSegmentIndex = clampedIndex;
+        });
+      });
+    }
+
+    final displayedLines = <String>[];
+    var lineIndex = sourceIndex;
+    var segmentIndex = clampedIndex;
+    while (displayedLines.length < visibleLineCapacity &&
+        lineIndex < controller.totalLineCount) {
+      final segments = lineIndex == sourceIndex
+          ? currentSourceSegments
+          : _wrapIntoSingleVisualLines(
+              text: controller.lineAt(lineIndex),
+              maxWidth: maxWidth,
+              style: style,
+              textDirection: Directionality.of(context),
+              textScaler: MediaQuery.textScalerOf(context),
+            );
+      for (
+        var index = segmentIndex;
+        index < segments.length && displayedLines.length < visibleLineCapacity;
+        index += 1
+      ) {
+        displayedLines.add(segments[index]);
+      }
+      lineIndex += 1;
+      segmentIndex = 0;
+    }
+
+    return displayedLines.isEmpty ? const <String>[''] : displayedLines;
+  }
+
+  Widget _buildAnimatedReaderText({
+    required String text,
+    required TextStyle style,
+    required int maxLines,
+    required double lineHeight,
+  }) {
+    final textWidget = Text(
+      text,
+      key: ValueKey<String>('reader-text-$text-$_readerTransitionToken'),
+      softWrap: false,
+      maxLines: maxLines,
+      overflow: TextOverflow.clip,
+      style: style,
+    );
+
+    if (!widget.controller.settings.readingAnimationEnabled) {
+      return textWidget;
+    }
+
+    final directionalDistance = switch (_readerTransitionDirection) {
+      _ReaderTransitionDirection.forward => lineHeight * 0.22,
+      _ReaderTransitionDirection.backward => -lineHeight * 0.22,
+      _ReaderTransitionDirection.idle => 0.0,
+    };
+
+    return TweenAnimationBuilder<double>(
+      key: ValueKey<int>(_readerTransitionToken),
+      duration: _readerLineTransitionDuration,
+      curve: Curves.easeOutCubic,
+      tween: Tween<double>(begin: directionalDistance, end: 0),
+      child: textWidget,
+      builder: (context, offsetY, child) {
+        return Transform.translate(offset: Offset(0, offsetY), child: child);
+      },
+      onEnd: () {
+        if (!mounted ||
+            _readerTransitionDirection == _ReaderTransitionDirection.idle) {
+          return;
+        }
+        setState(() {
+          _readerTransitionDirection = _ReaderTransitionDirection.idle;
+        });
+      },
+    );
   }
 
   double _resolveTextColumnWidth(
@@ -1394,6 +1668,13 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
         onChanged: controller.setTransparentTextShadowEnabled,
         title: Text(l10n.transparentTextShadowTitle),
         subtitle: Text(l10n.transparentTextShadowSubtitle),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: controller.settings.readingAnimationEnabled,
+        onChanged: controller.setReadingAnimationEnabled,
+        title: Text(l10n.readingAnimationTitle),
+        subtitle: Text(l10n.readingAnimationSubtitle),
       ),
       const SizedBox(height: 12),
       Text(l10n.languageTitle),

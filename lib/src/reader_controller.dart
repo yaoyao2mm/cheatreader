@@ -76,6 +76,14 @@ class ReaderController extends ChangeNotifier {
     return ((currentLineIndex / (totalLineCount - 1)) * 100).round();
   }
 
+  String lineAt(int index) {
+    if (_lines.isEmpty) {
+      return '';
+    }
+
+    return _lines[_clampLineIndex(index)];
+  }
+
   int get _activeStartLineIndex =>
       burnModeEnabled ? _burnedLineCount : _readLineIndex;
 
@@ -232,6 +240,10 @@ class ReaderController extends ChangeNotifier {
 
   void setAlwaysOnTop(bool value) {
     _updateSettings(_settings.copyWith(alwaysOnTop: value));
+  }
+
+  void setReadingAnimationEnabled(bool value) {
+    _updateSettings(_settings.copyWith(readingAnimationEnabled: value));
   }
 
   void setFontFamilyPreset(ReaderFontFamilyPreset value) {
@@ -453,6 +465,7 @@ class ReaderController extends ChangeNotifier {
         _settings.modeToggleTrigger == value.modeToggleTrigger &&
         _settings.languageMode == value.languageMode &&
         _settings.alwaysOnTop == value.alwaysOnTop &&
+        _settings.readingAnimationEnabled == value.readingAnimationEnabled &&
         _settings.fontScale == value.fontScale &&
         _settings.lineSpacing == value.lineSpacing &&
         _settings.readingWidthFactor == value.readingWidthFactor &&
