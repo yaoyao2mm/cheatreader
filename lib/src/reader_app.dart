@@ -184,6 +184,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   OverlayEntry? _messageOverlayEntry;
   Timer? _messageTimer;
   bool _windowListenerRegistered = false;
+  DateTime? _lastForegroundRecoveryAt;
   int? _lastOneLineSourceIndex;
   int _oneLineSegmentIndex = 0;
   bool _jumpToTailOnNextOneLineSource = false;
@@ -243,6 +244,22 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     } finally {
       await windowController.restoreAfterControlPanel(controller.settings);
     }
+  }
+
+  void _recoverForegroundFromActivation() {
+    if (!widget.windowController.supportsFloatingControls) {
+      return;
+    }
+
+    final now = DateTime.now();
+    final lastRecoveryAt = _lastForegroundRecoveryAt;
+    if (lastRecoveryAt != null &&
+        now.difference(lastRecoveryAt) < const Duration(milliseconds: 250)) {
+      return;
+    }
+
+    _lastForegroundRecoveryAt = now;
+    unawaited(widget.windowController.bringToForegroundFromSystemActivation());
   }
 
   void _showMessage(String message) {
@@ -509,6 +526,12 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   }
 
   List<String> _cachedOneLineSegments = const <String>[];
+
+  @override
+  void onWindowFocus() => _recoverForegroundFromActivation();
+
+  @override
+  void onWindowRestore() => _recoverForegroundFromActivation();
 
   @override
   void onWindowMove() {}

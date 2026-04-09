@@ -27,6 +27,36 @@ void main() {
       await tempDirectory.delete(recursive: true);
     });
 
+    test('compacts excessive blank lines in txt files', () async {
+      final tempDirectory = await Directory.systemTemp.createTemp(
+        'cheatreader-import-test',
+      );
+      final file = File('${tempDirectory.path}/空白行过多.txt');
+      await file.writeAsString('第一段\n\n\n\n第二段');
+
+      final service = FileSelectorReaderImportService();
+      final imported = await service.openTxtFile(file.path);
+
+      expect(imported.content, '第一段\n第二段');
+
+      await tempDirectory.delete(recursive: true);
+    });
+
+    test('keeps normal line breaks in txt files', () async {
+      final tempDirectory = await Directory.systemTemp.createTemp(
+        'cheatreader-import-test',
+      );
+      final file = File('${tempDirectory.path}/普通换行.txt');
+      await file.writeAsString('第一行\n第二行\n第三行');
+
+      final service = FileSelectorReaderImportService();
+      final imported = await service.openTxtFile(file.path);
+
+      expect(imported.content, '第一行\n第二行\n第三行');
+
+      await tempDirectory.delete(recursive: true);
+    });
+
     test('decodes UTF-16LE txt files without BOM', () async {
       final tempDirectory = await Directory.systemTemp.createTemp(
         'cheatreader-import-test',
@@ -77,7 +107,7 @@ void main() {
       final service = FileSelectorReaderImportService();
       final imported = await service.openTxtFile(file.path);
 
-      expect(imported.content, '标题\n\n第一段\n\n第二段');
+      expect(imported.content, '标题\n第一段\n第二段');
 
       await tempDirectory.delete(recursive: true);
     });
@@ -103,7 +133,7 @@ void main() {
       final service = FileSelectorReaderImportService();
       final imported = await service.openTxtFile(file.path);
 
-      expect(imported.content, '标题\n\n第一段\n\n第二段');
+      expect(imported.content, '标题\n第一段\n第二段');
 
       await tempDirectory.delete(recursive: true);
     });
@@ -168,7 +198,7 @@ void main() {
       final service = FileSelectorReaderImportService();
       final imported = await service.openTxtFile(file.path);
 
-      expect(imported.content, '第一章\n\n第一段\n\n第二章\n\n第二段');
+      expect(imported.content, '第一章\n第一段\n第二章\n第二段');
 
       await tempDirectory.delete(recursive: true);
     });
@@ -199,10 +229,7 @@ void main() {
       final service = FileSelectorReaderImportService();
       final imported = await service.openTxtFile(file.path);
 
-      expect(
-        imported.content,
-        'Heading\n\nFirst paragraph\n\nSecond paragraph',
-      );
+      expect(imported.content, 'Heading\nFirst paragraph\nSecond paragraph');
 
       await tempDirectory.delete(recursive: true);
     });
@@ -228,6 +255,7 @@ void main() {
 
       expect(imported.content, contains('Chapter One'));
       expect(imported.content, contains('First paragraph'));
+      expect(imported.content, isNot(contains('\n\n')));
 
       await tempDirectory.delete(recursive: true);
     });

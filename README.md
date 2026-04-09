@@ -139,6 +139,9 @@ flutter test
 flutter analyze
 ```
 
+For desktop floating-window changes, also run the manual checklist in
+[`manual-test-files/regression-checklist.md`](./manual-test-files/regression-checklist.md).
+
 You can also test platform builds directly:
 
 ```bash

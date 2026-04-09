@@ -136,7 +136,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get readingAnimationSubtitle =>
-      'Off by default. When enabled, use only a slight slide to soften line changes without trailing ghosts';
+      'Use only a slight slide to soften line changes';
 
   @override
   String get fontTitle => 'Font';

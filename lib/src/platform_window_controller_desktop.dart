@@ -285,6 +285,33 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   }
 
   @override
+  Future<void> bringToForegroundFromSystemActivation() async {
+    if (!_isSupportedDesktop || _bossKeyHidden) {
+      return;
+    }
+
+    if (_controlPanelRestorePosition != null) {
+      return;
+    }
+
+    final isVisible = await windowManager.isVisible();
+    if (!isVisible) {
+      await windowManager.show();
+    }
+
+    // isFocused is not supported on Linux in window_manager.
+    if (defaultTargetPlatform == TargetPlatform.linux) {
+      await windowManager.focus();
+      return;
+    }
+
+    final isFocused = await windowManager.isFocused();
+    if (!isFocused) {
+      await windowManager.focus();
+    }
+  }
+
+  @override
   Future<void> syncPresentation(ReaderSettings settings) async {
     if (!_isSupportedDesktop) {
       return;

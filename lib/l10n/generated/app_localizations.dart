@@ -329,7 +329,7 @@ abstract class AppLocalizations {
   /// No description provided for @readingAnimationSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Off by default. When enabled, use only a slight slide to soften line changes without trailing ghosts'**
+  /// **'Use only a slight slide to soften line changes'**
   String get readingAnimationSubtitle;
 
   /// No description provided for @fontTitle.

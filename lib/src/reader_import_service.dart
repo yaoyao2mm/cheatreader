@@ -98,7 +98,7 @@ class FileSelectorReaderImportService implements ReaderImportService {
   String _extractContent({required String filePath, required List<int> bytes}) {
     final extension = path.extension(filePath).toLowerCase();
     return switch (extension) {
-      '.txt' => _decodeTextBytes(bytes),
+      '.txt' => _cleanExtractedText(_decodeTextBytes(bytes)),
       '.md' || '.markdown' => _extractMarkdownText(_decodeTextBytes(bytes)),
       '.html' ||
       '.htm' ||
@@ -394,12 +394,14 @@ class FileSelectorReaderImportService implements ReaderImportService {
 
   String _cleanExtractedText(String text) {
     return text
+        .replaceAll('\r\n', '\n')
+        .replaceAll('\r', '\n')
         .replaceAll('\u00A0', ' ')
         .replaceAll('\t', ' ')
         .replaceAll(RegExp(r'[ \t]+\n'), '\n')
         .replaceAll(RegExp(r'\n[ \t]+'), '\n')
         .replaceAll(RegExp(r'[ \t]{2,}'), ' ')
-        .replaceAll(RegExp(r'\n{3,}'), '\n\n')
+        .replaceAll(RegExp(r'\n{2,}'), '\n')
         .trim();
   }
 

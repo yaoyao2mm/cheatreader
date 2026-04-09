@@ -30,6 +30,8 @@ abstract class PlatformWindowController {
 
   Future<void> syncPresentation(ReaderSettings settings);
 
+  Future<void> bringToForegroundFromSystemActivation();
+
   Future<void> startDragging();
 
   Future<void> resizeWindow(WindowResizeEdge edge, Offset delta);

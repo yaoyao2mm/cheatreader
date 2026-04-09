@@ -35,7 +35,7 @@ class ReaderSettings {
     oneLineMode: false,
     modeToggleTrigger: ReaderModeToggleTrigger.doubleClick,
     languageMode: ReaderLanguageMode.system,
-    alwaysOnTop: true,
+    alwaysOnTop: false,
     readingAnimationEnabled: false,
     fontScale: 1.0,
     lineSpacing: 1.5,

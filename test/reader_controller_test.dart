@@ -212,6 +212,7 @@ void main() {
       controller.setLineSpacing(1.8);
       controller.setReadingWidthFactor(0.7);
       controller.setWindowOpacity(0.78);
+      controller.setAlwaysOnTop(true);
       controller.setTransparentModeEnabled(true);
       controller.setTransparentTextShadowEnabled(false);
       controller.setTextColorMode(ReaderTextColorMode.custom);
@@ -237,6 +238,7 @@ void main() {
       expect(saved.settings.lineSpacing, 1.8);
       expect(saved.settings.readingWidthFactor, 0.7);
       expect(saved.settings.windowOpacity, 0.78);
+      expect(saved.settings.alwaysOnTop, isTrue);
       expect(saved.settings.transparentModeEnabled, isTrue);
       expect(saved.settings.transparentTextShadowEnabled, isFalse);
       expect(saved.settings.textColorMode, ReaderTextColorMode.custom);
@@ -268,6 +270,7 @@ void main() {
       expect(windowController.syncedSettings?.lineSpacing, 1.8);
       expect(windowController.syncedSettings?.readingWidthFactor, 0.7);
       expect(windowController.syncedSettings?.windowOpacity, 0.78);
+      expect(windowController.syncedSettings?.alwaysOnTop, isTrue);
       expect(windowController.syncedSettings?.transparentModeEnabled, isTrue);
       expect(
         windowController.syncedSettings?.transparentTextShadowEnabled,
@@ -506,6 +509,29 @@ void main() {
   });
 
   group('SharedPreferencesReaderPreferencesStore', () {
+    test(
+      'uses default non-topmost when always-on-top preference is missing',
+      () async {
+        SharedPreferences.setMockInitialValues(<String, Object>{});
+        final store = await SharedPreferencesReaderPreferencesStore.create();
+
+        final loaded = await store.loadSnapshot();
+
+        expect(loaded.settings.alwaysOnTop, isFalse);
+      },
+    );
+
+    test('keeps saved always-on-top value for existing users', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'reader.alwaysOnTop': true,
+      });
+      final store = await SharedPreferencesReaderPreferencesStore.create();
+
+      final loaded = await store.loadSnapshot();
+
+      expect(loaded.settings.alwaysOnTop, isTrue);
+    });
+
     test('loads previously saved values', () async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final store = await SharedPreferencesReaderPreferencesStore.create();
@@ -690,6 +716,9 @@ class FakePlatformWindowController implements PlatformWindowController {
   Future<void> syncPresentation(ReaderSettings settings) async {
     syncedSettings = settings;
   }
+
+  @override
+  Future<void> bringToForegroundFromSystemActivation() async {}
 
   @override
   Future<void> closeWindow() async {}
