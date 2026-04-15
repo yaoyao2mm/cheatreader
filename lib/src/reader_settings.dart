@@ -26,9 +26,13 @@ class ReaderSettings {
     required this.transparentTextShadowEnabled,
     required this.textColorMode,
     required this.customTextColorValue,
+    required this.textBrightnessFactor,
     required this.shortcutBindings,
   });
 
+  static const double minTextBrightnessFactor = 0.35;
+  static const double maxTextBrightnessFactor = 1.0;
+  static const double defaultTextBrightnessFactor = 1.0;
   static const int defaultCustomTextColorValue = 0xFFF4F4F0;
 
   static const ReaderSettings defaults = ReaderSettings(
@@ -48,6 +52,7 @@ class ReaderSettings {
     transparentTextShadowEnabled: true,
     textColorMode: ReaderTextColorMode.adaptive,
     customTextColorValue: defaultCustomTextColorValue,
+    textBrightnessFactor: defaultTextBrightnessFactor,
     shortcutBindings: ReaderShortcutBindings.defaults,
   );
 
@@ -67,6 +72,7 @@ class ReaderSettings {
   final bool transparentTextShadowEnabled;
   final ReaderTextColorMode textColorMode;
   final int customTextColorValue;
+  final double textBrightnessFactor;
   final ReaderShortcutBindings shortcutBindings;
 
   static const Object _unset = Object();
@@ -88,6 +94,7 @@ class ReaderSettings {
     bool? transparentTextShadowEnabled,
     ReaderTextColorMode? textColorMode,
     int? customTextColorValue,
+    double? textBrightnessFactor,
     ReaderShortcutBindings? shortcutBindings,
   }) {
     return ReaderSettings(
@@ -114,6 +121,8 @@ class ReaderSettings {
           transparentTextShadowEnabled ?? this.transparentTextShadowEnabled,
       textColorMode: textColorMode ?? this.textColorMode,
       customTextColorValue: customTextColorValue ?? this.customTextColorValue,
+      textBrightnessFactor:
+          textBrightnessFactor ?? this.textBrightnessFactor,
       shortcutBindings: shortcutBindings ?? this.shortcutBindings,
     );
   }

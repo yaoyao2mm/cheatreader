@@ -165,7 +165,7 @@ This repository is configured for automated desktop releases with GitHub Actions
 
 - Push a tag like `v0.1.0`
 - GitHub Actions runs analyze and tests
-- The workflow builds macOS, Windows, and Linux release artifacts
+- The workflow builds macOS, Windows, Linux `amd64`, and Linux `arm64` release artifacts
 - GitHub Release assets are uploaded automatically
 
 You can also trigger the workflow manually from the Actions tab with a tag name.

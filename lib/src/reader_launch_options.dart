@@ -39,6 +39,9 @@ ReaderPreferencesSnapshot applyLaunchOptionsToSnapshot(
     textColorMode: options.resetDisplay
         ? ReaderTextColorMode.adaptive
         : settings.textColorMode,
+    textBrightnessFactor: options.resetDisplay
+      ? ReaderSettings.defaultTextBrightnessFactor
+      : settings.textBrightnessFactor,
   );
 
   return ReaderPreferencesSnapshot(

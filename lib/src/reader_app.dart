@@ -53,14 +53,25 @@ const XTypeGroup _fontFileTypeGroup = XTypeGroup(
 
 enum _ReaderTransitionDirection { idle, forward, backward }
 
+Color _applyTextBrightness(Color color, double factor) {
+  final hsl = HSLColor.fromColor(color);
+  return hsl
+      .withLightness((hsl.lightness * factor).clamp(0.0, 1.0))
+      .toColor();
+}
+
 ({Color background, Color text, Color dragIndicator, List<Shadow> textShadows})
 _resolveReaderPresentation(ReaderSettings settings) {
   final customTextColor = Color(settings.customTextColorValue);
 
   if (settings.transparentModeEnabled) {
+    final automaticTextColor = _applyTextBrightness(
+      _readerLightTextColor,
+      settings.textBrightnessFactor,
+    );
     final textColor = settings.textColorMode == ReaderTextColorMode.custom
         ? customTextColor
-        : _readerLightTextColor;
+        : automaticTextColor;
     final haloIsDark = textColor.computeLuminance() > 0.45;
     final haloColor = haloIsDark ? Colors.black : Colors.white;
     final textShadows = settings.transparentTextShadowEnabled
@@ -88,9 +99,10 @@ _resolveReaderPresentation(ReaderSettings settings) {
   }
 
   final useLightReaderBackground = settings.windowOpacity < 0.78;
-  final automaticTextColor = useLightReaderBackground
-      ? _readerDarkTextColor
-      : _readerLightTextColor;
+  final automaticTextColor = _applyTextBrightness(
+    useLightReaderBackground ? _readerDarkTextColor : _readerLightTextColor,
+    settings.textBrightnessFactor,
+  );
   final readerBackgroundColor = useLightReaderBackground
       ? const Color(0xFFF2F0E8).withValues(alpha: settings.windowOpacity)
       : Colors.black.withValues(alpha: settings.windowOpacity);
@@ -1790,6 +1802,20 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
         textColor: readerPresentation.text,
         textShadows: readerPresentation.textShadows,
       ),
+      if (settings.textColorMode == ReaderTextColorMode.adaptive) ...[
+        const SizedBox(height: 12),
+        _SliderRow(
+          label: l10n.fontColorLightnessLabel,
+          value: settings.textBrightnessFactor,
+          min: ReaderSettings.minTextBrightnessFactor,
+          max: ReaderSettings.maxTextBrightnessFactor,
+          divisions: 13,
+          displayValue: l10n.sliderPercent(
+            (settings.textBrightnessFactor * 100).round(),
+          ),
+          onChanged: controller.setTextBrightnessFactor,
+        ),
+      ],
       if (settings.textColorMode == ReaderTextColorMode.custom) ...[
         const SizedBox(height: 12),
         Text(l10n.fontColorPresetsLabel),
@@ -2070,11 +2096,26 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          l10n.controlPanelTitle,
-                          style: Theme.of(
-                            context,
-                          ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l10n.controlPanelTitle,
+                                style: Theme.of(context).textTheme.titleLarge
+                                    ?.copyWith(color: Colors.white),
+                              ),
+                            ),
+                            IconButton(
+                              onPressed: () => Navigator.of(context).pop(),
+                              icon: const Icon(Icons.close),
+                              color: Colors.white70,
+                              iconSize: 20,
+                              padding: EdgeInsets.zero,
+                              constraints: const BoxConstraints(),
+                              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                            ),
+                          ],
                         ),
                         const SizedBox(height: 8),
                         Text(
@@ -2111,11 +2152,26 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        l10n.controlPanelTitle,
-                        style: Theme.of(
-                          context,
-                        ).textTheme.titleLarge?.copyWith(color: Colors.white),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              l10n.controlPanelTitle,
+                              style: Theme.of(context).textTheme.titleLarge
+                                  ?.copyWith(color: Colors.white),
+                            ),
+                          ),
+                          IconButton(
+                            onPressed: () => Navigator.of(context).pop(),
+                            icon: const Icon(Icons.close),
+                            color: Colors.white70,
+                            iconSize: 20,
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                          ),
+                        ],
                       ),
                       const SizedBox(height: 8),
                       Text(

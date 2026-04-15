@@ -215,6 +215,7 @@ void main() {
       controller.setAlwaysOnTop(true);
       controller.setTransparentModeEnabled(true);
       controller.setTransparentTextShadowEnabled(false);
+      controller.setTextBrightnessFactor(0.6);
       controller.setTextColorMode(ReaderTextColorMode.custom);
       controller.setCustomTextColorValue(0xFF2B6CB0);
       final conflictMessage = controller.setShortcutBinding(
@@ -241,6 +242,7 @@ void main() {
       expect(saved.settings.alwaysOnTop, isTrue);
       expect(saved.settings.transparentModeEnabled, isTrue);
       expect(saved.settings.transparentTextShadowEnabled, isFalse);
+      expect(saved.settings.textBrightnessFactor, 0.6);
       expect(saved.settings.textColorMode, ReaderTextColorMode.custom);
       expect(saved.settings.customTextColorValue, 0xFF2B6CB0);
       expect(conflictMessage, isNull);
@@ -276,6 +278,7 @@ void main() {
         windowController.syncedSettings?.transparentTextShadowEnabled,
         isFalse,
       );
+      expect(windowController.syncedSettings?.textBrightnessFactor, 0.6);
       expect(
         windowController.syncedSettings?.textColorMode,
         ReaderTextColorMode.custom,
@@ -347,11 +350,14 @@ void main() {
         );
 
         await controller.initialize();
-        controller.setWindowOpacity(0.4);
+        controller.setTextBrightnessFactor(0.5);
         controller.setTextColorMode(ReaderTextColorMode.custom);
 
         expect(controller.settings.textColorMode, ReaderTextColorMode.custom);
-        expect(controller.settings.customTextColorValue, 0xFF111111);
+        expect(
+          controller.settings.customTextColorValue,
+          _dimmedColorValue(ReaderSettings.defaultCustomTextColorValue, 0.5),
+        );
       },
     );
 
@@ -552,6 +558,7 @@ void main() {
         transparentTextShadowEnabled: false,
         textColorMode: ReaderTextColorMode.custom,
         customTextColorValue: 0xFF0F766E,
+        textBrightnessFactor: 0.6,
         shortcutBindings: ReaderShortcutBindings.defaults,
       );
 
@@ -584,6 +591,7 @@ void main() {
       expect(loaded.settings.customFontDisplayName, 'book.ttf');
       expect(loaded.settings.transparentModeEnabled, isTrue);
       expect(loaded.settings.transparentTextShadowEnabled, isFalse);
+      expect(loaded.settings.textBrightnessFactor, 0.6);
       expect(loaded.settings.textColorMode, ReaderTextColorMode.custom);
       expect(loaded.settings.customTextColorValue, 0xFF0F766E);
       expect(loaded.bookshelf.single.path, '/tmp/book.txt');
@@ -591,6 +599,14 @@ void main() {
       expect(loaded.bookshelf.single.fileBookmark, 'bookmark:/tmp/book.txt');
     });
   });
+}
+
+int _dimmedColorValue(int colorValue, double factor) {
+  final hsl = HSLColor.fromColor(Color(colorValue));
+  return hsl
+      .withLightness((hsl.lightness * factor).clamp(0.0, 1.0))
+      .toColor()
+      .toARGB32();
 }
 
 class FakeReaderFileBookmarkService implements ReaderFileBookmarkService {

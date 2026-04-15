@@ -45,6 +45,7 @@ class SharedPreferencesReaderPreferencesStore
       'reader.transparentTextShadowEnabled';
   static const _textColorModeKey = 'reader.textColorMode';
   static const _customTextColorValueKey = 'reader.customTextColorValue';
+  static const _textBrightnessFactorKey = 'reader.textBrightnessFactor';
   static const _shortcutBindingsKey = 'reader.shortcutBindings';
   static const _bookshelfKey = 'reader.bookshelf';
 
@@ -115,6 +116,10 @@ class SharedPreferencesReaderPreferencesStore
           _preferences.getInt(_customTextColorValueKey) ??
               ReaderSettings.defaults.customTextColorValue,
         ),
+        textBrightnessFactor: _normalizeTextBrightnessFactor(
+          _preferences.getDouble(_textBrightnessFactorKey) ??
+              ReaderSettings.defaults.textBrightnessFactor,
+        ),
         shortcutBindings: _loadShortcutBindings(),
       ),
       bookshelf: decodedBookshelf
@@ -182,6 +187,10 @@ class SharedPreferencesReaderPreferencesStore
       _customTextColorValueKey,
       _normalizeOpaqueColorValue(settings.customTextColorValue),
     );
+    await _preferences.setDouble(
+      _textBrightnessFactorKey,
+      _normalizeTextBrightnessFactor(settings.textBrightnessFactor),
+    );
     await _preferences.setString(
       _shortcutBindingsKey,
       jsonEncode(settings.shortcutBindings.toJson()),
@@ -216,6 +225,19 @@ class SharedPreferencesReaderPreferencesStore
 
   int _normalizeOpaqueColorValue(int value) {
     return 0xFF000000 | (value & 0x00FFFFFF);
+  }
+
+  double _normalizeTextBrightnessFactor(double value) {
+    if (value.isNaN) {
+      return ReaderSettings.defaultTextBrightnessFactor;
+    }
+
+    return value
+        .clamp(
+          ReaderSettings.minTextBrightnessFactor,
+          ReaderSettings.maxTextBrightnessFactor,
+        )
+        .toDouble();
   }
 }
 

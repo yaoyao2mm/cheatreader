@@ -27,6 +27,7 @@ void main() {
           windowOpacity: 0.42,
           textColorMode: ReaderTextColorMode.custom,
           customTextColorValue: 0xFF2B6CB0,
+          textBrightnessFactor: 0.55,
           languageMode: ReaderLanguageMode.english,
         ),
         bookshelf: [
@@ -52,6 +53,10 @@ void main() {
       expect(recovered.settings.windowOpacity, 0.94);
       expect(recovered.settings.textColorMode, ReaderTextColorMode.adaptive);
       expect(recovered.settings.customTextColorValue, 0xFF2B6CB0);
+      expect(
+        recovered.settings.textBrightnessFactor,
+        ReaderSettings.defaultTextBrightnessFactor,
+      );
       expect(recovered.settings.languageMode, ReaderLanguageMode.english);
       expect(recovered.bookshelf, same(snapshot.bookshelf));
     });
@@ -66,6 +71,7 @@ void main() {
             transparentTextShadowEnabled: false,
             windowOpacity: 0.42,
             textColorMode: ReaderTextColorMode.custom,
+            textBrightnessFactor: 0.55,
           ),
           bookshelf: const [],
         );
@@ -81,6 +87,7 @@ void main() {
         expect(recovered.settings.transparentTextShadowEnabled, isFalse);
         expect(recovered.settings.windowOpacity, 0.42);
         expect(recovered.settings.textColorMode, ReaderTextColorMode.custom);
+        expect(recovered.settings.textBrightnessFactor, 0.55);
       },
     );
   });

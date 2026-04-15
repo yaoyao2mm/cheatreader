@@ -191,6 +191,39 @@ void main() {
     },
   );
 
+  testWidgets('automatic text brightness can dim the default light text', (
+    WidgetTester tester,
+  ) async {
+    final controller = ReaderController(
+      initialContent: '自动亮度测试',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          textBrightnessFactor: 0.5,
+        ),
+      ),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+
+    final text = tester.widget<Text>(find.text('自动亮度测试'));
+    final expected = _dimmedColor(
+      const Color(ReaderSettings.defaultCustomTextColorValue),
+      0.5,
+    );
+    expect(text.style?.color, expected);
+    expect(text.style?.shadows, isEmpty);
+  });
+
   testWidgets('custom text color works with custom opacity', (
     WidgetTester tester,
   ) async {
@@ -471,6 +504,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('Check latest version'), findsOneWidget);
   });
+}
+
+Color _dimmedColor(Color color, double factor) {
+  final hsl = HSLColor.fromColor(color);
+  return hsl
+      .withLightness((hsl.lightness * factor).clamp(0.0, 1.0))
+      .toColor();
 }
 
 class _FakeReaderImportService implements ReaderImportService {

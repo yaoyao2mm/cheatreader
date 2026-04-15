@@ -76,9 +76,16 @@ jobs:
             release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-windows-setup.exe
           - os: ubuntu-22.04
             target: linux
-            artifact_name: cheatreader-linux
+            arch: amd64
+            artifact_name: cheatreader-linux-amd64
             build_output: build/linux/x64/release/bundle
-            release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-linux.deb
+            release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-linux-amd64.deb
+          - os: ubuntu-22.04-arm
+            target: linux
+            arch: arm64
+            artifact_name: cheatreader-linux-arm64
+            build_output: build/linux/arm64/release/bundle
+            release_asset: cheatreader-${{ needs.prepare.outputs.release_tag }}-linux-arm64.deb
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout
@@ -118,7 +125,6 @@ jobs:
         shell: bash
         run: |
           docker run --rm \
-            --platform linux/amd64 \
             -v "${GITHUB_WORKSPACE}:/work" \
             -w /work \
             ubuntu:20.04 \
@@ -236,7 +242,7 @@ jobs:
             echo "Version: ${RELEASE_TAG#v}"
             echo 'Section: utils'
             echo 'Priority: optional'
-            echo 'Architecture: amd64'
+            echo 'Architecture: ${{ matrix.arch }}'
             echo 'Maintainer: yaoyao2mm <yaoyao2mm@users.noreply.github.com>'
             echo 'Description: Floating desktop reader for low-distraction reading'
             echo 'Depends: libgtk-3-0, libblkid1, liblzma5, libstdc++6'

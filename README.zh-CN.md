@@ -162,7 +162,7 @@ flutter build linux
 
 - 推送 `v0.1.0` 这种 tag
 - 自动执行 analyze 和 test
-- 自动构建 macOS / Windows / Linux 三端产物
+- 自动构建 macOS / Windows / Linux `amd64` / Linux `arm64` 四类产物
 - 自动上传到 GitHub Release
 
 也可以在 Actions 页面手动触发，并指定 tag 名称。

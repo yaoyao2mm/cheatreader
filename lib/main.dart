@@ -83,5 +83,6 @@ bool _settingsMatch(ReaderSettings a, ReaderSettings b) {
       a.transparentModeEnabled == b.transparentModeEnabled &&
       a.textColorMode == b.textColorMode &&
       a.customTextColorValue == b.customTextColorValue &&
+      a.textBrightnessFactor == b.textBrightnessFactor &&
       a.shortcutBindings == b.shortcutBindings;
 }

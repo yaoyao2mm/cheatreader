@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/painting.dart';
 
 import 'platform_window_controller_base.dart';
 import 'reader_book.dart';
@@ -305,7 +306,7 @@ class ReaderController extends ChangeNotifier {
       _updateSettings(
         _settings.copyWith(
           textColorMode: value,
-          customTextColorValue: _adaptiveTextColorValueFor(_settings),
+          customTextColorValue: _effectiveAdaptiveTextColorValueFor(_settings),
         ),
       );
       return;
@@ -318,6 +319,14 @@ class ReaderController extends ChangeNotifier {
     _updateSettings(
       _settings.copyWith(
         customTextColorValue: _normalizeOpaqueColorValue(value),
+      ),
+    );
+  }
+
+  void setTextBrightnessFactor(double value) {
+    _updateSettings(
+      _settings.copyWith(
+        textBrightnessFactor: _normalizeTextBrightnessFactor(value),
       ),
     );
   }
@@ -478,6 +487,7 @@ class ReaderController extends ChangeNotifier {
             value.transparentTextShadowEnabled &&
         _settings.textColorMode == value.textColorMode &&
         _settings.customTextColorValue == value.customTextColorValue &&
+        _settings.textBrightnessFactor == value.textBrightnessFactor &&
         _settings.shortcutBindings == value.shortcutBindings) {
       return;
     }
@@ -508,8 +518,34 @@ class ReaderController extends ChangeNotifier {
         : ReaderSettings.defaults.customTextColorValue;
   }
 
+  int _effectiveAdaptiveTextColorValueFor(ReaderSettings settings) {
+    final baseColor = Color(_adaptiveTextColorValueFor(settings));
+    final hsl = HSLColor.fromColor(baseColor);
+    return _normalizeOpaqueColorValue(
+      hsl
+          .withLightness(
+            (hsl.lightness * settings.textBrightnessFactor).clamp(0.0, 1.0),
+          )
+          .toColor()
+          .toARGB32(),
+    );
+  }
+
   int _normalizeOpaqueColorValue(int value) {
     return 0xFF000000 | (value & 0x00FFFFFF);
+  }
+
+  double _normalizeTextBrightnessFactor(double value) {
+    if (value.isNaN) {
+      return ReaderSettings.defaultTextBrightnessFactor;
+    }
+
+    return value
+        .clamp(
+          ReaderSettings.minTextBrightnessFactor,
+          ReaderSettings.maxTextBrightnessFactor,
+        )
+        .toDouble();
   }
 
   Future<void> _persistCurrentBookProgress() async {
