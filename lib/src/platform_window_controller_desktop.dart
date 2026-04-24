@@ -312,6 +312,37 @@ class DesktopPlatformWindowController implements PlatformWindowController {
   }
 
   @override
+  Future<void> locateReader(ReaderSettings settings) async {
+    if (!_isSupportedDesktop) {
+      return;
+    }
+
+    if (_bossKeyHidden) {
+      _bossKeyHidden = false;
+      await windowManager.setIgnoreMouseEvents(false);
+      await windowManager.setOpacity(1.0);
+    }
+
+    if (_controlPanelRestorePosition != null) {
+      await windowManager.focus();
+      return;
+    }
+
+    final isVisible = await windowManager.isVisible();
+    if (!isVisible) {
+      await windowManager.show();
+    }
+
+    await windowManager.setAlwaysOnTop(true);
+    try {
+      await windowManager.center(animate: true);
+      await windowManager.focus();
+    } finally {
+      await windowManager.setAlwaysOnTop(settings.alwaysOnTop);
+    }
+  }
+
+  @override
   Future<void> syncPresentation(ReaderSettings settings) async {
     if (!_isSupportedDesktop) {
       return;

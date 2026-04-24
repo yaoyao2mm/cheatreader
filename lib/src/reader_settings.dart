@@ -33,6 +33,14 @@ class ReaderSettings {
   static const double minTextBrightnessFactor = 0.35;
   static const double maxTextBrightnessFactor = 1.0;
   static const double defaultTextBrightnessFactor = 1.0;
+  static const double minFontScale = 0.5;
+  static const double maxFontScale = 1.4;
+  static const double minLineSpacing = 1.2;
+  static const double maxLineSpacing = 2.0;
+  static const double minReadingWidthFactor = 0.55;
+  static const double maxReadingWidthFactor = 1.0;
+  static const double minWindowOpacity = 0.0;
+  static const double maxWindowOpacity = 1.0;
   static const int defaultCustomTextColorValue = 0xFFF4F4F0;
 
   static const ReaderSettings defaults = ReaderSettings(
@@ -121,8 +129,7 @@ class ReaderSettings {
           transparentTextShadowEnabled ?? this.transparentTextShadowEnabled,
       textColorMode: textColorMode ?? this.textColorMode,
       customTextColorValue: customTextColorValue ?? this.customTextColorValue,
-      textBrightnessFactor:
-          textBrightnessFactor ?? this.textBrightnessFactor,
+      textBrightnessFactor: textBrightnessFactor ?? this.textBrightnessFactor,
       shortcutBindings: shortcutBindings ?? this.shortcutBindings,
     );
   }

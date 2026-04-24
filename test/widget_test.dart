@@ -317,6 +317,73 @@ void main() {
     expect(find.textContaining('第二行'), findsOneWidget);
   });
 
+  testWidgets('arbitrary custom shortcut advances reading', (
+    WidgetTester tester,
+  ) async {
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行\n第三行',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          shortcutBindings: ReaderShortcutBindings.defaults.copyWith(
+            nextLine: ReaderShortcutKey(
+              logicalKeyId: LogicalKeyboardKey.f5.keyId,
+            ),
+          ),
+        ),
+      ),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.f5);
+    await tester.pumpAndSettle();
+
+    expect(find.textContaining('第二行'), findsOneWidget);
+  });
+
+  testWidgets('locate shortcut asks window controller to reveal reader', (
+    WidgetTester tester,
+  ) async {
+    final windowController = _FakePlatformWindowController(
+      floatingControls: true,
+    );
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行\n第三行',
+      preferencesStore: MemoryReaderPreferencesStore(),
+      windowController: windowController,
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: windowController,
+      ),
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+
+    expect(windowController.locateReaderCount, 1);
+  });
+
   testWidgets('reading animation is disabled by default', (
     WidgetTester tester,
   ) async {
@@ -508,9 +575,7 @@ void main() {
 
 Color _dimmedColor(Color color, double factor) {
   final hsl = HSLColor.fromColor(color);
-  return hsl
-      .withLightness((hsl.lightness * factor).clamp(0.0, 1.0))
-      .toColor();
+  return hsl.withLightness((hsl.lightness * factor).clamp(0.0, 1.0)).toColor();
 }
 
 class _FakeReaderImportService implements ReaderImportService {
@@ -547,10 +612,14 @@ class _FakeReaderFileBookmarkService implements ReaderFileBookmarkService {
 }
 
 class _FakePlatformWindowController implements PlatformWindowController {
+  _FakePlatformWindowController({this.floatingControls = false});
+
+  final bool floatingControls;
   int hideForBossKeyCount = 0;
+  int locateReaderCount = 0;
 
   @override
-  bool get supportsFloatingControls => false;
+  bool get supportsFloatingControls => floatingControls;
 
   @override
   bool get supportsFramelessWindow => false;
@@ -589,6 +658,11 @@ class _FakePlatformWindowController implements PlatformWindowController {
 
   @override
   Future<void> bringToForegroundFromSystemActivation() async {}
+
+  @override
+  Future<void> locateReader(ReaderSettings settings) async {
+    locateReaderCount += 1;
+  }
 
   @override
   Future<void> closeWindow() async {}

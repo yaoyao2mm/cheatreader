@@ -408,6 +408,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shortcutBossKey => 'Boss key';
 
   @override
+  String get shortcutLocateReader => 'Locate reader';
+
+  @override
   String get shortcutKeyArrowDown => 'Arrow Down';
 
   @override

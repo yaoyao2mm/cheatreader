@@ -30,6 +30,7 @@ const _readerTransparentShadowOffsets = <Offset>[
   Offset(0, -1),
   Offset(0, 1),
 ];
+const _readerLocatorHighlightDuration = Duration(milliseconds: 1500);
 
 const _readerTextColorPresets = <Color>[
   Color(0xFFF4F4F0),
@@ -55,9 +56,7 @@ enum _ReaderTransitionDirection { idle, forward, backward }
 
 Color _applyTextBrightness(Color color, double factor) {
   final hsl = HSLColor.fromColor(color);
-  return hsl
-      .withLightness((hsl.lightness * factor).clamp(0.0, 1.0))
-      .toColor();
+  return hsl.withLightness((hsl.lightness * factor).clamp(0.0, 1.0)).toColor();
 }
 
 ({Color background, Color text, Color dragIndicator, List<Shadow> textShadows})
@@ -195,7 +194,9 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   );
   OverlayEntry? _messageOverlayEntry;
   Timer? _messageTimer;
+  Timer? _locatorHighlightTimer;
   bool _windowListenerRegistered = false;
+  bool _locatorHighlightVisible = false;
   DateTime? _lastForegroundRecoveryAt;
   int? _lastOneLineSourceIndex;
   int _oneLineSegmentIndex = 0;
@@ -272,6 +273,26 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
 
     _lastForegroundRecoveryAt = now;
     unawaited(widget.windowController.bringToForegroundFromSystemActivation());
+    _showLocatorHighlight();
+  }
+
+  void _showLocatorHighlight() {
+    if (!mounted) {
+      return;
+    }
+
+    _locatorHighlightTimer?.cancel();
+    setState(() {
+      _locatorHighlightVisible = true;
+    });
+    _locatorHighlightTimer = Timer(_readerLocatorHighlightDuration, () {
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _locatorHighlightVisible = false;
+      });
+    });
   }
 
   void _showMessage(String message) {
@@ -555,6 +576,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
   void dispose() {
     _messageTimer?.cancel();
     _messageOverlayEntry?.remove();
+    _locatorHighlightTimer?.cancel();
     if (_windowListenerRegistered) {
       windowManager.removeListener(this);
     }
@@ -735,6 +757,30 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
                                 ),
                               ),
                             ),
+                          IgnorePointer(
+                            child: AnimatedOpacity(
+                              opacity: _locatorHighlightVisible ? 1 : 0,
+                              duration: const Duration(milliseconds: 180),
+                              child: DecoratedBox(
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    color: const Color(0xFFFFD166),
+                                    width: 3,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: const Color(
+                                        0xFFFFD166,
+                                      ).withValues(alpha: 0.44),
+                                      blurRadius: 18,
+                                      spreadRadius: 2,
+                                    ),
+                                  ],
+                                ),
+                                child: const SizedBox.expand(),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                     ),
@@ -773,6 +819,15 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     await widget.controller.toggleBossKey();
   }
 
+  Future<void> _handleLocateReaderShortcut() async {
+    await widget.controller.locateReader();
+    if (!mounted) {
+      return;
+    }
+
+    _showLocatorHighlight();
+  }
+
   Map<ShortcutActivator, VoidCallback> _buildShortcutBindings(
     ReaderSettings settings,
   ) {
@@ -790,10 +845,7 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     };
 
     void addBinding(ReaderShortcutKey key, VoidCallback callback) {
-      final activator = _activatorForShortcutKey(key);
-      if (activator != null) {
-        bindings[activator] = callback;
-      }
+      bindings[key.toActivator()] = callback;
     }
 
     final shortcuts = settings.shortcutBindings;
@@ -805,38 +857,11 @@ class _ReaderSurfaceState extends State<ReaderSurface> with WindowListener {
     addBinding(shortcuts.bossKey, () {
       unawaited(_handleBossKeyShortcut());
     });
+    addBinding(shortcuts.locateReader, () {
+      unawaited(_handleLocateReaderShortcut());
+    });
 
     return bindings;
-  }
-
-  ShortcutActivator? _activatorForShortcutKey(ReaderShortcutKey key) {
-    return switch (key) {
-      ReaderShortcutKey.arrowDown => const SingleActivator(
-        LogicalKeyboardKey.arrowDown,
-      ),
-      ReaderShortcutKey.arrowUp => const SingleActivator(
-        LogicalKeyboardKey.arrowUp,
-      ),
-      ReaderShortcutKey.pageDown => const SingleActivator(
-        LogicalKeyboardKey.pageDown,
-      ),
-      ReaderShortcutKey.pageUp => const SingleActivator(
-        LogicalKeyboardKey.pageUp,
-      ),
-      ReaderShortcutKey.space => const SingleActivator(
-        LogicalKeyboardKey.space,
-      ),
-      ReaderShortcutKey.shiftSpace => const SingleActivator(
-        LogicalKeyboardKey.space,
-        shift: true,
-      ),
-      ReaderShortcutKey.keyJ => const SingleActivator(LogicalKeyboardKey.keyJ),
-      ReaderShortcutKey.keyK => const SingleActivator(LogicalKeyboardKey.keyK),
-      ReaderShortcutKey.keyN => const SingleActivator(LogicalKeyboardKey.keyN),
-      ReaderShortcutKey.keyP => const SingleActivator(LogicalKeyboardKey.keyP),
-      ReaderShortcutKey.keyM => const SingleActivator(LogicalKeyboardKey.keyM),
-      ReaderShortcutKey.keyB => const SingleActivator(LogicalKeyboardKey.keyB),
-    };
   }
 
   List<String> _resolveDisplayedLines({
@@ -1877,17 +1902,17 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       _SliderRow(
         label: l10n.fontScaleLabel,
         value: settings.fontScale,
-        min: 0.85,
-        max: 1.4,
-        divisions: 11,
+        min: ReaderSettings.minFontScale,
+        max: ReaderSettings.maxFontScale,
+        divisions: 18,
         displayValue: l10n.sliderPercent((settings.fontScale * 100).round()),
         onChanged: controller.setFontScale,
       ),
       _SliderRow(
         label: l10n.lineSpacingLabel,
         value: settings.lineSpacing,
-        min: 1.2,
-        max: 2.0,
+        min: ReaderSettings.minLineSpacing,
+        max: ReaderSettings.maxLineSpacing,
         divisions: 8,
         displayValue: l10n.sliderMultiplier(
           settings.lineSpacing.toStringAsFixed(2),
@@ -1897,8 +1922,8 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       _SliderRow(
         label: l10n.readingWidthLabel,
         value: settings.readingWidthFactor,
-        min: 0.55,
-        max: 1.0,
+        min: ReaderSettings.minReadingWidthFactor,
+        max: ReaderSettings.maxReadingWidthFactor,
         divisions: 9,
         displayValue: l10n.sliderPercent(
           (settings.readingWidthFactor * 100).round(),
@@ -1908,8 +1933,8 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       _SliderRow(
         label: l10n.windowOpacityLabel,
         value: settings.windowOpacity,
-        min: 0.0,
-        max: 1.0,
+        min: ReaderSettings.minWindowOpacity,
+        max: ReaderSettings.maxWindowOpacity,
         divisions: 20,
         displayValue: settings.transparentModeEnabled
             ? l10n.transparentModeOverridesOpacity
@@ -1924,7 +1949,7 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       ...ReaderShortcutAction.values.map(
         (action) => Padding(
           padding: const EdgeInsets.only(bottom: 12),
-          child: _ShortcutDropdown(
+          child: _ShortcutRecorder(
             label: _shortcutActionLabel(l10n, action),
             value: controller.settings.shortcutBindings.keyForAction(action),
             keyLabelBuilder: (key) => _shortcutKeyLabel(l10n, key),
@@ -2042,24 +2067,32 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
       ReaderShortcutAction.previousPage => l10n.shortcutPreviousPage,
       ReaderShortcutAction.toggleMode => l10n.shortcutToggleMode,
       ReaderShortcutAction.bossKey => l10n.shortcutBossKey,
+      ReaderShortcutAction.locateReader => l10n.shortcutLocateReader,
     };
   }
 
   String _shortcutKeyLabel(AppLocalizations l10n, ReaderShortcutKey key) {
-    return switch (key) {
+    final keyLabel = switch (key) {
       ReaderShortcutKey.arrowDown => l10n.shortcutKeyArrowDown,
       ReaderShortcutKey.arrowUp => l10n.shortcutKeyArrowUp,
       ReaderShortcutKey.pageDown => l10n.shortcutKeyPageDown,
       ReaderShortcutKey.pageUp => l10n.shortcutKeyPageUp,
       ReaderShortcutKey.space => l10n.shortcutKeySpace,
-      ReaderShortcutKey.shiftSpace => l10n.shortcutKeyShiftSpace,
-      ReaderShortcutKey.keyJ => 'J',
-      ReaderShortcutKey.keyK => 'K',
-      ReaderShortcutKey.keyN => 'N',
-      ReaderShortcutKey.keyP => 'P',
-      ReaderShortcutKey.keyM => 'M',
-      ReaderShortcutKey.keyB => 'B',
+      _ =>
+        key.logicalKey.keyLabel.isEmpty
+            ? key.logicalKey.debugName ?? key.logicalKey.keyId.toRadixString(16)
+            : key.logicalKey.keyLabel,
     };
+    final modifiers = <String>[
+      if (key.control) 'Ctrl',
+      if (key.alt) 'Alt',
+      if (key.shift) 'Shift',
+      if (key.meta) 'Meta',
+    ];
+    if (modifiers.isEmpty) {
+      return keyLabel;
+    }
+    return [...modifiers, keyLabel].join(' + ');
   }
 
   @override
@@ -2113,7 +2146,9 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                               iconSize: 20,
                               padding: EdgeInsets.zero,
                               constraints: const BoxConstraints(),
-                              tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                              tooltip: MaterialLocalizations.of(
+                                context,
+                              ).closeButtonTooltip,
                             ),
                           ],
                         ),
@@ -2169,7 +2204,9 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
                             iconSize: 20,
                             padding: EdgeInsets.zero,
                             constraints: const BoxConstraints(),
-                            tooltip: MaterialLocalizations.of(context).closeButtonTooltip,
+                            tooltip: MaterialLocalizations.of(
+                              context,
+                            ).closeButtonTooltip,
                           ),
                         ],
                       ),
@@ -2801,8 +2838,8 @@ class _TextColorPresetButton extends StatelessWidget {
   }
 }
 
-class _ShortcutDropdown extends StatelessWidget {
-  const _ShortcutDropdown({
+class _ShortcutRecorder extends StatefulWidget {
+  const _ShortcutRecorder({
     required this.label,
     required this.value,
     required this.keyLabelBuilder,
@@ -2815,75 +2852,108 @@ class _ShortcutDropdown extends StatelessWidget {
   final ValueChanged<ReaderShortcutKey> onChanged;
 
   @override
+  State<_ShortcutRecorder> createState() => _ShortcutRecorderState();
+}
+
+class _ShortcutRecorderState extends State<_ShortcutRecorder> {
+  late final FocusNode _focusNode = FocusNode();
+  bool _isRecording = false;
+
+  @override
+  void dispose() {
+    _focusNode.dispose();
+    super.dispose();
+  }
+
+  void _startRecording() {
+    setState(() {
+      _isRecording = true;
+    });
+    _focusNode.requestFocus();
+  }
+
+  void _handleKeyEvent(KeyEvent event) {
+    if (!_isRecording || event is! KeyDownEvent) {
+      return;
+    }
+
+    final shortcutKey = ReaderShortcutKey.fromKeyEvent(event);
+    if (shortcutKey.isModifierOnly) {
+      return;
+    }
+
+    setState(() {
+      _isRecording = false;
+    });
+    widget.onChanged(shortcutKey);
+  }
+
+  @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        color: const Color(0xFF22262C),
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: const Color(0x22FFFFFF)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        child: Row(
-          children: [
-            Expanded(
-              child: Text(
-                label,
-                style: textTheme.bodyMedium?.copyWith(color: Colors.white),
-              ),
-            ),
-            const SizedBox(width: 12),
-            PopupMenuButton<ReaderShortcutKey>(
-              tooltip: label,
-              color: const Color(0xFF22262C),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              onSelected: onChanged,
-              itemBuilder: (context) {
-                return ReaderShortcutKey.values
-                    .map(
-                      (key) => PopupMenuItem<ReaderShortcutKey>(
-                        value: key,
-                        child: Text(keyLabelBuilder(key)),
-                      ),
-                    )
-                    .toList(growable: false);
-              },
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1B1D21),
-                  borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: const Color(0x22FFFFFF)),
+    return KeyboardListener(
+      focusNode: _focusNode,
+      onKeyEvent: _handleKeyEvent,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          color: const Color(0xFF22262C),
+          borderRadius: BorderRadius.circular(10),
+          border: Border.all(
+            color: _isRecording
+                ? Theme.of(context).colorScheme.primary
+                : const Color(0x22FFFFFF),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  widget.label,
+                  style: textTheme.bodyMedium?.copyWith(color: Colors.white),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 7,
+              ),
+              const SizedBox(width: 12),
+              Tooltip(
+                message: widget.label,
+                child: OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.white,
+                    backgroundColor: const Color(0xFF1B1D21),
+                    side: BorderSide(
+                      color: _isRecording
+                          ? Theme.of(context).colorScheme.primary
+                          : const Color(0x22FFFFFF),
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(999),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 7,
+                    ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        keyLabelBuilder(value),
-                        style: textTheme.labelLarge?.copyWith(
-                          color: Colors.white,
-                          letterSpacing: 0.2,
-                        ),
-                      ),
-                      const SizedBox(width: 6),
-                      const Icon(
-                        Icons.keyboard_arrow_down,
-                        size: 18,
-                        color: Colors.white70,
-                      ),
-                    ],
+                  onPressed: _startRecording,
+                  icon: Icon(
+                    _isRecording
+                        ? Icons.keyboard_command_key
+                        : Icons.keyboard_outlined,
+                    size: 18,
+                    color: Colors.white70,
+                  ),
+                  label: Text(
+                    _isRecording ? '...' : widget.keyLabelBuilder(widget.value),
+                    style: textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      letterSpacing: 0.2,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

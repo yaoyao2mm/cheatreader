@@ -73,6 +73,7 @@ bool _settingsMatch(ReaderSettings a, ReaderSettings b) {
       a.modeToggleTrigger == b.modeToggleTrigger &&
       a.languageMode == b.languageMode &&
       a.alwaysOnTop == b.alwaysOnTop &&
+      a.readingAnimationEnabled == b.readingAnimationEnabled &&
       a.fontScale == b.fontScale &&
       a.lineSpacing == b.lineSpacing &&
       a.readingWidthFactor == b.readingWidthFactor &&
@@ -81,6 +82,7 @@ bool _settingsMatch(ReaderSettings a, ReaderSettings b) {
       a.customFontPath == b.customFontPath &&
       a.customFontDisplayName == b.customFontDisplayName &&
       a.transparentModeEnabled == b.transparentModeEnabled &&
+      a.transparentTextShadowEnabled == b.transparentTextShadowEnabled &&
       a.textColorMode == b.textColorMode &&
       a.customTextColorValue == b.customTextColorValue &&
       a.textBrightnessFactor == b.textBrightnessFactor &&

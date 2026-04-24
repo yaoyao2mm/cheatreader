@@ -818,6 +818,12 @@ abstract class AppLocalizations {
   /// **'Boss key'**
   String get shortcutBossKey;
 
+  /// No description provided for @shortcutLocateReader.
+  ///
+  /// In en, this message translates to:
+  /// **'Locate reader'**
+  String get shortcutLocateReader;
+
   /// No description provided for @shortcutKeyArrowDown.
   ///
   /// In en, this message translates to:

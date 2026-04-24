@@ -36,7 +36,12 @@ class ReaderReleaseChecker {
       return null;
     }
 
-    final decoded = jsonDecode(response.body);
+    final dynamic decoded;
+    try {
+      decoded = jsonDecode(response.body);
+    } catch (_) {
+      return null;
+    }
     if (decoded is! Map<String, dynamic>) {
       return null;
     }

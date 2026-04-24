@@ -391,6 +391,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get shortcutBossKey => '老板键';
 
   @override
+  String get shortcutLocateReader => '定位阅读器';
+
+  @override
   String get shortcutKeyArrowDown => '下方向键';
 
   @override

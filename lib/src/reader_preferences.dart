@@ -58,23 +58,20 @@ class SharedPreferencesReaderPreferencesStore
 
   @override
   Future<ReaderPreferencesSnapshot> loadSnapshot() async {
-    final rawBookshelf = _preferences.getString(_bookshelfKey);
-    final decodedBookshelf = rawBookshelf == null
-        ? const <dynamic>[]
-        : (jsonDecode(rawBookshelf) as List<dynamic>);
-
     return ReaderPreferencesSnapshot(
       settings: ReaderSettings(
         oneLineMode:
             _preferences.getBool(_oneLineModeKey) ??
             ReaderSettings.defaults.oneLineMode,
-        modeToggleTrigger: ReaderModeToggleTrigger.values.byName(
-          _preferences.getString(_modeToggleTriggerKey) ??
-              ReaderSettings.defaults.modeToggleTrigger.name,
+        modeToggleTrigger: _enumByName(
+          ReaderModeToggleTrigger.values,
+          _preferences.getString(_modeToggleTriggerKey),
+          ReaderSettings.defaults.modeToggleTrigger,
         ),
-        languageMode: ReaderLanguageMode.values.byName(
-          _preferences.getString(_languageModeKey) ??
-              ReaderSettings.defaults.languageMode.name,
+        languageMode: _enumByName(
+          ReaderLanguageMode.values,
+          _preferences.getString(_languageModeKey),
+          ReaderSettings.defaults.languageMode,
         ),
         alwaysOnTop:
             _preferences.getBool(_alwaysOnTopKey) ??
@@ -82,21 +79,35 @@ class SharedPreferencesReaderPreferencesStore
         readingAnimationEnabled:
             _preferences.getBool(_readingAnimationEnabledKey) ??
             ReaderSettings.defaults.readingAnimationEnabled,
-        fontScale:
-            _preferences.getDouble(_fontScaleKey) ??
-            ReaderSettings.defaults.fontScale,
-        lineSpacing:
-            _preferences.getDouble(_lineSpacingKey) ??
-            ReaderSettings.defaults.lineSpacing,
-        readingWidthFactor:
-            _preferences.getDouble(_readingWidthFactorKey) ??
-            ReaderSettings.defaults.readingWidthFactor,
-        windowOpacity:
-            _preferences.getDouble(_windowOpacityKey) ??
-            ReaderSettings.defaults.windowOpacity,
-        fontFamilyPreset: ReaderFontFamilyPreset.values.byName(
-          _preferences.getString(_fontFamilyPresetKey) ??
-              ReaderSettings.defaults.fontFamilyPreset.name,
+        fontScale: _normalizeFontScale(
+          _preferences.getDouble(_fontScaleKey) ??
+              ReaderSettings.defaults.fontScale,
+        ),
+        lineSpacing: _normalizeDoubleSetting(
+          _preferences.getDouble(_lineSpacingKey) ??
+              ReaderSettings.defaults.lineSpacing,
+          min: ReaderSettings.minLineSpacing,
+          max: ReaderSettings.maxLineSpacing,
+          fallback: ReaderSettings.defaults.lineSpacing,
+        ),
+        readingWidthFactor: _normalizeDoubleSetting(
+          _preferences.getDouble(_readingWidthFactorKey) ??
+              ReaderSettings.defaults.readingWidthFactor,
+          min: ReaderSettings.minReadingWidthFactor,
+          max: ReaderSettings.maxReadingWidthFactor,
+          fallback: ReaderSettings.defaults.readingWidthFactor,
+        ),
+        windowOpacity: _normalizeDoubleSetting(
+          _preferences.getDouble(_windowOpacityKey) ??
+              ReaderSettings.defaults.windowOpacity,
+          min: ReaderSettings.minWindowOpacity,
+          max: ReaderSettings.maxWindowOpacity,
+          fallback: ReaderSettings.defaults.windowOpacity,
+        ),
+        fontFamilyPreset: _enumByName(
+          ReaderFontFamilyPreset.values,
+          _preferences.getString(_fontFamilyPresetKey),
+          ReaderSettings.defaults.fontFamilyPreset,
         ),
         customFontPath: _preferences.getString(_customFontPathKey),
         customFontDisplayName: _preferences.getString(
@@ -108,9 +119,10 @@ class SharedPreferencesReaderPreferencesStore
         transparentTextShadowEnabled:
             _preferences.getBool(_transparentTextShadowEnabledKey) ??
             ReaderSettings.defaults.transparentTextShadowEnabled,
-        textColorMode: ReaderTextColorMode.values.byName(
-          _preferences.getString(_textColorModeKey) ??
-              ReaderSettings.defaults.textColorMode.name,
+        textColorMode: _enumByName(
+          ReaderTextColorMode.values,
+          _preferences.getString(_textColorModeKey),
+          ReaderSettings.defaults.textColorMode,
         ),
         customTextColorValue: _normalizeOpaqueColorValue(
           _preferences.getInt(_customTextColorValueKey) ??
@@ -122,11 +134,7 @@ class SharedPreferencesReaderPreferencesStore
         ),
         shortcutBindings: _loadShortcutBindings(),
       ),
-      bookshelf: decodedBookshelf
-          .map(
-            (item) => ReaderBookRecord.fromJson(item as Map<String, dynamic>),
-          )
-          .toList(growable: false),
+      bookshelf: _loadBookshelf(),
     );
   }
 
@@ -143,13 +151,37 @@ class SharedPreferencesReaderPreferencesStore
       _readingAnimationEnabledKey,
       settings.readingAnimationEnabled,
     );
-    await _preferences.setDouble(_fontScaleKey, settings.fontScale);
-    await _preferences.setDouble(_lineSpacingKey, settings.lineSpacing);
+    await _preferences.setDouble(
+      _fontScaleKey,
+      _normalizeFontScale(settings.fontScale),
+    );
+    await _preferences.setDouble(
+      _lineSpacingKey,
+      _normalizeDoubleSetting(
+        settings.lineSpacing,
+        min: ReaderSettings.minLineSpacing,
+        max: ReaderSettings.maxLineSpacing,
+        fallback: ReaderSettings.defaults.lineSpacing,
+      ),
+    );
     await _preferences.setDouble(
       _readingWidthFactorKey,
-      settings.readingWidthFactor,
+      _normalizeDoubleSetting(
+        settings.readingWidthFactor,
+        min: ReaderSettings.minReadingWidthFactor,
+        max: ReaderSettings.maxReadingWidthFactor,
+        fallback: ReaderSettings.defaults.readingWidthFactor,
+      ),
     );
-    await _preferences.setDouble(_windowOpacityKey, settings.windowOpacity);
+    await _preferences.setDouble(
+      _windowOpacityKey,
+      _normalizeDoubleSetting(
+        settings.windowOpacity,
+        min: ReaderSettings.minWindowOpacity,
+        max: ReaderSettings.maxWindowOpacity,
+        fallback: ReaderSettings.defaults.windowOpacity,
+      ),
+    );
     await _preferences.setString(
       _fontFamilyPresetKey,
       settings.fontFamilyPreset.name,
@@ -211,16 +243,49 @@ class SharedPreferencesReaderPreferencesStore
       return ReaderShortcutBindings.defaults;
     }
 
-    final decoded = jsonDecode(rawShortcutBindings);
-    if (decoded is! Map<String, dynamic>) {
-      return ReaderShortcutBindings.defaults;
-    }
-
     try {
+      final decoded = jsonDecode(rawShortcutBindings);
+      if (decoded is! Map<String, dynamic>) {
+        return ReaderShortcutBindings.defaults;
+      }
       return ReaderShortcutBindings.fromJson(decoded);
     } catch (_) {
       return ReaderShortcutBindings.defaults;
     }
+  }
+
+  List<ReaderBookRecord> _loadBookshelf() {
+    final rawBookshelf = _preferences.getString(_bookshelfKey);
+    if (rawBookshelf == null || rawBookshelf.isEmpty) {
+      return const <ReaderBookRecord>[];
+    }
+
+    try {
+      final decoded = jsonDecode(rawBookshelf);
+      if (decoded is! List<dynamic>) {
+        return const <ReaderBookRecord>[];
+      }
+
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map(ReaderBookRecord.fromJson)
+          .toList(growable: false);
+    } catch (_) {
+      return const <ReaderBookRecord>[];
+    }
+  }
+
+  T _enumByName<T extends Enum>(List<T> values, String? name, T fallback) {
+    if (name == null) {
+      return fallback;
+    }
+
+    for (final value in values) {
+      if (value.name == name) {
+        return value;
+      }
+    }
+    return fallback;
   }
 
   int _normalizeOpaqueColorValue(int value) {
@@ -238,6 +303,29 @@ class SharedPreferencesReaderPreferencesStore
           ReaderSettings.maxTextBrightnessFactor,
         )
         .toDouble();
+  }
+
+  double _normalizeFontScale(double value) {
+    if (value.isNaN) {
+      return ReaderSettings.defaults.fontScale;
+    }
+
+    return value
+        .clamp(ReaderSettings.minFontScale, ReaderSettings.maxFontScale)
+        .toDouble();
+  }
+
+  double _normalizeDoubleSetting(
+    double value, {
+    required double min,
+    required double max,
+    required double fallback,
+  }) {
+    if (value.isNaN) {
+      return fallback;
+    }
+
+    return value.clamp(min, max).toDouble();
   }
 }
 

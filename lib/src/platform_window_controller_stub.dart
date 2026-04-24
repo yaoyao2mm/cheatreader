@@ -43,6 +43,9 @@ class UnsupportedPlatformWindowController implements PlatformWindowController {
   Future<void> bringToForegroundFromSystemActivation() async {}
 
   @override
+  Future<void> locateReader(ReaderSettings settings) async {}
+
+  @override
   Future<void> closeWindow() async {}
 }
 

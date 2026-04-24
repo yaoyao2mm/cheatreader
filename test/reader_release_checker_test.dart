@@ -44,5 +44,15 @@ void main() {
         'https://github.com/yaoyao2mm/cheatreader/releases/tag/v0.1.15',
       );
     });
+
+    test('returns null for malformed release response data', () async {
+      final checker = ReaderReleaseChecker(
+        client: MockClient((_) async => http.Response('{bad-json', 200)),
+      );
+
+      final latestRelease = await checker.fetchLatestRelease();
+
+      expect(latestRelease, isNull);
+    });
   });
 }

@@ -286,6 +286,48 @@ void main() {
       expect(windowController.syncedSettings?.customTextColorValue, 0xFF2B6CB0);
     });
 
+    test('clamps font scale to the supported 50 percent minimum', () async {
+      final controller = ReaderController(
+        initialContent: 'One\nTwo',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+      controller.setFontScale(0.4);
+
+      expect(controller.settings.fontScale, ReaderSettings.minFontScale);
+    });
+
+    test('clamps numeric reader settings to supported ranges', () async {
+      final controller = ReaderController(
+        initialContent: 'One\nTwo',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: FakePlatformWindowController(),
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+      controller.setLineSpacing(99);
+      controller.setReadingWidthFactor(-1);
+      controller.setWindowOpacity(double.nan);
+
+      expect(controller.settings.lineSpacing, ReaderSettings.maxLineSpacing);
+      expect(
+        controller.settings.readingWidthFactor,
+        ReaderSettings.minReadingWidthFactor,
+      );
+      expect(
+        controller.settings.windowOpacity,
+        ReaderSettings.defaults.windowOpacity,
+      );
+    });
+
     test('rejects conflicting shortcut assignments', () async {
       final controller = ReaderController(
         initialContent: 'One\nTwo',
@@ -384,6 +426,24 @@ void main() {
         expect(windowController.restoreFromBossKeyCount, 1);
       },
     );
+
+    test('locates reader through window controller', () async {
+      final windowController = FakePlatformWindowController();
+      final controller = ReaderController(
+        initialContent: 'One\nTwo',
+        preferencesStore: MemoryReaderPreferencesStore(),
+        windowController: windowController,
+        fileBookmarkService: FakeReaderFileBookmarkService(),
+        importService: FakeReaderImportService(),
+        libraryStorage: MemoryReaderLibraryStorage(),
+      );
+
+      await controller.initialize();
+      await controller.locateReader();
+
+      expect(windowController.locateReaderCount, 1);
+      expect(windowController.syncedSettings, controller.settings);
+    });
 
     test('restores saved progress for imported txt files', () async {
       final store = MemoryReaderPreferencesStore(
@@ -538,6 +598,53 @@ void main() {
       expect(loaded.settings.alwaysOnTop, isTrue);
     });
 
+    test('falls back from corrupted saved preferences', () async {
+      SharedPreferences.setMockInitialValues(<String, Object>{
+        'reader.modeToggleTrigger': 'bad-trigger',
+        'reader.languageMode': 'bad-language',
+        'reader.fontFamilyPreset': 'bad-font',
+        'reader.textColorMode': 'bad-color-mode',
+        'reader.fontScale': double.nan,
+        'reader.lineSpacing': 99.0,
+        'reader.readingWidthFactor': -1.0,
+        'reader.windowOpacity': double.nan,
+        'reader.shortcutBindings': '{bad-json',
+        'reader.bookshelf': '{bad-json',
+      });
+      final store = await SharedPreferencesReaderPreferencesStore.create();
+
+      final loaded = await store.loadSnapshot();
+
+      expect(
+        loaded.settings.modeToggleTrigger,
+        ReaderSettings.defaults.modeToggleTrigger,
+      );
+      expect(
+        loaded.settings.languageMode,
+        ReaderSettings.defaults.languageMode,
+      );
+      expect(
+        loaded.settings.fontFamilyPreset,
+        ReaderSettings.defaults.fontFamilyPreset,
+      );
+      expect(
+        loaded.settings.textColorMode,
+        ReaderSettings.defaults.textColorMode,
+      );
+      expect(loaded.settings.fontScale, ReaderSettings.defaults.fontScale);
+      expect(loaded.settings.lineSpacing, ReaderSettings.maxLineSpacing);
+      expect(
+        loaded.settings.readingWidthFactor,
+        ReaderSettings.minReadingWidthFactor,
+      );
+      expect(
+        loaded.settings.windowOpacity,
+        ReaderSettings.defaults.windowOpacity,
+      );
+      expect(loaded.settings.shortcutBindings, ReaderShortcutBindings.defaults);
+      expect(loaded.bookshelf, isEmpty);
+    });
+
     test('loads previously saved values', () async {
       SharedPreferences.setMockInitialValues(<String, Object>{});
       final store = await SharedPreferencesReaderPreferencesStore.create();
@@ -688,6 +795,7 @@ class FakePlatformWindowController implements PlatformWindowController {
   ReaderSettings? syncedSettings;
   int hideForBossKeyCount = 0;
   int restoreFromBossKeyCount = 0;
+  int locateReaderCount = 0;
 
   @override
   bool get supportsFloatingControls => true;
@@ -735,6 +843,12 @@ class FakePlatformWindowController implements PlatformWindowController {
 
   @override
   Future<void> bringToForegroundFromSystemActivation() async {}
+
+  @override
+  Future<void> locateReader(ReaderSettings settings) async {
+    locateReaderCount += 1;
+    syncedSettings = settings;
+  }
 
   @override
   Future<void> closeWindow() async {}

@@ -275,19 +275,46 @@ class ReaderController extends ChangeNotifier {
   }
 
   void setFontScale(double value) {
-    _updateSettings(_settings.copyWith(fontScale: value));
+    _updateSettings(_settings.copyWith(fontScale: _normalizeFontScale(value)));
   }
 
   void setLineSpacing(double value) {
-    _updateSettings(_settings.copyWith(lineSpacing: value));
+    _updateSettings(
+      _settings.copyWith(
+        lineSpacing: _normalizeDoubleSetting(
+          value,
+          min: ReaderSettings.minLineSpacing,
+          max: ReaderSettings.maxLineSpacing,
+          fallback: ReaderSettings.defaults.lineSpacing,
+        ),
+      ),
+    );
   }
 
   void setReadingWidthFactor(double value) {
-    _updateSettings(_settings.copyWith(readingWidthFactor: value));
+    _updateSettings(
+      _settings.copyWith(
+        readingWidthFactor: _normalizeDoubleSetting(
+          value,
+          min: ReaderSettings.minReadingWidthFactor,
+          max: ReaderSettings.maxReadingWidthFactor,
+          fallback: ReaderSettings.defaults.readingWidthFactor,
+        ),
+      ),
+    );
   }
 
   void setWindowOpacity(double value) {
-    _updateSettings(_settings.copyWith(windowOpacity: value));
+    _updateSettings(
+      _settings.copyWith(
+        windowOpacity: _normalizeDoubleSetting(
+          value,
+          min: ReaderSettings.minWindowOpacity,
+          max: ReaderSettings.maxWindowOpacity,
+          fallback: ReaderSettings.defaults.windowOpacity,
+        ),
+      ),
+    );
   }
 
   void setTransparentModeEnabled(bool value) {
@@ -335,6 +362,10 @@ class ReaderController extends ChangeNotifier {
     ReaderShortcutAction action,
     ReaderShortcutKey key,
   ) {
+    if (key.isModifierOnly) {
+      return stringsForSettings(_settings).shortcutConflictMessage;
+    }
+
     final conflict = _settings.shortcutBindings.conflictingActionFor(
       key,
       excluding: action,
@@ -366,6 +397,16 @@ class ReaderController extends ChangeNotifier {
       _bossKeyHidden = true;
       await _windowController.hideForBossKey(_settings);
     }
+    notifyListeners();
+  }
+
+  Future<void> locateReader() async {
+    if (!_windowController.supportsFloatingControls) {
+      return;
+    }
+
+    _bossKeyHidden = false;
+    await _windowController.locateReader(_settings);
     notifyListeners();
   }
 
@@ -546,6 +587,29 @@ class ReaderController extends ChangeNotifier {
           ReaderSettings.maxTextBrightnessFactor,
         )
         .toDouble();
+  }
+
+  double _normalizeFontScale(double value) {
+    if (value.isNaN) {
+      return ReaderSettings.defaults.fontScale;
+    }
+
+    return value
+        .clamp(ReaderSettings.minFontScale, ReaderSettings.maxFontScale)
+        .toDouble();
+  }
+
+  double _normalizeDoubleSetting(
+    double value, {
+    required double min,
+    required double max,
+    required double fallback,
+  }) {
+    if (value.isNaN) {
+      return fallback;
+    }
+
+    return value.clamp(min, max).toDouble();
   }
 
   Future<void> _persistCurrentBookProgress() async {
