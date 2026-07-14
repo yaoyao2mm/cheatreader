@@ -489,6 +489,65 @@ void main() {
     expect(find.textContaining('第三段'), findsNothing);
   });
 
+  testWidgets('custom page shortcuts keep one visual line of context', (
+    WidgetTester tester,
+  ) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(760, 132);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    addTearDown(tester.view.resetPhysicalSize);
+
+    final controller = ReaderController(
+      initialContent: List<String>.generate(
+        12,
+        (index) => 'LINE-${index + 1}',
+      ).join('\n'),
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          lineSpacing: ReaderSettings.minLineSpacing,
+          shortcutBindings: ReaderShortcutBindings.defaults.copyWith(
+            nextPage: ReaderShortcutKey.keyN,
+            previousPage: ReaderShortcutKey.keyP,
+          ),
+        ),
+      ),
+      windowController: _FakePlatformWindowController(),
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: _FakePlatformWindowController(),
+      ),
+    );
+    await tester.pump();
+
+    expect(
+      tester.widget<Text>(find.byType(Text).first).data,
+      'LINE-1\nLINE-2\nLINE-3\nLINE-4\nLINE-5',
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyN);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<Text>(find.byType(Text).first).data,
+      'LINE-5\nLINE-6\nLINE-7\nLINE-8\nLINE-9',
+    );
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyP);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<Text>(find.byType(Text).first).data,
+      'LINE-1\nLINE-2\nLINE-3\nLINE-4\nLINE-5',
+    );
+  });
+
   testWidgets('can disable punctuation-preferred visual wrapping', (
     WidgetTester tester,
   ) async {

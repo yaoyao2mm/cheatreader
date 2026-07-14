@@ -534,7 +534,7 @@ class _ReaderSurfaceState extends State<ReaderSurface>
   }
 
   Future<bool> _advanceReadingPage() async {
-    final stepCount = math.max(1, _visibleVisualLineCapacity);
+    final stepCount = math.max(1, _visibleVisualLineCapacity - 1);
     var movedAny = false;
     var animated = false;
     for (var index = 0; index < stepCount; index += 1) {
@@ -614,7 +614,7 @@ class _ReaderSurfaceState extends State<ReaderSurface>
   }
 
   Future<void> _rewindReadingPage() async {
-    final stepCount = math.max(1, _visibleVisualLineCapacity);
+    final stepCount = math.max(1, _visibleVisualLineCapacity - 1);
     var animated = false;
     for (var index = 0; index < stepCount; index += 1) {
       final moved = _rewindReadingInternal(animate: !animated);

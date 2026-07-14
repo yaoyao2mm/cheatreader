@@ -14,6 +14,9 @@ on:
 permissions:
   contents: write
 
+env:
+  FLUTTER_VERSION: 3.44.6
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -43,7 +46,7 @@ jobs:
 
       - name: Set up Flutter
         run: |
-          git clone https://github.com/flutter/flutter.git --depth 1 -b stable "$HOME/flutter"
+          git clone https://github.com/flutter/flutter.git --depth 1 -b "$FLUTTER_VERSION" "$HOME/flutter"
           echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
           "$HOME/flutter/bin/flutter" --version
 
@@ -100,7 +103,7 @@ jobs:
         if: matrix.target == 'macos'
         shell: bash
         run: |
-          git clone https://github.com/flutter/flutter.git --depth 1 -b stable "$HOME/flutter"
+          git clone https://github.com/flutter/flutter.git --depth 1 -b "$FLUTTER_VERSION" "$HOME/flutter"
           echo "$HOME/flutter/bin" >> "$GITHUB_PATH"
           "$HOME/flutter/bin/flutter" --version
 
@@ -108,7 +111,7 @@ jobs:
         if: matrix.target == 'windows'
         shell: pwsh
         run: |
-          git clone https://github.com/flutter/flutter.git --depth 1 -b stable "$env:USERPROFILE\flutter"
+          git clone https://github.com/flutter/flutter.git --depth 1 -b "$env:FLUTTER_VERSION" "$env:USERPROFILE\flutter"
           "$env:USERPROFILE\flutter\bin" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
           & "$env:USERPROFILE\flutter\bin\flutter.bat" --version
 
@@ -125,6 +128,7 @@ jobs:
         shell: bash
         run: |
           docker run --rm \
+            -e FLUTTER_VERSION \
             -v "${GITHUB_WORKSPACE}:/work" \
             -w /work \
             ubuntu:20.04 \
@@ -245,7 +249,7 @@ jobs:
             echo 'Architecture: ${{ matrix.arch }}'
             echo 'Maintainer: yaoyao2mm <yaoyao2mm@users.noreply.github.com>'
             echo 'Description: Floating desktop reader for low-distraction reading'
-            echo 'Depends: libgtk-3-0, libayatana-appindicator3-1 | libappindicator3-1, libblkid1, liblzma5, libstdc++6'
+            echo 'Depends: libgtk-3-0, libayatana-appindicator3-1, libblkid1, liblzma5, libstdc++6'
           } > "$DEBIAN_DIR/control"
 
           chmod 0755 "$DEBIAN_DIR"
@@ -255,6 +259,7 @@ jobs:
           chmod 0644 "$DESKTOP_DIR/cheatreader.desktop"
           chmod 0644 "$ICON_DIR/cheatreader.png"
           dpkg-deb --build --root-owner-group "$PACKAGE_ROOT" "$RUNNER_TEMP/${{ matrix.release_asset }}"
+          .github/scripts/verify-linux-deb.sh "$RUNNER_TEMP/${{ matrix.release_asset }}"
 
       - name: Upload packaged asset
         uses: actions/upload-artifact@v4
