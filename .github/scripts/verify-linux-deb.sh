@@ -20,6 +20,10 @@ if [[ "$depends" == *"libappindicator3-1"* ]]; then
   echo "Package incorrectly treats libappindicator3-1 as interchangeable: $depends" >&2
   exit 1
 fi
+if [[ "$depends" != *"libkeybinder-3.0-0"* ]]; then
+  echo "Package does not require libkeybinder-3.0-0: $depends" >&2
+  exit 1
+fi
 
 dpkg-deb --extract "$package_path" "$package_root"
 tray_plugin="$package_root/opt/cheatreader/lib/libtray_manager_plugin.so"
@@ -32,4 +36,14 @@ if ! readelf -d "$tray_plugin" | grep -F 'libayatana-appindicator3.so.1' >/dev/n
   exit 1
 fi
 
-echo "Linux package dependency matches the tray plugin SONAME."
+hotkey_plugin="$package_root/opt/cheatreader/lib/libhotkey_manager_linux_plugin.so"
+if [ ! -f "$hotkey_plugin" ]; then
+  echo "Packaged hotkey plugin was not found." >&2
+  exit 1
+fi
+if ! readelf -d "$hotkey_plugin" | grep -F 'libkeybinder-3.0.so.0' >/dev/null; then
+  echo "Packaged hotkey plugin does not link to libkeybinder-3.0.so.0." >&2
+  exit 1
+fi
+
+echo "Linux package dependencies match the tray and hotkey plugin SONAMEs."

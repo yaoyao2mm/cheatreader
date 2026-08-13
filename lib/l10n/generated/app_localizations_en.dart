@@ -131,6 +131,13 @@ class AppLocalizationsEn extends AppLocalizations {
       'This platform does not support it right now';
 
   @override
+  String get locatorHighlightTitle => 'Show activation highlight';
+
+  @override
+  String get locatorHighlightSubtitle =>
+      'Briefly outline the reader when it is restored from the tray or taskbar';
+
+  @override
   String get appDisguiseTitle => 'App disguise';
 
   @override

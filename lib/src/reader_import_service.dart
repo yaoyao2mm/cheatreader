@@ -425,7 +425,11 @@ class FileSelectorReaderImportService implements ReaderImportService {
     final candidates = <String>[];
 
     try {
-      candidates.add(utf8.decode(bytes));
+      final decodedUtf8 = utf8.decode(bytes);
+      if (!_hasSuspiciousControlCharacters(decodedUtf8)) {
+        return decodedUtf8;
+      }
+      candidates.add(decodedUtf8);
     } on FormatException {
       // Fall through to other decoders.
     }
@@ -447,6 +451,18 @@ class FileSelectorReaderImportService implements ReaderImportService {
           ? current
           : best;
     });
+  }
+
+  bool _hasSuspiciousControlCharacters(String text) {
+    return text.runes.any(
+      (rune) =>
+          rune == 0x0000 ||
+          (rune < 0x0020 &&
+              rune != 0x0009 &&
+              rune != 0x000A &&
+              rune != 0x000D) ||
+          (rune >= 0x007F && rune <= 0x009F),
+    );
   }
 
   bool _hasUtf8Bom(List<int> bytes) {
@@ -502,6 +518,8 @@ class FileSelectorReaderImportService implements ReaderImportService {
           (rune >= 0x4E00 && rune <= 0x9FFF) ||
           (rune >= 0x3400 && rune <= 0x4DBF) ||
           (rune >= 0x3000 && rune <= 0x303F) ||
+          (rune >= 0x3040 && rune <= 0x30FF) ||
+          (rune >= 0x31F0 && rune <= 0x31FF) ||
           (rune >= 0xFF00 && rune <= 0xFFEF)) {
         score += 1.2;
         continue;

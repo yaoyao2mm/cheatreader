@@ -21,3 +21,15 @@ Use this checklist before release builds that change desktop window behavior.
 - [ ] Open and close the control panel repeatedly and verify window size/position restoration still works.
 - [ ] Trigger boss key hide/restore and verify foreground recovery logic does not break the hide/restore cycle.
 - [ ] On unsupported floating-control environments, verify the always-on-top control remains hidden or disabled.
+
+## Boss key and tray recovery
+
+- [ ] On Windows, macOS, or Linux X11, press `Ctrl+Shift+B` while another app has focus and verify CheatReader hides; press it again and verify the same reading position is restored.
+- [ ] Change the boss-key shortcut to another modified key, switch to another app, and verify only the new shortcut toggles CheatReader.
+- [ ] On Linux Wayland, verify the boss key still works while CheatReader has focus and that the tray icon restores it after hiding.
+
+## Activation highlight and Linux frame
+
+- [ ] Disable `Show activation highlight`, restore or locate the reader from the tray/taskbar/shortcut, and verify no yellow outline appears.
+- [ ] Re-enable the setting and verify the outline appears briefly and disappears after about 1.5 seconds.
+- [ ] On Linux X11 and Wayland, verify the GTK window remains frameless after its first frame.

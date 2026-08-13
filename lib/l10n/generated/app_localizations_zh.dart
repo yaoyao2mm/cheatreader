@@ -125,6 +125,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get hideTaskbarIconUnsupported => '当前平台暂不支持';
 
   @override
+  String get locatorHighlightTitle => '显示唤回高亮';
+
+  @override
+  String get locatorHighlightSubtitle => '从托盘或任务栏唤回窗口时短暂显示边框';
+
+  @override
   String get appDisguiseTitle => '应用伪装';
 
   @override

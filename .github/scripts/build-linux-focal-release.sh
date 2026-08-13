@@ -14,6 +14,7 @@ apt-get -o Acquire::Retries=5 install -y --fix-missing \
   git \
   libgtk-3-dev \
   libayatana-appindicator3-dev \
+  libkeybinder-3.0-dev \
   liblzma-dev \
   libstdc++-9-dev \
   ninja-build \

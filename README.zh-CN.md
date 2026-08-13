@@ -41,7 +41,7 @@ CheatReader 的方向相反：它更轻、更安静、更适合挂在桌面边�
 - 支持调节行距、阅读宽度和键盘控制，便于长时间使用
 - 支持按行号、页号、百分比直接跳转，也支持文本搜索和上一个 / 下一个匹配跳转
 - 支持加载本地自定义字体，并在字体选项里直接切换使用
-- 提供可快速隐藏并恢复窗口的老板键能力
+- Windows、macOS 和 Linux X11 支持系统级老板键，可在应用失焦后隐藏和恢复窗口
 - 支持 `txt`、`epub`、`html`、`markdown`、`fb2`、`docx`、`pdf`
 - 导入后的本地托管副本，重启后仍能恢复阅读
 - 面向桌面、低干扰、可拖拽导入的轻量阅读体验
@@ -129,8 +129,30 @@ Ubuntu / Debian 常见安装方式：
 
 ```bash
 sudo apt-get update
-sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libkeybinder-3.0-dev
 ```
+
+发布的 Debian 包还依赖 `libayatana-appindicator3-1` 提供系统托盘，依赖
+`libkeybinder-3.0-0` 在 X11 下提供全局快捷键。请使用 APT 安装发布包，以便
+自动解析依赖：
+
+```bash
+sudo apt install ./cheatreader-v0.1.29-linux-amd64.deb
+```
+
+Ubuntu 20.04 的 `libayatana-appindicator3-1` 位于 `universe` 仓库。如果 APT
+提示找不到该依赖，请先修复软件包状态并启用仓库：
+
+```bash
+sudo add-apt-repository universe
+sudo apt update
+sudo apt --fix-broken install
+sudo apt install libayatana-appindicator3-1
+sudo apt install ./cheatreader-v0.1.29-linux-amd64.deb
+```
+
+Linux 全局老板键目前支持 X11。Wayland 通常不允许应用任意注册全局快捷键，
+因此 Wayland 下快捷键仍可在 CheatReader 聚焦时使用，窗口隐藏后可从托盘恢复。
 
 ## 校验
 

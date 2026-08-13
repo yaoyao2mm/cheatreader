@@ -6,6 +6,7 @@
 // tree, read text, and verify that the values of widget properties are correct.
 
 import 'package:cheatreader/src/platform_window_controller_base.dart';
+import 'package:cheatreader/src/boss_key_hotkey_registrar.dart';
 import 'package:cheatreader/src/reader_app.dart';
 import 'package:cheatreader/src/reader_controller.dart';
 import 'package:cheatreader/src/reader_file_bookmark_service.dart';
@@ -382,6 +383,59 @@ void main() {
     await tester.pump();
 
     expect(windowController.locateReaderCount, 1);
+    expect(
+      tester
+          .widget<AnimatedOpacity>(
+            find.byKey(const Key('reader-locator-highlight')),
+          )
+          .opacity,
+      1,
+    );
+  });
+
+  testWidgets('locate shortcut respects the disabled activation highlight', (
+    WidgetTester tester,
+  ) async {
+    final windowController = _FakePlatformWindowController(
+      floatingControls: true,
+    );
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行',
+      preferencesStore: MemoryReaderPreferencesStore(
+        initialSettings: ReaderSettings.defaults.copyWith(
+          locatorHighlightEnabled: false,
+        ),
+      ),
+      windowController: windowController,
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: windowController,
+      ),
+    );
+
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+
+    expect(windowController.locateReaderCount, 1);
+    expect(
+      tester
+          .widget<AnimatedOpacity>(
+            find.byKey(const Key('reader-locator-highlight')),
+          )
+          .opacity,
+      0,
+    );
   });
 
   testWidgets('reading animation is disabled by default', (
@@ -668,6 +722,87 @@ void main() {
     expect(controller.shouldShowTrayIcon, isTrue);
   });
 
+  testWidgets('system boss key hides and restores while the app is unfocused', (
+    WidgetTester tester,
+  ) async {
+    final hotkeyRegistrar = _FakeBossKeyHotkeyRegistrar();
+    final windowController = _FakePlatformWindowController();
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行\n第三行',
+      preferencesStore: MemoryReaderPreferencesStore(),
+      windowController: windowController,
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: windowController,
+        bossKeyHotkeyRegistrar: hotkeyRegistrar,
+      ),
+    );
+    await tester.pump();
+
+    expect(hotkeyRegistrar.registeredKey, ReaderShortcutKey.controlShiftB);
+
+    await hotkeyRegistrar.trigger();
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+    await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyEvent(LogicalKeyboardKey.keyB);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+    await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+    await tester.pump();
+    expect(windowController.hideForBossKeyCount, 1);
+    expect(controller.isBossKeyHidden, isTrue);
+
+    await tester.pump(const Duration(milliseconds: 251));
+    await hotkeyRegistrar.trigger();
+    await tester.pump();
+    expect(windowController.restoreFromBossKeyCount, 1);
+    expect(controller.isBossKeyHidden, isFalse);
+  });
+
+  testWidgets('changing the boss key replaces the system registration', (
+    WidgetTester tester,
+  ) async {
+    final hotkeyRegistrar = _FakeBossKeyHotkeyRegistrar();
+    final windowController = _FakePlatformWindowController();
+    final controller = ReaderController(
+      initialContent: '第一行\n第二行',
+      preferencesStore: MemoryReaderPreferencesStore(),
+      windowController: windowController,
+      fileBookmarkService: _FakeReaderFileBookmarkService(),
+      importService: _FakeReaderImportService(),
+      libraryStorage: MemoryReaderLibraryStorage(),
+    );
+    await controller.initialize();
+
+    await tester.pumpWidget(
+      CheatReaderApp(
+        controller: controller,
+        windowController: windowController,
+        bossKeyHotkeyRegistrar: hotkeyRegistrar,
+      ),
+    );
+    await tester.pump();
+
+    final replacement = ReaderShortcutKey(
+      logicalKeyId: LogicalKeyboardKey.f5.keyId,
+    );
+    expect(
+      controller.setShortcutBinding(ReaderShortcutAction.bossKey, replacement),
+      isNull,
+    );
+    await tester.pump();
+    await tester.pump();
+
+    expect(hotkeyRegistrar.registeredKey, replacement);
+    expect(hotkeyRegistrar.unregisterCount, 1);
+  });
+
   testWidgets('english language mode localizes the control panel', (
     WidgetTester tester,
   ) async {
@@ -772,6 +907,7 @@ class _FakePlatformWindowController implements PlatformWindowController {
 
   final bool floatingControls;
   int hideForBossKeyCount = 0;
+  int restoreFromBossKeyCount = 0;
   int locateReaderCount = 0;
 
   @override
@@ -813,7 +949,9 @@ class _FakePlatformWindowController implements PlatformWindowController {
   }
 
   @override
-  Future<void> restoreFromBossKey(ReaderSettings settings) async {}
+  Future<void> restoreFromBossKey(ReaderSettings settings) async {
+    restoreFromBossKeyCount += 1;
+  }
 
   @override
   Future<void> syncPresentation(ReaderSettings settings) async {}
@@ -828,4 +966,36 @@ class _FakePlatformWindowController implements PlatformWindowController {
 
   @override
   Future<void> closeWindow() async {}
+}
+
+class _FakeBossKeyHotkeyRegistrar implements BossKeyHotkeyRegistrar {
+  ReaderShortcutKey? registeredKey;
+  Future<void> Function()? _handler;
+  int unregisterCount = 0;
+
+  @override
+  Future<bool> register(
+    ReaderShortcutKey key,
+    Future<void> Function() handler,
+  ) async {
+    if (registeredKey != null) {
+      unregisterCount += 1;
+    }
+    registeredKey = key;
+    _handler = handler;
+    return true;
+  }
+
+  @override
+  Future<void> unregister() async {
+    if (registeredKey != null) {
+      unregisterCount += 1;
+    }
+    registeredKey = null;
+    _handler = null;
+  }
+
+  Future<void> trigger() async {
+    await _handler?.call();
+  }
 }

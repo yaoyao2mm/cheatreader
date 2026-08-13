@@ -59,6 +59,7 @@ class ReaderSettings {
     required this.customAppDisplayName,
     required this.alwaysOnTop,
     required this.hideTaskbarIcon,
+    required this.locatorHighlightEnabled,
     required this.readingAnimationEnabled,
     required this.preferPunctuationLineBreaks,
     required this.fontScale,
@@ -103,6 +104,7 @@ class ReaderSettings {
     customAppDisplayName: null,
     alwaysOnTop: false,
     hideTaskbarIcon: false,
+    locatorHighlightEnabled: true,
     readingAnimationEnabled: false,
     preferPunctuationLineBreaks: true,
     fontScale: 1.0,
@@ -130,6 +132,7 @@ class ReaderSettings {
   final String? customAppDisplayName;
   final bool alwaysOnTop;
   final bool hideTaskbarIcon;
+  final bool locatorHighlightEnabled;
   final bool readingAnimationEnabled;
   final bool preferPunctuationLineBreaks;
   final double fontScale;
@@ -159,6 +162,7 @@ class ReaderSettings {
     Object? customAppDisplayName = _unset,
     bool? alwaysOnTop,
     bool? hideTaskbarIcon,
+    bool? locatorHighlightEnabled,
     bool? readingAnimationEnabled,
     bool? preferPunctuationLineBreaks,
     double? fontScale,
@@ -188,6 +192,8 @@ class ReaderSettings {
           : customAppDisplayName as String?,
       alwaysOnTop: alwaysOnTop ?? this.alwaysOnTop,
       hideTaskbarIcon: hideTaskbarIcon ?? this.hideTaskbarIcon,
+      locatorHighlightEnabled:
+          locatorHighlightEnabled ?? this.locatorHighlightEnabled,
       readingAnimationEnabled:
           readingAnimationEnabled ?? this.readingAnimationEnabled,
       preferPunctuationLineBreaks:

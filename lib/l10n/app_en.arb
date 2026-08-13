@@ -52,6 +52,8 @@
   "hideTaskbarIconTitle": "Hide taskbar icon",
   "hideTaskbarIconSupported": "Hide the app icon from the taskbar; a system tray icon will appear instead",
   "hideTaskbarIconUnsupported": "This platform does not support it right now",
+  "locatorHighlightTitle": "Show activation highlight",
+  "locatorHighlightSubtitle": "Briefly outline the reader when it is restored from the tray or taskbar",
   "appDisguiseTitle": "App disguise",
   "appDisguisePresetLabel": "Preset icon",
   "appDisguiseNameLabel": "Display name",

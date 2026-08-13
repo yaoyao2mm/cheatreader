@@ -14,6 +14,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 import '../l10n/generated/app_localizations.dart';
+import 'boss_key_hotkey_registrar.dart';
 import 'platform_window_controller_base.dart';
 import 'reader_book.dart';
 import 'reader_controller.dart';
@@ -126,10 +127,12 @@ class CheatReaderApp extends StatelessWidget {
     super.key,
     required this.controller,
     required this.windowController,
+    this.bossKeyHotkeyRegistrar,
   });
 
   final ReaderController controller;
   final PlatformWindowController windowController;
+  final BossKeyHotkeyRegistrar? bossKeyHotkeyRegistrar;
 
   @override
   Widget build(BuildContext context) {
@@ -170,6 +173,7 @@ class CheatReaderApp extends StatelessWidget {
           home: ReaderSurface(
             controller: controller,
             windowController: windowController,
+            bossKeyHotkeyRegistrar: bossKeyHotkeyRegistrar,
           ),
         );
       },
@@ -182,10 +186,12 @@ class ReaderSurface extends StatefulWidget {
     super.key,
     required this.controller,
     required this.windowController,
+    this.bossKeyHotkeyRegistrar,
   });
 
   final ReaderController controller;
   final PlatformWindowController windowController;
+  final BossKeyHotkeyRegistrar? bossKeyHotkeyRegistrar;
 
   @override
   State<ReaderSurface> createState() => _ReaderSurfaceState();
@@ -209,6 +215,12 @@ class _ReaderSurfaceState extends State<ReaderSurface>
   String? _lastTrayIconAssetPath;
   String? _lastTrayTooltip;
   bool _locatorHighlightVisible = false;
+  late final BossKeyHotkeyRegistrar _bossKeyHotkeyRegistrar;
+  ReaderShortcutKey? _requestedSystemBossKey;
+  ReaderShortcutKey? _registeredSystemBossKey;
+  Future<void>? _bossKeyRegistrationTask;
+  Timer? _bossKeyTriggerDebounceTimer;
+  bool _disposed = false;
   DateTime? _lastForegroundRecoveryAt;
   int? _lastOneLineSourceIndex;
   int _oneLineSegmentIndex = 0;
@@ -225,6 +237,10 @@ class _ReaderSurfaceState extends State<ReaderSurface>
   @override
   void initState() {
     super.initState();
+    _bossKeyHotkeyRegistrar =
+        widget.bossKeyHotkeyRegistrar ?? DesktopBossKeyHotkeyRegistrar();
+    widget.controller.addListener(_handleControllerChanged);
+    _requestSystemBossKeyRegistration();
     if (widget.windowController.supportsFloatingControls) {
       windowManager.addListener(this);
       _windowListenerRegistered = true;
@@ -232,6 +248,50 @@ class _ReaderSurfaceState extends State<ReaderSurface>
     if (widget.windowController.supportsTrayIcon) {
       tray.trayManager.addListener(this);
       _trayListenerRegistered = true;
+    }
+  }
+
+  void _handleControllerChanged() {
+    _requestSystemBossKeyRegistration();
+  }
+
+  void _requestSystemBossKeyRegistration() {
+    final requestedKey = widget.controller.settings.shortcutBindings.bossKey;
+    if (_requestedSystemBossKey == requestedKey) {
+      return;
+    }
+    _requestedSystemBossKey = requestedKey;
+    _bossKeyRegistrationTask ??= _drainSystemBossKeyRegistrations();
+  }
+
+  Future<void> _drainSystemBossKeyRegistrations() async {
+    try {
+      while (!_disposed) {
+        final requestedKey = _requestedSystemBossKey;
+        if (requestedKey == null || requestedKey == _registeredSystemBossKey) {
+          return;
+        }
+
+        await _bossKeyHotkeyRegistrar.register(
+          requestedKey,
+          _handleBossKeyShortcut,
+        );
+        if (_disposed) {
+          await _bossKeyHotkeyRegistrar.unregister();
+          return;
+        }
+        if (_requestedSystemBossKey == requestedKey) {
+          _registeredSystemBossKey = requestedKey;
+          return;
+        }
+      }
+    } finally {
+      _bossKeyRegistrationTask = null;
+      if (!_disposed &&
+          _requestedSystemBossKey != null &&
+          _requestedSystemBossKey != _registeredSystemBossKey) {
+        _bossKeyRegistrationTask = _drainSystemBossKeyRegistrations();
+      }
     }
   }
 
@@ -289,7 +349,9 @@ class _ReaderSurfaceState extends State<ReaderSurface>
 
     _lastForegroundRecoveryAt = now;
     unawaited(widget.windowController.bringToForegroundFromSystemActivation());
-    _showLocatorHighlight();
+    if (widget.controller.settings.locatorHighlightEnabled) {
+      _showLocatorHighlight();
+    }
   }
 
   void _showLocatorHighlight() {
@@ -744,10 +806,14 @@ class _ReaderSurfaceState extends State<ReaderSurface>
 
   @override
   void dispose() {
+    _disposed = true;
     _messageTimer?.cancel();
     _messageOverlayEntry?.remove();
     _locatorHighlightTimer?.cancel();
     _autoPageTimer?.cancel();
+    _bossKeyTriggerDebounceTimer?.cancel();
+    widget.controller.removeListener(_handleControllerChanged);
+    _bossKeyHotkeyRegistrar.unregister();
     if (_windowListenerRegistered) {
       windowManager.removeListener(this);
     }
@@ -936,6 +1002,7 @@ class _ReaderSurfaceState extends State<ReaderSurface>
                             ),
                           IgnorePointer(
                             child: AnimatedOpacity(
+                              key: const Key('reader-locator-highlight'),
                               opacity: _locatorHighlightVisible ? 1 : 0,
                               duration: const Duration(milliseconds: 180),
                               child: DecoratedBox(
@@ -993,6 +1060,14 @@ class _ReaderSurfaceState extends State<ReaderSurface>
   }
 
   Future<void> _handleBossKeyShortcut() async {
+    if (_bossKeyTriggerDebounceTimer?.isActive ?? false) {
+      return;
+    }
+    _bossKeyTriggerDebounceTimer = Timer(
+      const Duration(milliseconds: 250),
+      () {},
+    );
+
     final willHide = !widget.controller.isBossKeyHidden;
     final l10n = AppLocalizations.of(context);
     await widget.controller.toggleBossKey();
@@ -1009,7 +1084,9 @@ class _ReaderSurfaceState extends State<ReaderSurface>
       return;
     }
 
-    _showLocatorHighlight();
+    if (widget.controller.settings.locatorHighlightEnabled) {
+      _showLocatorHighlight();
+    }
   }
 
   Map<ShortcutActivator, VoidCallback> _buildShortcutBindings(
@@ -1946,6 +2023,13 @@ class _ReaderControlPanelState extends State<_ReaderControlPanel> {
               ? l10n.hideTaskbarIconSupported
               : l10n.hideTaskbarIconUnsupported,
         ),
+      ),
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        value: controller.settings.locatorHighlightEnabled,
+        onChanged: controller.setLocatorHighlightEnabled,
+        title: Text(l10n.locatorHighlightTitle),
+        subtitle: Text(l10n.locatorHighlightSubtitle),
       ),
       const SizedBox(height: 8),
       Text(

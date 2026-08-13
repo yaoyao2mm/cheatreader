@@ -81,6 +81,12 @@ class ReaderShortcutKey {
     control: true,
     legacyName: 'controlShiftF',
   );
+  static const controlShiftB = ReaderShortcutKey(
+    logicalKeyId: 0x0000000062,
+    shift: true,
+    control: true,
+    legacyName: 'controlShiftB',
+  );
 
   static const legacyValues = <ReaderShortcutKey>[
     arrowDown,
@@ -97,6 +103,7 @@ class ReaderShortcutKey {
     keyB,
     keyA,
     controlShiftF,
+    controlShiftB,
   ];
 
   final int logicalKeyId;
@@ -234,7 +241,7 @@ class ReaderShortcutBindings {
     nextPage: ReaderShortcutKey.pageDown,
     previousPage: ReaderShortcutKey.pageUp,
     toggleMode: ReaderShortcutKey.keyM,
-    bossKey: ReaderShortcutKey.keyB,
+    bossKey: ReaderShortcutKey.controlShiftB,
     locateReader: ReaderShortcutKey.controlShiftF,
     autoPage: ReaderShortcutKey.keyA,
   );
@@ -336,13 +343,17 @@ class ReaderShortcutBindings {
       return ReaderShortcutKey.fromStorageValue(rawValue, fallback);
     }
 
+    final bossKey = json['bossKey'] == ReaderShortcutKey.keyB.legacyName
+        ? ReaderShortcutKey.controlShiftB
+        : decode('bossKey', defaults.bossKey);
+
     return ReaderShortcutBindings(
       nextLine: decode('nextLine', defaults.nextLine),
       previousLine: decode('previousLine', defaults.previousLine),
       nextPage: decode('nextPage', defaults.nextPage),
       previousPage: decode('previousPage', defaults.previousPage),
       toggleMode: decode('toggleMode', defaults.toggleMode),
-      bossKey: decode('bossKey', defaults.bossKey),
+      bossKey: bossKey,
       locateReader: decode('locateReader', defaults.locateReader),
       autoPage: decode('autoPage', defaults.autoPage),
     );

@@ -52,6 +52,8 @@
   "hideTaskbarIconTitle": "隐藏任务栏图标",
   "hideTaskbarIconSupported": "从任务栏隐藏图标，改为显示右下角托盘图标",
   "hideTaskbarIconUnsupported": "当前平台暂不支持",
+  "locatorHighlightTitle": "显示唤回高亮",
+  "locatorHighlightSubtitle": "从托盘或任务栏唤回窗口时短暂显示边框",
   "appDisguiseTitle": "应用伪装",
   "appDisguisePresetLabel": "预设图标",
   "appDisguiseNameLabel": "显示名称",

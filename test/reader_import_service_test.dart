@@ -57,6 +57,27 @@ void main() {
       await tempDirectory.delete(recursive: true);
     });
 
+    test('round-trips UTF-8 Japanese text without changing encoding', () async {
+      final tempDirectory = await Directory.systemTemp.createTemp(
+        'cheatreader-import-test',
+      );
+      final source = File('${tempDirectory.path}/japanese.txt');
+      const content = '安達としまむら\nあの子のことを考えていた。\n夏休みが始まる。';
+      await source.writeAsString(content, encoding: utf8);
+
+      final service = FileSelectorReaderImportService();
+      final imported = await service.openTxtFile(source.path);
+      final stored = File('${tempDirectory.path}/stored.txt');
+      await stored.writeAsString(imported.content, encoding: utf8);
+      final restored = await service.openTxtFile(stored.path);
+
+      expect(imported.content, content);
+      expect(restored.content, content);
+      expect('\n'.allMatches(restored.content), hasLength(2));
+
+      await tempDirectory.delete(recursive: true);
+    });
+
     test('decodes UTF-16LE txt files without BOM', () async {
       final tempDirectory = await Directory.systemTemp.createTemp(
         'cheatreader-import-test',

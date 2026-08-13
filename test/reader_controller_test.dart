@@ -456,6 +456,14 @@ void main() {
       );
     });
 
+    test('migrates the legacy bare B boss key to a safe global shortcut', () {
+      final bindings = ReaderShortcutBindings.fromJson(const {
+        'bossKey': 'keyB',
+      });
+
+      expect(bindings.bossKey, ReaderShortcutKey.controlShiftB);
+    });
+
     test('clearing a custom font falls back to the system preset', () async {
       final controller = ReaderController(
         initialContent: 'One\nTwo',
@@ -749,6 +757,7 @@ void main() {
         ReaderSettings.defaults.windowOpacity,
       );
       expect(loaded.settings.hideTaskbarIcon, isFalse);
+      expect(loaded.settings.locatorHighlightEnabled, isTrue);
       expect(loaded.settings.shortcutBindings, ReaderShortcutBindings.defaults);
       expect(loaded.bookshelf, isEmpty);
     });
@@ -764,6 +773,7 @@ void main() {
         customAppDisplayName: 'Research IDE',
         alwaysOnTop: false,
         hideTaskbarIcon: true,
+        locatorHighlightEnabled: false,
         readingAnimationEnabled: true,
         preferPunctuationLineBreaks: false,
         fontScale: 1.2,
@@ -810,6 +820,7 @@ void main() {
       expect(loaded.settings.customAppDisplayName, 'Research IDE');
       expect(loaded.settings.alwaysOnTop, isFalse);
       expect(loaded.settings.hideTaskbarIcon, isTrue);
+      expect(loaded.settings.locatorHighlightEnabled, isFalse);
       expect(loaded.settings.preferPunctuationLineBreaks, isFalse);
       expect(loaded.settings.fontScale, 1.2);
       expect(loaded.settings.lineSpacing, 1.8);

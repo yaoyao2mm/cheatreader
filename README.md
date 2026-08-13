@@ -41,7 +41,7 @@ CheatReader does the opposite: it stays light, quiet, and easy to tuck into the 
 - Adjustable line spacing, reading width, and keyboard controls for longer sessions
 - Direct jump by line, page, percentage, and text search with previous/next match navigation
 - Built-in custom font loading with a dedicated user-selected font option
-- Boss-key style hide and restore support without losing reading state
+- System-wide boss-key hide and restore on Windows, macOS, and Linux X11 without losing reading state
 - Support for `txt`, `epub`, `html`, `markdown`, `fb2`, `docx`, and `pdf`
 - Local managed library copies so imported books still restore after restart
 - Lightweight desktop-first reading flow with drag-and-drop import
@@ -129,8 +129,37 @@ Typical Ubuntu/Debian setup:
 
 ```bash
 sudo apt-get update
-sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev
+sudo apt-get install clang cmake ninja-build pkg-config libgtk-3-dev liblzma-dev libkeybinder-3.0-dev
 ```
+
+The released Debian package also requires `libayatana-appindicator3-1` for its
+system tray integration and `libkeybinder-3.0-0` for global shortcuts on X11.
+Install release packages with APT so dependencies are resolved automatically:
+
+```bash
+sudo apt install ./cheatreader-v0.1.29-linux-amd64.deb
+```
+
+On Ubuntu 20.04, that runtime is provided by the `universe` repository. If APT
+reports that it is unavailable, repair the package state and enable the
+repository before retrying:
+
+```bash
+sudo add-apt-repository universe
+sudo apt update
+sudo apt --fix-broken install
+sudo apt install libayatana-appindicator3-1
+sudo apt install ./cheatreader-v0.1.29-linux-amd64.deb
+```
+
+Use `apt-cache policy libayatana-appindicator3-1` to confirm which repository
+and version APT selected. Avoid `dpkg -i` for this package because it does not
+resolve missing dependencies.
+
+Global boss-key registration works on Linux X11. Wayland compositors generally
+block applications from registering arbitrary global shortcuts, so Wayland
+users can still use the shortcut while CheatReader is focused and restore a
+hidden reader from its tray icon.
 
 ## Verify
 

@@ -45,6 +45,15 @@ static void configure_transparent_window(GtkWindow* window) {
   g_object_unref(css_provider);
 }
 
+static void enforce_frameless_window(GtkWindow* window) {
+  gtk_window_set_decorated(window, false);
+
+  GdkWindow* gdk_window = gtk_widget_get_window(GTK_WIDGET(window));
+  if (gdk_window != nullptr) {
+    gdk_window_set_decorations(gdk_window, static_cast<GdkWMDecoration>(0));
+  }
+}
+
 static gboolean os_release_contains_value(const gchar* contents,
                                          const gchar* key,
                                          const gchar* value) {
@@ -96,7 +105,7 @@ static void my_application_activate(GApplication* application) {
   // frameless visual style while avoiding runtime decoration toggles that are
   // unreliable on Ubuntu 20.04 X11/GNOME combinations.
   gtk_window_set_title(window, "cheatreader");
-  gtk_window_set_decorated(window, false);
+  enforce_frameless_window(window);
   configure_transparent_window(window);
 
   gtk_window_set_default_size(window, 1280, 720);
@@ -125,6 +134,7 @@ static void my_application_activate(GApplication* application) {
   g_signal_connect_swapped(view, "first-frame", G_CALLBACK(first_frame_cb),
                            self);
   gtk_widget_realize(GTK_WIDGET(view));
+  enforce_frameless_window(window);
 
   fl_register_plugins(FL_PLUGIN_REGISTRY(view));
 

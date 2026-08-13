@@ -76,6 +76,7 @@ bool _settingsMatch(ReaderSettings a, ReaderSettings b) {
       a.customAppDisplayName == b.customAppDisplayName &&
       a.alwaysOnTop == b.alwaysOnTop &&
       a.hideTaskbarIcon == b.hideTaskbarIcon &&
+      a.locatorHighlightEnabled == b.locatorHighlightEnabled &&
       a.readingAnimationEnabled == b.readingAnimationEnabled &&
       a.preferPunctuationLineBreaks == b.preferPunctuationLineBreaks &&
       a.fontScale == b.fontScale &&

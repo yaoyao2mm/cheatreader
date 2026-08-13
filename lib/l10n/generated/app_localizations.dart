@@ -314,6 +314,18 @@ abstract class AppLocalizations {
   /// **'This platform does not support it right now'**
   String get hideTaskbarIconUnsupported;
 
+  /// No description provided for @locatorHighlightTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Show activation highlight'**
+  String get locatorHighlightTitle;
+
+  /// No description provided for @locatorHighlightSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Briefly outline the reader when it is restored from the tray or taskbar'**
+  String get locatorHighlightSubtitle;
+
   /// No description provided for @appDisguiseTitle.
   ///
   /// In en, this message translates to:

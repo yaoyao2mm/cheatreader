@@ -35,6 +35,7 @@ class SharedPreferencesReaderPreferencesStore
   static const _customAppDisplayNameKey = 'reader.customAppDisplayName';
   static const _alwaysOnTopKey = 'reader.alwaysOnTop';
   static const _hideTaskbarIconKey = 'reader.hideTaskbarIcon';
+  static const _locatorHighlightEnabledKey = 'reader.locatorHighlightEnabled';
   static const _readingAnimationEnabledKey = 'reader.readingAnimationEnabled';
   static const _preferPunctuationLineBreaksKey =
       'reader.preferPunctuationLineBreaks';
@@ -93,6 +94,9 @@ class SharedPreferencesReaderPreferencesStore
         hideTaskbarIcon:
             _preferences.getBool(_hideTaskbarIconKey) ??
             ReaderSettings.defaults.hideTaskbarIcon,
+        locatorHighlightEnabled:
+            _preferences.getBool(_locatorHighlightEnabledKey) ??
+            ReaderSettings.defaults.locatorHighlightEnabled,
         readingAnimationEnabled:
             _preferences.getBool(_readingAnimationEnabledKey) ??
             ReaderSettings.defaults.readingAnimationEnabled,
@@ -193,6 +197,10 @@ class SharedPreferencesReaderPreferencesStore
     }
     await _preferences.setBool(_alwaysOnTopKey, settings.alwaysOnTop);
     await _preferences.setBool(_hideTaskbarIconKey, settings.hideTaskbarIcon);
+    await _preferences.setBool(
+      _locatorHighlightEnabledKey,
+      settings.locatorHighlightEnabled,
+    );
     await _preferences.setBool(
       _readingAnimationEnabledKey,
       settings.readingAnimationEnabled,

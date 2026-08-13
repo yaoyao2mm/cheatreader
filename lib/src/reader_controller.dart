@@ -266,6 +266,10 @@ class ReaderController extends ChangeNotifier {
     _updateSettings(_settings.copyWith(hideTaskbarIcon: value));
   }
 
+  void setLocatorHighlightEnabled(bool value) {
+    _updateSettings(_settings.copyWith(locatorHighlightEnabled: value));
+  }
+
   void setReadingAnimationEnabled(bool value) {
     _updateSettings(_settings.copyWith(readingAnimationEnabled: value));
   }
@@ -562,6 +566,7 @@ class ReaderController extends ChangeNotifier {
         _settings.customAppDisplayName == value.customAppDisplayName &&
         _settings.alwaysOnTop == value.alwaysOnTop &&
         _settings.hideTaskbarIcon == value.hideTaskbarIcon &&
+        _settings.locatorHighlightEnabled == value.locatorHighlightEnabled &&
         _settings.readingAnimationEnabled == value.readingAnimationEnabled &&
         _settings.preferPunctuationLineBreaks ==
             value.preferPunctuationLineBreaks &&

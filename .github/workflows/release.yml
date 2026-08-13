@@ -42,7 +42,7 @@ jobs:
       - name: Install Linux build dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libayatana-appindicator3-dev libstdc++-12-dev liblzma-dev
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev libayatana-appindicator3-dev libkeybinder-3.0-dev libstdc++-12-dev liblzma-dev
 
       - name: Set up Flutter
         run: |
@@ -249,7 +249,7 @@ jobs:
             echo 'Architecture: ${{ matrix.arch }}'
             echo 'Maintainer: yaoyao2mm <yaoyao2mm@users.noreply.github.com>'
             echo 'Description: Floating desktop reader for low-distraction reading'
-            echo 'Depends: libgtk-3-0, libayatana-appindicator3-1, libblkid1, liblzma5, libstdc++6'
+            echo 'Depends: libgtk-3-0, libayatana-appindicator3-1, libkeybinder-3.0-0, libblkid1, liblzma5, libstdc++6'
           } > "$DEBIAN_DIR/control"
 
           chmod 0755 "$DEBIAN_DIR"
